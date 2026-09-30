@@ -27,6 +27,8 @@ export default function Quotes() {
   const [back, setBack] = useState(false); const flip = useSharedValue(0); const accepted = useRef(false);
   const toggle = () => { const nb = !back; setBack(nb); flip.value = withTiming(nb ? 1 : 0, { duration: 650, easing: EASE }); };
   const frontSt = useAnimatedStyle(() => ({ transform: [{ perspective: 1000 }, { rotateY: `${flip.value * 180}deg` }] }));
+  const frontOp = useAnimatedStyle(() => ({ opacity: flip.value < 0.5 ? 1 : 0 }));
+  const backOp = useAnimatedStyle(() => ({ opacity: flip.value < 0.5 ? 0 : 1 }));
   const backSt = useAnimatedStyle(() => ({ transform: [{ perspective: 1000 }, { rotateY: `${180 + flip.value * 180}deg` }] }));
   if (!best) return <Screen><Header /><T size={14} style={{ marginTop: s(20) }}>Quotes are on their way.</T></Screen>;
   const ex = EXPERTS.find((e) => e.id === best.expertId)!; const others = all.filter((q) => q.id !== best.id);
@@ -38,7 +40,7 @@ export default function Quotes() {
       <T size={25} w={700} ls={-0.035} lh={1.05} style={{ marginTop: s(14) }}>Your best match</T>
       <T size={11} c={C.mute} style={{ marginTop: s(4) }}>{`From ${all.length} quotes for your ${(req?.title ?? 'bid review').toLowerCase()}`}</T>
       <Animated.View entering={FadeInDown.delay(100).springify().damping(16)} style={{ marginTop: s(18) }}>
-        <Animated.View {...(back ? hide : {})} style={[{ padding: s(18), borderRadius: s(24), backgroundColor: '#fff', alignItems: 'center', shadowColor: '#16205A', shadowOpacity: 0.06, shadowRadius: s(10), elevation: 3, backfaceVisibility: 'hidden' }, frontSt]}>
+        <Animated.View {...(back ? hide : {})} pointerEvents={back ? 'none' : 'auto'} style={[{ padding: s(18), borderRadius: s(24), backgroundColor: '#fff', alignItems: 'center', shadowColor: '#16205A', shadowOpacity: 0.06, shadowRadius: s(10), elevation: 3, backfaceVisibility: 'hidden' }, frontSt, frontOp]}>
         <Avatar photo={ex.photo} size={64} />
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(4), marginTop: s(10) }}>
           <T size={14} w={700}>{ex.name}</T>
@@ -48,7 +50,7 @@ export default function Quotes() {
         <View style={{ marginTop: s(12) }}><CountUp to={best.price} prefix="AED " size={30} ls={-0.04} /></View>
         {below > 0 && <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(6), marginTop: s(10) }}><Orb size={14} /><T size={10} w={600} c={C.blue}>{`${below}% below average price`}</T></View>}
       </Animated.View>
-        <Animated.View {...(back ? {} : hide)} style={[FACE, { borderRadius: s(24), backgroundColor: '#fff', padding: s(14), shadowColor: '#16205A', shadowOpacity: 0.06, shadowRadius: s(10), elevation: 3 }, backSt]}>
+        <Animated.View {...(back ? {} : hide)} pointerEvents={back ? 'auto' : 'none'} style={[FACE, { borderRadius: s(24), backgroundColor: '#fff', padding: s(14), shadowColor: '#16205A', shadowOpacity: 0.06, shadowRadius: s(10), elevation: 3 }, backSt, backOp]}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <T size={13} w={700}>Side by side</T>
             <Pressable onPress={toggle} hitSlop={10} accessibilityLabel="Close comparison"><T size={13} w={600} c={C.mute}>✕</T></Pressable>

@@ -1,7 +1,7 @@
 import { Pressable, ScrollView, View } from 'react-native';
 import Animated, { SharedValue, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withDelay, withSequence, withSpring, withTiming } from 'react-native-reanimated';
-import { router } from 'expo-router';
-import { useRef, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useRef, useState } from 'react';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Screen } from '@/ui/Screen';
@@ -16,25 +16,29 @@ import { EXPERTS, aed } from '@/data/seed';
 import { STAGES } from '@/data/types';
 import { PHOTOS } from '@/theme/photos';
 import { useDemo } from '@/store/demo';
-import { setTileRect } from '@/screens/experts/fx';
+import { IS_TEST, setTileRect } from '@/screens/experts/fx';
 import { s } from '@/theme/scale';
 import { C } from '@/theme/tokens';
 
-const PAR = s(5); // parallax travel (photo is 2*PAR taller than its box)
+const PAR = s(5); // parallax travel; the photo scales up only while scrolled (scale 1, translate 0 at rest = approved crop)
+const BOX = s(124);
 type E = (typeof EXPERTS)[number];
 function Tile({ e, i, top, scrollY }: { e: E; i: number; top: boolean; scrollY: SharedValue<number> }) {
   const ref = useRef<View>(null); const lift = useSharedValue(0);
   const wrap = useAnimatedStyle(() => ({ transform: [{ scale: 1 + 0.03 * lift.value }], zIndex: lift.value > 0.01 ? 5 : 0,
     shadowColor: '#16205A', shadowOpacity: 0.2 * lift.value, shadowRadius: 18, shadowOffset: { width: 0, height: 12 } }));
-  const par = useAnimatedStyle(() => ({ transform: [{ translateY: Math.max(-PAR, Math.min(PAR, -scrollY.value * 0.06)) }] }));
+  const par = useAnimatedStyle(() => { const ty = Math.max(-PAR, Math.min(PAR, -scrollY.value * 0.06)); return { transform: [{ translateY: ty }, { scale: 1 + (2 * Math.abs(ty)) / BOX }] }; });
   const open = () => {
     lift.value = withSequence(withSpring(1, { damping: 14, stiffness: 220 }), withDelay(600, withTiming(0, { duration: 300 })));
-    (ref.current as any)?.measureInWindow?.((x: number, y: number, w: number, h: number) => setTileRect({ x, y, w, h }));
-    router.push(`/expert/${e.id}`);
+    let pushed = false; const go = () => { if (pushed) return; pushed = true; router.push(`/expert/${e.id}`); };
+    const node = ref.current as any;
+    if (IS_TEST || !node?.measureInWindow) return go();
+    node.measureInWindow((x: number, y: number, w: number, h: number) => { setTileRect({ x, y, w, h, id: e.id, t: Date.now() }); go(); });
+    setTimeout(go, 60); // fallback if the measure callback never fires
   };
   const photo = (
-    <View style={{ height: s(124), borderRadius: s(18), overflow: 'hidden' }}>
-      <Animated.View style={[{ position: 'absolute', left: 0, right: 0, top: -PAR, height: s(124) + 2 * PAR }, par]}>
+    <View style={{ height: BOX, borderRadius: s(18), overflow: 'hidden' }}>
+      <Animated.View style={[{ position: 'absolute', left: 0, right: 0, top: 0, height: BOX }, par]}>
         <Image source={PHOTOS[e.photo]} contentFit="cover" contentPosition={{ top: '20%' }} style={{ flex: 1 }} />
       </Animated.View>
       <View style={{ position: 'absolute', left: s(8), top: s(8), backgroundColor: '#fff', paddingVertical: s(3), paddingHorizontal: s(8), borderRadius: s(10) }}>
@@ -60,6 +64,8 @@ function Tile({ e, i, top, scrollY }: { e: E; i: number; top: boolean; scrollY: 
 const FILTERS = ['For you', 'Engineers', 'Architects', 'Interiors'] as const;
 export default function Experts() {
   const stage = useDemo((st) => st.stage); const [f, setF] = useState<(typeof FILTERS)[number]>('For you');
+  // drop any stale tile rect whenever this tab regains focus (guarded: the jest router mock has no useFocusEffect)
+  if (typeof useFocusEffect === 'function') useFocusEffect(useCallback(() => { setTileRect(null); }, []));
   const scrollY = useSharedValue(0); const onScroll = useAnimatedScrollHandler((ev) => { scrollY.value = ev.contentOffset.y; });
   const list = [...EXPERTS].filter((e) => f === 'For you' || e.category === f).sort((a, b) => b.match - a.match);
   return (

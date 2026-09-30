@@ -20,6 +20,7 @@ import { C, EASE } from '@/theme/tokens';
 
 type Svc = (typeof EXPERTS)[number]['services'][number];
 const HERO_H = s(250);
+const HERO_RAD = s(18);
 const DOT_ON = s(5);
 const SPRING = { damping: 11, stiffness: 190, mass: 0.8 };
 /** Service card: the blue ring/border springs across on select (pop + colour); cards glide in staggered. */
@@ -50,14 +51,15 @@ export default function ExpertProfile() {
   const e = EXPERTS.find((x) => x.id === id) ?? EXPERTS[0];
   const [svc, setSvc] = useState(e.services[0].id); const price = e.services.find((x) => x.id === svc)!.price;
   const insets = useSafeAreaInsets(); const { width: W } = useWindowDimensions();
-  const [from] = useState(takeTileRect); const zoom = useSharedValue(from ? 0 : 1); const booked = useRef(false);
+  const [from] = useState(() => takeTileRect(e.id)); const zoom = useSharedValue(from ? 0 : 1); const booked = useRef(false);
   useEffect(() => { if (from) zoom.value = withTiming(1, { duration: 460, easing: EASE }); }, [from, zoom]);
   // portrait grows out of the tapped tile (uniform scale + corner radius), then sits full-bleed
   const heroStyle = useAnimatedStyle(() => {
     if (!from) return {};
     const k = from.w / W; const p = zoom.value; const H = HERO_H;
-    return { borderRadius: interpolate(p, [0, 1], [18, 0]), transform: [
-      { translateX: (1 - p) * (from.x + from.w / 2 - W / 2) }, { translateY: (1 - p) * (from.y + from.h / 2 - H / 2) }, { scale: interpolate(p, [0, 1], [k, 1]) }] };
+    const sc = interpolate(p, [0, 1], [k, 1]);
+    return { borderRadius: ((1 - p) * HERO_RAD) / sc, transform: [
+      { translateX: (1 - p) * (from.x + from.w / 2 - W / 2) }, { translateY: (1 - p) * (from.y + from.h / 2 - H / 2) }, { scale: sc }] };
   });
   return (
     <View style={{ flex: 1, backgroundColor: C.bg }}>

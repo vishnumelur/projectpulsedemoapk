@@ -6,15 +6,16 @@ import { s } from '@/theme/scale';
 import { EASE } from '@/theme/tokens';
 
 const ease = (t: number) => { const e: any = EASE; return (typeof e === 'function' ? e : e.factory())(t) as number; };
-const IS_TEST = typeof process !== 'undefined' && !!process.env.JEST_WORKER_ID;
+export const IS_TEST = typeof process !== 'undefined' && !!process.env.JEST_WORKER_ID;
 const hidden = { accessibilityElementsHidden: true, importantForAccessibility: 'no-hide-descendants' } as const;
 const srOnly = { position: 'absolute', opacity: 0 } as const;
 
 /** Tile rect handed from the Experts grid to the profile so the portrait can zoom out of the tapped tile. */
-export type Rect = { x: number; y: number; w: number; h: number };
+export type Rect = { x: number; y: number; w: number; h: number; id: string; t: number };
 let pending: Rect | null = null;
 export const setTileRect = (r: Rect | null) => { pending = r; };
-export const takeTileRect = () => { const r = pending; pending = null; return r; };
+/** Accept the rect only if it belongs to this expert and is under 1s old; always consumes it. */
+export const takeTileRect = (id: string) => { const r = pending; pending = null; return r && r.id === id && Date.now() - r.t < 1000 ? r : null; };
 
 function Digit({ d, size, w, c, lh }: { d: number; size: number; w: 500 | 600 | 700; c: string; lh: number }) {
   const lineH = s(size * lh);
