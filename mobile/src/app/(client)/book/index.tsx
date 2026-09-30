@@ -12,7 +12,7 @@ import { Glass } from '@/ui/Glass';
 import { Btn } from '@/ui/Btn';
 import { Avatar } from '@/ui/Avatar';
 import { Sheet } from '@/ui/Sheet';
-import { DayStrip, DEFAULT_DAY, StripDay, dayLabel, stripDay } from '@/ui/DayStrip';
+import { DayStrip, DEFAULT_DAY, StripDay, dayLabel, dueLabel, stripDay } from '@/ui/DayStrip';
 import { enterFade, exitFade } from '@/theme/motion';
 import { EXPERTS, CLIENT_SLOTS, FEE, VAT_RATE, aed } from '@/data/seed';
 import { useDemo } from '@/store/demo';
@@ -66,9 +66,7 @@ export default function Book() {
   const doPay = () => {
     if (paying.current) return; paying.current = true; setState('busy');
     timers.current.push(setTimeout(() => {
-      const job = useDemo.getState().bookAndPay({ expertId: e.id, serviceId: sv.id, slotId: slot }); setState('done');
-      // the store stamps Thursday's labels; carry the picked day and time onto the job
-      useDemo.setState((st) => ({ jobs: st.jobs.map((j) => (j.id === job ? { ...j, dayLabel: dayLabel(d), timeLabel: time } : j)) }));
+      const job = useDemo.getState().bookAndPay({ expertId: e.id, serviceId: sv.id, slotId: slot, dayLabel: dayLabel(d), timeLabel: time, due: dueLabel(d) }); setState('done');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       timers.current.push(setTimeout(() => { setPay(false); router.replace(`/book/done?job=${job}`); }, 400));
     }, 700));

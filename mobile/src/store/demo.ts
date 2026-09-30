@@ -26,7 +26,8 @@ export interface DemoState {
   sendRequest(r: NewRequest): string;
   receiveQuotes(requestId: string): void;
   acceptQuote(quoteId: string): void;
-  bookAndPay(b: { expertId: string; serviceId: string; slotId: string }): string;
+  /** dayLabel/timeLabel/due default to the seeded Thursday booking; a booking is unique per expert + day + slot. */
+  bookAndPay(b: { expertId: string; serviceId: string; slotId: string; dayLabel?: string; timeLabel?: string; due?: string }): string;
   completeJob(jobId: string): void; approveJob(jobId: string): void; submitReview(jobId: string, stars: number, tags: string[]): void;
   flagQuestion(question: string, category: FlagCategory): string; teamReplied(ref: string): void;
   pushNotice(n: Omit<Notice, 'id' | 'at' | 'read'>): void; dismissBanner(): void; markNoticesRead(role: 'client' | 'expert'): void;
@@ -82,12 +83,12 @@ export const useDemo = create<DemoState>()(persist((set, get) => ({
   },
   acceptQuote: (quoteId) => set((s) => ({ quotes: s.quotes.map((q) => (q.id === quoteId ? { ...q, seen: true } : q)) })),
 
-  bookAndPay: ({ expertId, serviceId, slotId }) => {
-    const existing = get().jobs.find((j) => j.expertId === expertId && j.slotId === slotId && j.status !== 'reviewed');
+  bookAndPay: ({ expertId, serviceId, slotId, dayLabel = 'Thu 9 Oct', timeLabel, due = 'Sun 12 Oct' }) => {
+    const existing = get().jobs.find((j) => j.expertId === expertId && j.slotId === slotId && j.dayLabel === dayLabel && j.status !== 'reviewed');
     if (existing) return existing.id;
     const ex = S.EXPERTS.find((e) => e.id === expertId)!; const sv = ex.services.find((x) => x.id === serviceId)!;
     const total = Math.round((sv.price + S.FEE) * (1 + S.VAT_RATE) * 100) / 100;
-    const job: Job = { id: uid('job'), requestId: 'req-bid', expertId, serviceId, title: sv.name, slotId, dayLabel: 'Thu 9 Oct', timeLabel: S.CLIENT_SLOTS.find((c) => c.id === slotId)?.time ?? '10:00', total, status: 'booked', due: 'Sun 12 Oct' };
+    const job: Job = { id: uid('job'), requestId: 'req-bid', expertId, serviceId, title: sv.name, slotId, dayLabel, timeLabel: timeLabel ?? S.CLIENT_SLOTS.find((c) => c.id === slotId)?.time ?? '10:00', total, status: 'booked', due };
     set((s) => ({ jobs: [job, ...s.jobs] }));
     get().pushNotice({ kind: 'payment', title: 'Payment held safely', text: `AED ${total.toLocaleString('en-US', { minimumFractionDigits: 2 })} until you sign off.`, href: `/job/${job.id}`, forRole: 'client' });
     return job.id;

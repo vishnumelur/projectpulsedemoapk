@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import { PageScroll } from '@/ui/PageScroll';
 import { Screen } from '@/ui/Screen';
 import { T } from '@/ui/T';
 import { useDemo } from '@/store/demo';
@@ -88,6 +89,7 @@ export default function Availability() {
   const dim = useAnimatedStyle(() => ({ opacity: 0.5 + 0.5 * Math.max(0, Math.min(1, k.value)) }));
   return (
     <Screen bg="aurora">
+      <PageScroll tabBar>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: s(8) }}>
         <T size={22} w={700} ls={-0.035} lh={1.1}>Availability</T>
         <Pressable accessibilityLabel="Pause all bookings" onPress={() => { setOn(!on); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
@@ -111,6 +113,7 @@ export default function Availability() {
         ) : <ToggleSlot key={x.id} x={x} onToggle={toggle} />)}
         </Animated.View>
       </Animated.View>
+      </PageScroll>
     </Screen>
   );
 }

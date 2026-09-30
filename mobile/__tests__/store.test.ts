@@ -69,3 +69,12 @@ test('booking a free slot creates exactly one new job, and paying twice is idemp
   expect(j2).toBe(j1);
   expect(useDemo.getState().jobs).toHaveLength(before + 1);
 });
+
+test('booking another day records its day, time and due date, and is a separate job from the same slot on Thursday', () => {
+  const thu = useDemo.getState().bookAndPay({ expertId: 'omar', serviceId: 'bid-visit', slotId: 'thu-1500' });
+  const fri = useDemo.getState().bookAndPay({ expertId: 'omar', serviceId: 'bid-visit', slotId: 'thu-1500', dayLabel: 'Fri 10 Oct', timeLabel: '15:00', due: 'Mon 13 Oct' });
+  expect(fri).not.toBe(thu);
+  const j = useDemo.getState().jobs.find((x) => x.id === fri)!;
+  expect([j.dayLabel, j.timeLabel, j.due]).toEqual(['Fri 10 Oct', '15:00', 'Mon 13 Oct']);
+  expect(useDemo.getState().bookAndPay({ expertId: 'omar', serviceId: 'bid-visit', slotId: 'thu-1500', dayLabel: 'Fri 10 Oct', timeLabel: '15:00', due: 'Mon 13 Oct' })).toBe(fri);
+});

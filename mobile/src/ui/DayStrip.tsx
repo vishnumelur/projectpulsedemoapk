@@ -36,6 +36,12 @@ const BY_KEY = new Map(STRIP_DAYS.map((d) => [d.key, d]));
 export const stripDay = (key: string) => BY_KEY.get(key)!;
 /** "Thu 9 Oct" */
 export const dayLabel = (d: StripDay) => `${d.wd[0]}${d.wd.slice(1).toLowerCase()} ${d.n} ${d.mon}`;
+/** Report due date for a visit on `d`: three days later (Thu 9 Oct → Sun 12 Oct, as seeded). */
+export const dueLabel = (d: StripDay) => {
+  const t = new Date(Date.parse(`${d.key}T00:00:00Z`) + 3 * 86400e3);
+  const w = WD[t.getUTCDay()];
+  return `${w[0]}${w.slice(1).toLowerCase()} ${t.getUTCDate()} ${MON[t.getUTCMonth()]}`;
+};
 
 // ---- look per screen (the approved 14a / E6 frames) ----
 // inset: the selected (borderless) cell is a touch narrower than the bordered glass cells, as CSS flex sized them in the mockups
