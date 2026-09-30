@@ -1,6 +1,6 @@
 import { Platform, Pressable, TextInput, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Svg, { Defs, LinearGradient as SvgGrad, Stop, Path } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { ZoomIn } from 'react-native-reanimated';
@@ -37,7 +37,8 @@ export default function Review() {
   const [stars, setStars] = useState(5); const [tags, setTags] = useState(['On time', 'Clear report', 'Great value']);
   const [note, setNote] = useState<string | null>(null); const [done, setDone] = useState(false);
   const toggle = (t: string) => { Haptics.selectionAsync(); setTags((x) => (x.includes(t) ? x.filter((y) => y !== t) : [...x, t])); };
-  const submit = () => { if (done) return; useDemo.getState().submitReview(id, stars, tags); setDone(true); setTimeout(() => router.replace('/home'), 1200); };
+  const sent = useRef(false);
+  const submit = () => { if (sent.current) return; sent.current = true; useDemo.getState().submitReview(id, stars, tags); setDone(true); setTimeout(() => router.replace('/home'), 1200); };
   return (
     <Screen bg="review">
       <View style={{ paddingTop: s(6) }}><BackButton flat label="✕" onPress={() => router.replace('/home')} /></View>

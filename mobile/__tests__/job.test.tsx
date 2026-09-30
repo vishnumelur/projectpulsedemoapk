@@ -28,3 +28,11 @@ test('approve → review → submit returns home', async () => {
   expect(useDemo.getState().jobs[0].status).toBe('reviewed');
   expect(router.replace).toHaveBeenCalledWith('/home');
 });
+
+test('double-tapping approve only navigates once', async () => {
+  await render(<Report />);
+  const btn = screen.getByText('Approve & release payment');
+  await fireEvent.press(btn);
+  await fireEvent.press(btn);
+  expect(router.replace).toHaveBeenCalledTimes(1);
+});

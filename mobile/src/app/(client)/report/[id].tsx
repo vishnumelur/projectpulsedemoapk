@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -17,6 +18,8 @@ import { Pressable } from 'react-native';
 const BULLETS: [string, string][] = [['', 'Gulf Construction is lowest once MEP is added.'], ['', 'Al Noor has the strongest schedule.'], ['Recommended: ', 'Gulf, with an MEP clause.']];
 export default function Report() {
   const { id = 'job-1' } = useLocalSearchParams<{ id?: string }>();
+  const sent = useRef(false); const [done, setDone] = useState(false);
+  const approve = () => { if (sent.current) return; sent.current = true; setDone(true); useDemo.getState().approveJob(id); router.replace(`/review/${id}`); };
   return (
     <Screen bg="aurora">
       <Header />
@@ -40,7 +43,7 @@ export default function Report() {
         ))}
       </View>
       <Dock>
-        <Btn title="Approve & release payment" onPress={() => { useDemo.getState().approveJob(id); router.replace(`/review/${id}`); }} />
+        <Btn title="Approve & release payment" done={done} onPress={approve} />
         <Pressable style={{ marginTop: s(10), alignItems: 'center' }}><T size={11} w={600} c={C.blue}>Ask for changes</T></Pressable>
       </Dock>
     </Screen>
