@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -35,7 +35,9 @@ export default function Report() {
         <View style={{ flex: 1, paddingRight: s(10) }}><T size={12} w={700} lh={1.33}>Bid review report</T><T size={10} c={C.mute} style={{ marginTop: s(1) }}>14 pages · 2.4 MB</T></View>
         <T size={11} w={700} c={C.blue}>Open</T>
       </Glass>
-      <View style={{ marginTop: s(12), borderRadius: s(18), padding: s(14), backgroundColor: '#fff', ...shadow(C.blue, 0.08, s(14)) }}>
+      {/* mockup .psum: 0 10px 28px rgba(0,0,254,.08) plus a 1px rgba(0,0,254,.06) ring; boxShadow can draw both on Android */}
+      <View style={{ marginTop: s(12), borderRadius: s(18), padding: s(14), backgroundColor: '#fff',
+        ...(Platform.OS === 'android' ? { boxShadow: `0px ${s(10)}px ${s(28)}px rgba(0,0,254,0.08), 0px 0px 0px ${s(1)}px rgba(0,0,254,0.06)` } : shadow(C.blue, 0.08, s(14))) }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(7) }}><Orb size={14} /><T size={9} w={700} ls={0.08} c={C.blue}>PULSE SUMMARY</T></View>
         {BULLETS.map(([b, t], i) => (
           <Animated.View key={i} entering={FadeInDown.delay(150 * i)} style={{ flexDirection: 'row', marginTop: s(6), marginLeft: s(4), gap: s(6) }}>

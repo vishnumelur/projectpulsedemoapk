@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { View, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { useEffect } from 'react';
 import Animated, { type SharedValue, useSharedValue, withRepeat, withTiming, Easing, useAnimatedStyle, ZoomIn, withSpring, withDelay } from 'react-native-reanimated';
@@ -43,8 +43,10 @@ export default function Sent() {
   useEffect(() => { spin.value = withRepeat(withTiming(Math.PI * 2, { duration: 30000, easing: Easing.linear }), -1, false); }, []);
   const step = (label: string, when: string, on = false) => (
     <View style={{ flex: 1, alignItems: 'center' }}>
-      <View style={{ width: s(12), height: s(12), borderRadius: s(6), backgroundColor: on ? C.blue : '#fff', borderWidth: 2, borderColor: on ? C.blue : '#D3D8E8' }}>
-        {on && <View style={{ position: 'absolute', left: -s(6), top: -s(6), width: s(20), height: s(20), borderRadius: s(10), backgroundColor: 'rgba(0,0,254,0.12)', zIndex: -1 }} />}
+      <View style={{ width: s(12), height: s(12), borderRadius: s(6), backgroundColor: on ? C.blue : '#fff', borderWidth: 2, borderColor: on ? C.blue : '#D3D8E8',
+        // Android can't draw a zIndex:-1 child behind its parent: the same halo as a boxShadow ring there
+        ...(on && Platform.OS === 'android' ? { boxShadow: `0px 0px 0px ${s(4)}px rgba(0,0,254,0.12)` } : null) }}>
+        {on && Platform.OS !== 'android' && <View style={{ position: 'absolute', left: -s(6), top: -s(6), width: s(20), height: s(20), borderRadius: s(10), backgroundColor: 'rgba(0,0,254,0.12)', zIndex: -1 }} />}
       </View>
       <T size={11} w={700} style={{ marginTop: s(7) }}>{label}</T><T size={9} c={C.faint} style={{ marginTop: 1 }}>{when}</T>
     </View>

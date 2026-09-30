@@ -53,6 +53,7 @@ function DayCell({ d, on, onPress }: { d: (typeof DAYS)[number]; on: boolean; on
   );
 }
 
+const BLUR = s(1.5);
 function Dim({ v }: { v: SharedValue<number> }) {
   const st = useAnimatedStyle(() => ({ opacity: v.value }));
   if (Platform.OS !== 'ios') return null;
@@ -66,7 +67,9 @@ export default function Book() {
   const [pay, setPay] = useState(!!p.pay); const [state, setState] = useState<'idle' | 'busy' | 'done'>('idle');
   const dimV = useSharedValue(pay ? 1 : 0);
   useEffect(() => { dimV.value = withTiming(pay ? 1 : 0, { duration: 300, easing: EASE }); }, [pay, dimV]);
-  const pageStyle = useAnimatedStyle(() => ({ opacity: 1 - 0.4 * dimV.value, ...(Platform.OS === 'web' ? ({ filter: `blur(${1.5 * dimV.value}px)` } as object) : null) }));
+  // page behind the pay sheet: dims and blurs (web: CSS filter; Android 12+: RN's native filter blur; iOS: the Dim BlurView)
+  const pageStyle = useAnimatedStyle(() => ({ opacity: 1 - 0.4 * dimV.value, ...(Platform.OS === 'web' ? ({ filter: `blur(${1.5 * dimV.value}px)` } as object)
+    : Platform.OS === 'android' ? ({ filter: [{ blur: BLUR * dimV.value }] } as object) : null) }));
   const paying = useRef(false);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   useEffect(() => () => { timers.current.forEach(clearTimeout); }, []);

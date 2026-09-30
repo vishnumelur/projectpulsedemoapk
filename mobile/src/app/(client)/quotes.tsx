@@ -70,9 +70,10 @@ export default function Quotes() {
       </Animated.View>
       {others.length > 0 && (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(10), marginTop: s(14), paddingHorizontal: s(4) }}>
-          <View style={{ flexDirection: 'row' }}>{others.slice(0, 2).map((q, i) => <Avatar key={q.id} photo={EXPERTS.find((e) => e.id === q.expertId)!.photo} size={20} ring="white" style={{ marginLeft: i ? -s(8) : 0 }} />)}</View>
-          <T size={9.5} c={C.mute} style={{ flex: 1 }} numberOfLines={1}>{`${others.length} more · from ${aed(others[0].price)}`}</T>
-          <Pressable onPress={toggle}><T size={11} w={700} c={C.blue}>Compare</T></Pressable>
+          <View style={{ flexDirection: 'row' }}>{others.slice(0, 2).map((q, i) => <Avatar key={q.id} photo={EXPERTS.find((e) => e.id === q.expertId)!.photo} size={20} ring="white" style={{ marginLeft: i ? -s(8) : 0, ...shadow('#16205A', 0, 0) }} />)}</View>
+          {/* natural width (as on web, where the label never shrinks): a flexed native Text ellipsized to "AED 2,…" */}
+          <T size={9.5} c={C.mute} style={{ flexShrink: 0 }} numberOfLines={1}>{`${others.length} more · from ${aed(others[0].price)}`}</T>
+          <Pressable onPress={toggle} style={{ marginLeft: 'auto' }}><T size={11} w={700} c={C.blue}>Compare</T></Pressable>
         </View>
       )}
       <Dock><Btn title="Accept & book" onPress={() => { if (accepted.current) return; accepted.current = true; setTimeout(() => { accepted.current = false; }, 1200); useDemo.getState().acceptQuote(best.id); router.push(`/book?expert=${ex.id}&service=${service}&quote=${best.id}`); }} /></Dock>

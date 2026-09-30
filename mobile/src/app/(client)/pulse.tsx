@@ -175,7 +175,7 @@ export default function PulseScreen() {
             <T size={9} w={700} ls={0.13} c={C.blue}>YOU'LL NEED</T>
             <T size={15} w={700} ls={-0.02} style={{ marginTop: s(6) }}>{e.recommend.expertType}</T>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(8), marginTop: s(8) }}>
-              <View style={{ flexDirection: 'row' }}>{e.recommend.avatars.map((p, i) => <Avatar key={p} photo={p} size={22} ring="white" style={{ marginLeft: i ? -s(8) : 0 }} />)}</View>
+              <View style={{ flexDirection: 'row' }}>{e.recommend.avatars.map((p, i) => <Avatar key={p} photo={p} size={22} ring="white" style={{ marginLeft: i ? -s(8) : 0, ...shadow('#16205A', 0, 0) }} />)}</View>
               <T size={9.5} c={C.mute} style={{ flexShrink: 0 }}>{`${e.recommend.count} verified · from ${aed(e.recommend.fromPrice)}`}</T>
             </View>
             <Btn title="Request a quote" style={{ marginTop: s(12), paddingVertical: s(11) }} onPress={() => router.push(`/request?kb=${e.id}`)} />

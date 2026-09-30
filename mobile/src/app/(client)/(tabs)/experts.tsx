@@ -78,9 +78,12 @@ export default function Experts() {
         <Orb size={14} /><GradientText shimmer base={C.faint2} size={9.5}>{`Matched by Pulse to your ${STAGES[stage - 1]} stage`}</GradientText>
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: s(12), flexGrow: 0, flexShrink: 0 }} contentContainerStyle={{ gap: s(6) }}>
-        {FILTERS.map((x) => <Chip key={x} label={x} on={x === f} onPress={() => setF(x)} />)}
+        {/* mockup .fchips: only the selected chip is filled; the others are bare labels */}
+        {FILTERS.map((x) => <Chip key={x} label={x} on={x === f} onPress={() => setF(x)} style={x === f ? undefined : { backgroundColor: 'transparent', borderColor: 'transparent' }} />)}
       </ScrollView>
-      <Animated.ScrollView onScroll={onScroll} scrollEventThrottle={16} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: s(12), marginTop: s(12), paddingBottom: s(110) }}>
+      {/* full-width scroller, margin inside: an Android ScrollView clips its children, which cut the top match's glow */}
+      <Animated.ScrollView onScroll={onScroll} scrollEventThrottle={16} showsVerticalScrollIndicator={false} style={{ marginHorizontal: -s(20) }}
+        contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: s(12), marginTop: s(12), paddingBottom: s(110), paddingHorizontal: s(20) }}>
         {list.map((e, i) => <Tile key={e.id} e={e} i={i} top={i === 0 && f === 'For you'} scrollY={scrollY} />)}
       </Animated.ScrollView>
       <LinearGradient pointerEvents="none" colors={['rgba(247,248,252,0)', 'rgba(247,248,252,1)', 'rgba(247,248,252,1)']} locations={[0, 0.55, 1]}
