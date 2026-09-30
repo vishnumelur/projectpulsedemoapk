@@ -1,12 +1,6 @@
 import { render, screen } from '@testing-library/react-native';
 import { StageTrack, stageLabels } from '@/fx/StageTrack';
 
-jest.mock('@/fx/RoundOrb', () => {
-  const { View: mockView } = require('react-native');
-  const mockOrb = () => require('react').createElement(mockView, { testID: 'RoundOrb' });
-  return { __esModule: true, RoundOrb: mockOrb, default: mockOrb };
-});
-
 test('B1 stage track: pill names the current stage, "Stage N of 6", first · Next · last labels', async () => {
   await render(<StageTrack stage={3} />);
   expect(screen.getByText('Tender')).toBeTruthy();

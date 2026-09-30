@@ -6,7 +6,7 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { Easing, cancelAnimation, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
+import Animated, { cancelAnimation, useAnimatedStyle, useReducedMotion, useSharedValue, withDelay, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { T } from '@/ui/T';
 import { LogoMark } from '@/ui/LogoMark';
@@ -16,7 +16,7 @@ import { PHOTOS } from '@/theme/photos';
 import { s } from '@/theme/scale';
 import { shadow } from '@/theme/shadow';
 import { C } from '@/theme/tokens';
-import { EASE_IN_OUT, PRESS_SCALE, enterUp } from '@/theme/motion';
+import { DUR, EASE_IN_OUT, PRESS_SCALE, enterUp } from '@/theme/motion';
 
 // Batch 5 A2 "Cinematic photo" (design/mockups/batch5-first-impression.html, A2 · Welcome).
 const ANSWER_BOLD = 'Likely yes.';
@@ -37,10 +37,12 @@ function Hero() {
   const { width } = useWindowDimensions();
   const H = s(370);
   const kb = useSharedValue(0);
+  const reduce = useReducedMotion();
   useEffect(() => {
-    kb.value = withRepeat(withTiming(1, { duration: 14000, easing: EASE_IN_OUT }), -1, true);
+    if (reduce) return;
+    kb.value = withRepeat(withTiming(1, { duration: DUR.kenBurns, easing: EASE_IN_OUT }), -1, true);
     return () => cancelAnimation(kb);
-  }, []);
+  }, [reduce]);
   const iw = width * 1.12, ih = H * 1.12;
   const st = useAnimatedStyle(() => ({ transform: [{ translateX: -0.02 * iw * kb.value }, { translateY: 0.01 * ih * kb.value }, { scale: 1 + 0.08 * kb.value }] }));
   return (
@@ -67,10 +69,12 @@ function GlassPill({ children, style }: { children: React.ReactNode; style?: any
 /** Mockup `.fl1`: a gentle 5px float on a 6s ease-in-out loop. */
 function useFloat() {
   const f = useSharedValue(0);
+  const reduce = useReducedMotion();
   useEffect(() => {
-    f.value = withRepeat(withSequence(withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.ease) }), withTiming(0, { duration: 3000, easing: Easing.inOut(Easing.ease) })), -1);
+    if (reduce) return;
+    f.value = withRepeat(withTiming(1, { duration: DUR.float / 2, easing: EASE_IN_OUT }), -1, true);
     return () => cancelAnimation(f);
-  }, []);
+  }, [reduce]);
   return useAnimatedStyle(() => ({ transform: [{ translateY: -s(5) * f.value }] }));
 }
 
@@ -124,10 +128,13 @@ function PulseCard() {
 export function GetStarted({ onPress }: { onPress: () => void }) {
   const [w, setW] = useState(0);
   const sw = useSharedValue(0);
+  const reduce = useReducedMotion();
   useEffect(() => {
-    sw.value = withDelay(800, withRepeat(withSequence(withTiming(1, { duration: 2000, easing: EASE_IN_OUT }), withTiming(1, { duration: 2000 }), withTiming(0, { duration: 0 })), -1));
+    if (reduce) return;
+    // mockup shimb: the light crosses in the first half of the loop, then rests off the button
+    sw.value = withDelay(800, withRepeat(withSequence(withTiming(1, { duration: DUR.sweep / 2, easing: EASE_IN_OUT }), withTiming(1, { duration: DUR.sweep / 2 }), withTiming(0, { duration: 0 })), -1));
     return () => cancelAnimation(sw);
-  }, []);
+  }, [reduce]);
   const ss = useAnimatedStyle(() => ({ transform: [{ translateX: w * (-0.5 + 1.8 * sw.value) }] }));
   return (
     <Pressable onPress={onPress} accessibilityRole="button" onLayout={(e) => setW(e.nativeEvent.layout.width)}

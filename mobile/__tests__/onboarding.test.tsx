@@ -6,8 +6,7 @@ import Building from '@/app/onboarding/building';
 import Stage from '@/app/onboarding/stage';
 import { useDemo } from '@/store/demo';
 
-jest.mock('expo-router', () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() }, useLocalSearchParams: () => ({}) }));
-jest.mock('@/fx/RoundOrb', () => { const { View: mockView } = require('react-native'); const mockOrb = () => require('react').createElement(mockView, { testID: 'RoundOrb' }); return { __esModule: true, RoundOrb: mockOrb, default: mockOrb }; });
+jest.mock('expo-router', () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() }, useLocalSearchParams: () => ({}), useFocusEffect: jest.fn() }));
 beforeEach(() => { useDemo.getState().resetDemo(); jest.clearAllMocks(); });
 
 test('Welcome (A2): Get started goes to the role screen; Sign in goes to sign in', async () => {
@@ -26,8 +25,10 @@ test.each([["I'm building", 'client'], ["I'm an engineer", 'expert']] as const)(
   expect(screen.getByText('What brings you\nto Pulse?')).toBeTruthy();
   await fireEvent.press(screen.getByText(card));
   expect(useDemo.getState().role).toBe(role);
-  expect(router.push).not.toHaveBeenCalled(); // the card lifts first
-  await act(async () => { jest.advanceTimersByTime(600); });
+  expect(router.push).not.toHaveBeenCalled(); // the card lifts, then expands to full screen
+  await act(async () => { jest.advanceTimersByTime(500); });
+  expect(router.push).not.toHaveBeenCalled();
+  await act(async () => { jest.advanceTimersByTime(400); });
   jest.useRealTimers();
   expect(router.push).toHaveBeenCalledWith('/onboarding/signup');
 });

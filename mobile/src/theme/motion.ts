@@ -7,7 +7,9 @@ export const EASE_OUT = Easing.bezier(0.22, 1, 0.36, 1);
 /** For things that move within the screen (in-out). */
 export const EASE_IN_OUT = Easing.bezier(0.4, 0, 0.2, 1);
 
-export const DUR = { fast: 180, base: 280, slow: 420, reveal: 600 } as const;
+export const DUR = { fast: 180, base: 280, slow: 420, reveal: 600,
+  /** Ambient loops (full cycle): Ken Burns push-in, a floating card, a light sweep on a button, a light sweep on a progress segment. */
+  kenBurns: 14000, float: 6000, sweep: 4000, trackSweep: 2600 } as const;
 
 /** Critically-damped springs (ζ ≥ 1): settle without overshoot. Use for press feedback, sheets, thumbs, knobs. */
 export const SPRING = { damping: 30, stiffness: 260, mass: 1, overshootClamping: true } as const;

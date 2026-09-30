@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { useSharedValue, useAnimatedStyle, withDelay, withRepeat, withSequence, withTiming, cancelAnimation } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withDelay, withRepeat, withSequence, withTiming, cancelAnimation, useReducedMotion } from 'react-native-reanimated';
 import { s } from '@/theme/scale';
 import { C } from '@/theme/tokens';
 import { DUR, EASE_IN_OUT, EASE_OUT } from '@/theme/motion';
@@ -39,12 +39,14 @@ function Done({ i, last }: { i: number; last: boolean }) {
 function Now({ i }: { i: number }) {
   const fill = useSharedValue(0);
   const sweep = useSharedValue(0);
+  const reduce = useReducedMotion();
   useEffect(() => {
     fill.value = withDelay(i * STAGGER + 150, withTiming(NOW_FILL, { duration: 1400, easing: EASE_OUT }));
     // mockup @keyframes sweep 2.6s ease-in-out: left -40% -> 60% over the first 70%, then rests off the fill
-    sweep.value = withDelay(1200, withRepeat(withSequence(withTiming(1, { duration: 1820, easing: EASE_IN_OUT }), withTiming(1, { duration: 780 }), withTiming(0, { duration: 0 })), -1));
+    if (reduce) return;
+    sweep.value = withDelay(1200, withRepeat(withSequence(withTiming(1, { duration: DUR.trackSweep * 0.7, easing: EASE_IN_OUT }), withTiming(1, { duration: DUR.trackSweep * 0.3 }), withTiming(0, { duration: 0 })), -1));
     return () => { cancelAnimation(sweep); };
-  }, []);
+  }, [reduce]);
   const fs = useAnimatedStyle(() => ({ width: `${fill.value * 100}%` }));
   const ss = useAnimatedStyle(() => ({ left: `${-40 + sweep.value * 100}%` }));
   return (
