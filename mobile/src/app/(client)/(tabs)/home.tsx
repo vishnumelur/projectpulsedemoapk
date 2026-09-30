@@ -63,11 +63,13 @@ export default function Home() {
   }, []));
   const b = BUILDINGS.find((x) => x.id === projectType)!;
   return (
-    <Screen bg="aurora3" overlay={flying ? (
+    <Screen bg="aurora3" px={0} overlay={flying ? (
       <Animated.View pointerEvents="none" style={[{ position: 'absolute', left: flying.x, top: flying.y, width: s(30), height: s(30) }, fly]}><Orb size={30} /></Animated.View>
     ) : undefined}>
       <Animated.View style={[{ flex: 1 }, page]}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: s(90) }}>
+      {/* full-width scroller with the 20px margin inside it: an Android ScrollView clips its children, which cut the Ask bar's
+          glow and the rounded ends of its gradient stroke flat at the margin */}
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: s(90), paddingHorizontal: s(20) }}>
         <Rise index={0} blur={false}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: s(9) }}>
             <View><T size={9.5} c={C.mute}>Good evening</T><GradientText shimmer size={22} w={700} ls={-0.035} style={{ marginTop: s(-1) }}>Sara</GradientText></View>

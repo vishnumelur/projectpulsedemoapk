@@ -1,4 +1,4 @@
-import { Pressable, View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { s } from '@/theme/scale';
 import { C } from '@/theme/tokens';
@@ -12,8 +12,12 @@ export type TabBarProps = { state: { index: number; routes: { name: string }[] }
 export function TabBar({ state, navigation, items }: TabBarProps) {
   const insets = useSafeAreaInsets();
   const current = state.routes[state.index].name;
+  // Mockup: the dock floats 12px above the screen's bottom edge. Android's gesture bar is a transparent inset only ~24dp
+  // high, and s(12) already clears its handle, so there the dock just keeps clear of the inset instead of stacking both
+  // (which lifted it ~15px and covered the list). iOS/web unchanged.
+  const bottom = Platform.OS === 'android' ? Math.max(s(12), insets.bottom) : s(12) + insets.bottom;
   return (
-    <View pointerEvents="box-none" style={{ position: 'absolute', left: s(12), right: s(12), bottom: s(12) + insets.bottom }}>
+    <View pointerEvents="box-none" style={{ position: 'absolute', left: s(12), right: s(12), bottom }}>
       <Glass r={27} style={{ height: s(54), flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
         {items.map((it) => {
           const on = current === it.route || (it.also ?? []).includes(current);
