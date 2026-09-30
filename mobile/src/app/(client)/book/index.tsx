@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
-import Animated, { FadeIn, FadeOut, useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, useAnimatedStyle, useSharedValue, SharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 import { Screen } from '@/ui/Screen';
 import { Header, Eyebrow } from '@/ui/Header';
 import { T } from '@/ui/T';
@@ -53,9 +53,7 @@ function DayCell({ d, on, onPress }: { d: (typeof DAYS)[number]; on: boolean; on
   );
 }
 
-function Dim({ show }: { show: boolean }) {
-  const v = useSharedValue(0);
-  useEffect(() => { v.value = withTiming(show ? 1 : 0, { duration: 320, easing: EASE }); }, [show, v]);
+function Dim({ v }: { v: SharedValue<number> }) {
   const st = useAnimatedStyle(() => ({ opacity: v.value }));
   if (Platform.OS !== 'ios') return null;
   return <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, st]}><BlurView intensity={10} tint="light" style={StyleSheet.absoluteFill} /></Animated.View>;
@@ -66,22 +64,27 @@ export default function Book() {
   const e = EXPERTS.find((x) => x.id === (p.expert ?? 'omar'))!; const sv = e.services.find((x) => x.id === (p.service ?? e.services[0].id))!;
   const [day, setDay] = useState(9); const [slot, setSlot] = useState('thu-1000');
   const [pay, setPay] = useState(!!p.pay); const [state, setState] = useState<'idle' | 'busy' | 'done'>('idle');
+  const dimV = useSharedValue(pay ? 1 : 0);
+  useEffect(() => { dimV.value = withTiming(pay ? 1 : 0, { duration: 300, easing: EASE }); }, [pay, dimV]);
+  const pageStyle = useAnimatedStyle(() => ({ opacity: 1 - 0.4 * dimV.value, ...(Platform.OS === 'web' ? ({ filter: `blur(${1.5 * dimV.value}px)` } as object) : null) }));
   const paying = useRef(false);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(() => () => { timers.current.forEach(clearTimeout); }, []);
   const vat = (sv.price + FEE) * VAT_RATE; const total = sv.price + FEE + vat;
   const time = CLIENT_SLOTS.find((x) => x.id === slot)!.time;
   const svName = sv.name === 'Bid review + visit' ? 'Bid review + site visit' : sv.name;
   const doPay = () => {
     if (paying.current) return; paying.current = true; setState('busy');
-    setTimeout(() => {
+    timers.current.push(setTimeout(() => {
       const job = useDemo.getState().bookAndPay({ expertId: e.id, serviceId: sv.id, slotId: slot }); setState('done');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setTimeout(() => { setPay(false); router.replace(`/book/done?job=${job}`); }, 400);
-    }, 700);
+      timers.current.push(setTimeout(() => { setPay(false); router.replace(`/book/done?job=${job}`); }, 400));
+    }, 700));
   };
   const line = (l: string, v: string) => <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: s(5) }}><T size={11} c={C.mute}>{l}</T><T size={11} w={700}>{v}</T></View>;
   return (
     <Screen bg="aurora" px={16}>
-      <View style={[{ flex: 1, opacity: pay ? 0.6 : 1 }, Platform.OS === 'web' && pay ? ({ filter: 'blur(1.5px)' } as object) : null]}>
+      <Animated.View style={[{ flex: 1 }, pageStyle]}>
         <Header center={<Eyebrow>BOOK</Eyebrow>} />
         <T size={27} w={700} ls={-0.035} lh={1.05} style={{ marginTop: s(12) }}>{'When suits\nyou?'}</T>
         <View style={{ flexDirection: 'row', gap: s(6), marginTop: s(12) }}>
@@ -104,8 +107,8 @@ export default function Book() {
           <View style={{ flex: 1 }}><T size={11.5} w={700}>{svName}</T><T size={9.5} c={C.mute}>{`Thu ${day} Oct · ${time} · Al Reem Island`}</T></View>
         </Glass>
         <View style={{ marginTop: 'auto', marginBottom: s(18) }}><Btn title={`Continue · ${aed(sv.price)}`} onPress={() => setPay(true)} /></View>
-      </View>
-      <Dim show={pay} />
+      </Animated.View>
+      <Dim v={dimV} />
       <Sheet visible={pay} onClose={() => state === 'idle' && setPay(false)}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}><T size={19} w={700} ls={-0.03}>Pay securely</T><T size={9.5} c={C.mute}>Held until job sign-off</T></View>
         <LinearGradient colors={[C.navy, C.blue, C.cyan]} locations={[0, 0.6, 1]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ marginTop: s(12), height: s(66), borderRadius: s(14), paddingVertical: s(10), paddingHorizontal: s(12), overflow: 'hidden' }}>
@@ -119,7 +122,7 @@ export default function Book() {
           </View>
         </View>
         <Btn title={`Pay ${aed(total, 2)}`} busy={state === 'busy'} done={state === 'done'} onPress={doPay} style={{ marginTop: s(12) }} />
-        <Btn variant="black" onPress={doPay} style={{ marginTop: s(8), borderRadius: s(14) }}><T size={13} w={600} c="#fff">Pay with <T size={13} w={800} c="#fff">G</T> Pay</T></Btn>
+        <Btn variant="black" busy={state === 'busy'} done={state === 'done'} onPress={doPay} style={{ marginTop: s(8), borderRadius: s(14) }}>{state === 'idle' ? <T size={13} w={600} c="#fff">Pay with <T size={13} w={800} c="#fff">G</T> Pay</T> : undefined}</Btn>
       </Sheet>
     </Screen>
   );

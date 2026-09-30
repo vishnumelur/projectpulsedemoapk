@@ -12,9 +12,12 @@ test('pick a time, pay once (double tap safe), land on booked', async () => {
   expect(screen.getByText("Omar's free times on Thursday")).toBeTruthy();
   await fireEvent.press(screen.getByText('Continue · AED 2,200'));
   expect(screen.getByText('AED 2,425.50')).toBeTruthy();
-  await fireEvent.press(screen.getByText('Pay AED 2,425.50'));
-  await fireEvent.press(screen.getAllByTestId('btn')[0]);
+  // two taps land before React re-renders (Pay twice, then Pay + Google Pay): only one job may be created
+  const pay = screen.getByText('Pay AED 2,425.50');
+  const g = screen.getByText('G');
+  await Promise.all([fireEvent.press(pay), fireEvent.press(pay), fireEvent.press(g)]);
   await act(async () => { jest.advanceTimersByTime(1200); });
   expect(useDemo.getState().jobs).toHaveLength(1);
+  expect(router.replace).toHaveBeenCalledTimes(1);
   expect(router.replace).toHaveBeenCalledWith(expect.stringMatching(/^\/book\/done\?job=/));
 });
