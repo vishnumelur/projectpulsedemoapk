@@ -1,4 +1,4 @@
-import { Modal, Pressable, ScrollView, View } from 'react-native';
+import { Modal, Platform, Pressable, ScrollView, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -173,7 +173,8 @@ export default function Project() {
   const dateRow = (key: string, day: string, month: string, title: string, sub: string, right: React.ReactNode, last: boolean) => (
     <View key={key} style={{ flexDirection: 'row', gap: s(12), alignItems: 'center', paddingVertical: s(11), borderBottomWidth: last ? 0 : 1, borderBottomColor: C.line }}>
       <View style={{ width: s(30), alignItems: 'center' }}><T size={14} w={700} ls={-0.02} style={{ lineHeight: s(22) }}>{day}</T><T size={8.5} w={700} ls={0.06} c={C.mute} style={{ lineHeight: s(17) }}>{month}</T></View>
-      <View style={{ flex: 1, minWidth: 0, marginRight: -s(8) }}><T size={11.5} w={700} ellipsizeMode="clip" numberOfLines={1} style={{ lineHeight: s(19.5) }}>{title}</T><T size={10} c={C.mute} style={{ lineHeight: s(19.5) }}>{sub}</T></View>
+      <View style={{ flex: 1, minWidth: 0, marginRight: -s(8), overflow: 'hidden' }}>{/* nowrap + clip mid-glyph as on web; a native 1-line Text cuts at a word boundary instead */}
+        <T size={11.5} w={700} ellipsizeMode="clip" numberOfLines={1} style={[{ lineHeight: s(19.5) }, Platform.OS === 'web' ? null : { width: s(400) }]}>{title}</T><T size={10} c={C.mute} style={{ lineHeight: s(19.5) }}>{sub}</T></View>
       {right}
     </View>
   );
