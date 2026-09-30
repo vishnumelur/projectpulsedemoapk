@@ -1,15 +1,15 @@
 // src/app/(expert)/pro/(tabs)/jobs.tsx — E6 availability & bookings
 import { Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Screen } from '@/ui/Screen';
 import { T } from '@/ui/T';
-import { Glass } from '@/ui/Glass';
 import { useDemo } from '@/store/demo';
-import { DAYS } from '@/data/seed';
+import { DayStrip, DEFAULT_DAY, StripDay, stripDay } from '@/ui/DayStrip';
+import { enterFade, exitFade } from '@/theme/motion';
 import type { Slot } from '@/data/types';
 import { GRAD, EASE } from '@/theme/tokens';
 import { s } from '@/theme/scale';
@@ -52,8 +52,32 @@ function ToggleSlot({ x, onToggle }: { x: Slot; onToggle: (id: string) => void }
   );
 }
 
+/** A day's schedule. Thursday 9 Oct is the store's seeded slots; other days are derived from the date so they stay stable. */
+const VISITS = [['Khalid · Site inspection', 'Khalifa City'], ['Mariam · Structural check', 'Yas Island'], ['Fatima · Snagging walk-through', 'Saadiyat']];
+function scheduleFor(d: StripDay): Slot[] {
+  const n = d.n + d.m * 31; const weekend = d.wd === 'SAT' || d.wd === 'SUN';
+  const times = weekend ? ['10:00', '13:00', '15:00'] : n % 2 ? ['09:00', '11:00', '14:00', '16:00'] : ['10:00', '13:00', '15:00', '17:00'];
+  const booked = !weekend && n % 3 === 0 ? n % times.length : -1;
+  return times.map((time, i) => {
+    const id = `${d.key}-${time.replace(':', '')}`;
+    if (i === booked) { const [label, sub] = VISITS[n % VISITS.length]; return { id, day: d.n, time, state: 'booked', label, sub }; }
+    return { id, day: d.n, time, state: weekend || (n + i) % 3 === 0 ? 'off' : 'open' };
+  });
+}
+const flip = (x: Slot): Slot => (x.state === 'booked' ? x : { ...x, state: x.state === 'open' ? 'off' : 'open' });
+
 export default function Availability() {
-  const slots = useDemo((st) => st.slots); const toggle = useDemo((st) => st.toggleSlot);
+  const seeded = useDemo((st) => st.slots); const toggleSeeded = useDemo((st) => st.toggleSlot);
+  // the picked day; toggles on other days are kept per day for the session
+  const [day, setDay] = useState(DEFAULT_DAY); const [edits, setEdits] = useState<Record<string, Slot[]>>({});
+  const slots = day === DEFAULT_DAY ? seeded : edits[day] ?? scheduleFor(stripDay(day));
+  const dayRef = useRef(day); dayRef.current = day;
+  const toggle = useCallback((id: string) => {
+    const k = dayRef.current; if (k === DEFAULT_DAY) { toggleSeeded(id); return; }
+    setEdits((e) => ({ ...e, [k]: (e[k] ?? scheduleFor(stripDay(k))).map((x) => (x.id === id ? flip(x) : x)) }));
+  }, [toggleSeeded]);
+  const changed = useRef(false);
+  const pick = useCallback((k: string) => { changed.current = true; setDay(k); }, []);
   const [on, setOn] = useState(true);
   // master switch: knob springs across, the gradient fades to grey, and all slots dim
   const k = useSharedValue(1);
@@ -76,22 +100,16 @@ export default function Availability() {
         </Pressable>
       </View>
       <T size={11} c={C.mute} style={{ marginTop: s(4) }}>Clients can book your open slots</T>
-      <View style={{ flexDirection: 'row', gap: s(5), marginTop: s(12) }}>
-        {DAYS.map((d) => d.n === 9 ? (
-          <LinearGradient key={d.n} colors={GRAD} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1, paddingVertical: s(8), borderRadius: s(12), alignItems: 'center' }}>
-            <T size={8.5} w={700} c="rgba(255,255,255,0.8)">{d.d}</T><T size={14} w={700} c="#fff" style={{ marginTop: 1 }}>{String(d.n)}</T>
-          </LinearGradient>
-        ) : (
-          <Glass key={d.n} r={12} style={{ flex: 1, paddingVertical: s(8), alignItems: 'center' }}><T size={8.5} w={700} c={C.mute}>{d.d}</T><T size={14} w={700} style={{ marginTop: 1 }}>{String(d.n)}</T></Glass>
-        ))}
-      </View>
+      <DayStrip variant="gradient" px={20} mt={12} selected={day} onSelect={pick} />
       <Animated.View pointerEvents={on ? 'auto' : 'none'} style={[{ marginTop: s(12) }, dim]}>
+        <Animated.View key={day} entering={changed.current ? enterFade() : undefined} exiting={exitFade}>
         {slots.map((x) => x.state === 'booked' ? (
-          <Pressable key={x.id} onPress={() => router.push(`/pro/job/${x.jobId}` as any)} style={[ROW, { backgroundColor: C.navy }]}>
+          <Pressable key={x.id} disabled={!x.jobId} onPress={() => router.push(`/pro/job/${x.jobId}` as any)} style={[ROW, { backgroundColor: C.navy }]}>
             <T size={10} w={700} c="rgba(255,255,255,0.6)" style={{ width: s(44) }}>{x.time}</T>
             <View style={{ flex: 1 }}><T size={11.5} w={600} c="#fff">{x.label}</T><T size={9.5} w={500} c="rgba(255,255,255,0.65)">{x.sub}</T></View>
           </Pressable>
         ) : <ToggleSlot key={x.id} x={x} onToggle={toggle} />)}
+        </Animated.View>
       </Animated.View>
     </Screen>
   );
