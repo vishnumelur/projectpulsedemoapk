@@ -1,36 +1,56 @@
 import { render, screen, fireEvent, act } from '@testing-library/react-native';
-import { router } from 'expo-router';
+import { router, Redirect } from 'expo-router';
 import Welcome from '@/app/onboarding/welcome';
 import Role from '@/app/onboarding/role';
 import Building from '@/app/onboarding/building';
 import Stage from '@/app/onboarding/stage';
 import { useDemo } from '@/store/demo';
 
-jest.mock('expo-router', () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() }, useLocalSearchParams: () => ({}), useFocusEffect: jest.fn() }));
+jest.mock('expo-router', () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() }, useLocalSearchParams: () => ({}), useFocusEffect: jest.fn(),
+  Redirect: jest.fn(() => null) }));
 beforeEach(() => { useDemo.getState().resetDemo(); jest.clearAllMocks(); });
 
-test('Welcome (A2): Get started goes to the role screen; Sign in goes to sign in', async () => {
+test('Welcome (A3): Pulse greets you, with the lockup, the two replies and the trust line', async () => {
   await render(<Welcome />);
-  for (const t of ['Project Pulse', 'Can I add a floor to my villa?', 'Omar H.', 'AED 2,200', 'Your project,', 'in expert hands.',
-    'Answers in seconds. Verified engineers in Abu Dhabi when you need one.', 'Verified experts', 'Secure pay', 'Abu Dhabi']) expect(screen.getByText(t)).toBeTruthy();
-  await fireEvent.press(screen.getByText('Get started'));
-  expect(router.push).toHaveBeenCalledWith('/onboarding/role');
+  for (const t of ['Project ', 'Pulse', 'Sign in', 'Your construction expert for Abu Dhabi. Are you planning a project, or are you an engineer?',
+    "I'm planning a project", "I'm an engineer", '1,200+ verified engineers', 'Abu Dhabi']) expect(screen.getByText(t)).toBeTruthy();
+  expect(screen.getByLabelText("Hi, I'm Pulse.")).toBeTruthy();
+  expect(screen.getByTestId('RoundOrb')).toBeTruthy();
+});
+
+test('Welcome (A3): Sign in goes to sign in', async () => {
+  await render(<Welcome />);
   await fireEvent.press(screen.getByText('Sign in'));
   expect(router.push).toHaveBeenCalledWith('/onboarding/signup?mode=signin');
 });
 
-test.each([["I'm building", 'client'], ["I'm an engineer", 'expert']] as const)('Role: tapping "%s" sets the %s role and moves on to sign up', async (card, role) => {
+test.each([["I'm planning a project", 'client'], ["I'm an engineer", 'expert']] as const)('Welcome (A3): the reply "%s" sets the %s role, glides up, then goes to sign up', async (reply, role) => {
   jest.useFakeTimers();
-  await render(<Role />);
-  expect(screen.getByText('What brings you\nto Pulse?')).toBeTruthy();
-  await fireEvent.press(screen.getByText(card));
+  await render(<Welcome />);
+  await fireEvent.press(screen.getByText(reply));
   expect(useDemo.getState().role).toBe(role);
-  expect(router.push).not.toHaveBeenCalled(); // the card lifts, then expands to full screen
-  await act(async () => { jest.advanceTimersByTime(500); });
-  expect(router.push).not.toHaveBeenCalled();
-  await act(async () => { jest.advanceTimersByTime(400); });
+  expect(router.push).not.toHaveBeenCalled(); // the reply glides up into the conversation first
+  await act(async () => { jest.advanceTimersByTime(1000); });
   jest.useRealTimers();
+  expect(router.push).toHaveBeenCalledTimes(1);
   expect(router.push).toHaveBeenCalledWith('/onboarding/signup');
+});
+
+test('Welcome (A3): a double tap on the replies navigates once', async () => {
+  jest.useFakeTimers();
+  await render(<Welcome />);
+  await fireEvent.press(screen.getByText("I'm planning a project"));
+  await fireEvent.press(screen.getByText("I'm planning a project"));
+  await fireEvent.press(screen.getByText("I'm an engineer"));
+  await act(async () => { jest.advanceTimersByTime(2000); });
+  jest.useRealTimers();
+  expect(useDemo.getState().role).toBe('client');
+  expect(router.push).toHaveBeenCalledTimes(1);
+});
+
+test('Role: the old role screen redirects to the A3 welcome', async () => {
+  await render(<Role />);
+  expect((Redirect as unknown as jest.Mock).mock.calls[0][0]).toMatchObject({ href: '/onboarding/welcome' });
 });
 
 test('Building: shows Villa first with its subtitle; Continue goes to chosen', async () => {
