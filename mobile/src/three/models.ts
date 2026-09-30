@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { Platform } from 'react-native';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { noiseTex, stripeTex, contactTex } from './textures';
+import { modelBox } from './frame';
 
 const nz = noiseTex(), nzFine = noiseTex(128, 190, 70, 10);
 
@@ -52,10 +53,22 @@ export const M = {
 };
 
 // ---------- primitives ----------
+/** RoundedBoxGeometry reports the unit BoxGeometry it starts from as its type/parameters, so its real shape is tagged
+ *  here for the stage edge cache. */
+/** They are also the costliest primitive to generate (a tower has 44 identical floor plates), so one instance per shape
+ *  is shared by every mesh, model and remount. Disposing it on unmount only frees its GPU buffers; a later render
+ *  re-uploads them. */
+const RBOX = new Map<string, any>();
+function rbox(w, h, d, s, r) {
+  const key = `RoundedBox:${w},${h},${d},${s},${r}`;
+  let g = RBOX.get(key);
+  if (!g) { g = new RoundedBoxGeometry(w, h, d, s, r); g.userData.shape = key; g.computeBoundingBox(); RBOX.set(key, g); }
+  return g;
+}
 export function part(parent, w, h, d, mat, x, y, z, o = {}) {
   const g = new THREE.Group(); g.position.set(x, y, z);
   const r = o.round ?? 0;
-  const geo = r > 0 ? new RoundedBoxGeometry(w, h, d, 3, Math.min(r, w / 2.01, h / 2.01, d / 2.01)) : new THREE.BoxGeometry(w, h, d);
+  const geo = r > 0 ? rbox(w, h, d, 3, Math.min(r, w / 2.01, h / 2.01, d / 2.01)) : new THREE.BoxGeometry(w, h, d);
   const m = new THREE.Mesh(geo, mat); m.position.y = h / 2;
   if (o.ry) g.rotation.y = o.ry; if (o.rx) m.rotation.x = o.rx; if (o.rz) m.rotation.z = o.rz;
   m.castShadow = o.cast !== false && mat !== M.glass; m.receiveShadow = true; g.add(m);
@@ -144,8 +157,8 @@ export function buildTower() {
   const n = 22;
   for (let i = 0; i < n; i++) {
     const g = new THREE.Group(); g.position.y = 4 + i * 1.05; g.rotation.y = i * 0.035; g.userData.rise = 0.1 + i * 0.035; solid.add(g);
-    const slab = new THREE.Mesh(new RoundedBoxGeometry(6.2, 0.2, 6.2, 3, 0.09), M.white); slab.position.y = 0.1; slab.castShadow = slab.receiveShadow = true; g.add(slab);
-    const gl = new THREE.Mesh(new RoundedBoxGeometry(5.8, 0.85, 5.8, 3, 0.3), M.glassDark); gl.position.y = 0.625; g.add(gl);
+    const slab = new THREE.Mesh(rbox(6.2, 0.2, 6.2, 3, 0.09), M.white); slab.position.y = 0.1; slab.castShadow = slab.receiveShadow = true; g.add(slab);
+    const gl = new THREE.Mesh(rbox(5.8, 0.85, 5.8, 3, 0.3), M.glassDark); gl.position.y = 0.625; g.add(gl);
     for (const [fx, fz] of [[2.95, 0], [-2.95, 0], [0, 2.95], [0, -2.95]]) { const f = new THREE.Mesh(new THREE.BoxGeometry(fz ? 0.08 : 0.35, 0.85, fz ? 0.35 : 0.08), M.alu); f.position.set(fx, 0.625, fz); g.add(f); }
   }
   part(solid, 4.6, 1.6, 4.6, M.navy, 0, 4 + n * 1.05, 0, { rise: 0.9, round: 0.1, ry: n * 0.035 });
@@ -174,8 +187,8 @@ function archGeo(w, h, depth = 0.08) {
 }
 function car(parent, x, z, mat, ry = 0, rise = 1.0) {
   const g = grp(parent, rise); g.position.set(x, 0, z); g.rotation.y = ry;
-  mesh(g, new RoundedBoxGeometry(1.8, 0.62, 4.1, 3, 0.22), mat, 0, 0.55, 0);
-  mesh(g, new RoundedBoxGeometry(1.6, 0.55, 2.2, 3, 0.22), M.glassDark, 0, 1.05, -0.2);
+  mesh(g, rbox(1.8, 0.62, 4.1, 3, 0.22), mat, 0, 0.55, 0);
+  mesh(g, rbox(1.6, 0.55, 2.2, 3, 0.22), M.glassDark, 0, 1.05, -0.2);
   for (const [wx, wz] of [[-0.85, 1.3], [0.85, 1.3], [-0.85, -1.3], [0.85, -1.3]]) mesh(g, new THREE.CylinderGeometry(0.33, 0.33, 0.24, 18), M2.rubber, wx, 0.33, wz, 0, 0, Math.PI / 2);
   return g;
 }
@@ -259,9 +272,9 @@ export function buildFactory() {
   const pipe = grp(solid, 0.55); mesh(pipe, new THREE.CylinderGeometry(0.16, 0.16, 3, 12), M.alu, 11.0, 6.5, -5.05, 0, 0, Math.PI / 2);
   // articulated truck backing into dock 2
   const tr = grp(solid, 0.95); tr.position.set(4.6, 0, 6.8); tr.rotation.y = Math.PI / 2;
-  mesh(tr, new RoundedBoxGeometry(2.3, 2.7, 7, 3, 0.08), M.white, 0, 1.9, 0);
+  mesh(tr, rbox(2.3, 2.7, 7, 3, 0.08), M.white, 0, 1.9, 0);
   mesh(tr, new THREE.BoxGeometry(2.32, 0.5, 6.9), M.blue, 0, 1.1, 0);
-  mesh(tr, new RoundedBoxGeometry(2.3, 2.3, 2.1, 3, 0.25), M.navy, 0, 1.75, 4.7);
+  mesh(tr, rbox(2.3, 2.3, 2.1, 3, 0.25), M.navy, 0, 1.75, 4.7);
   mesh(tr, new THREE.BoxGeometry(2.0, 0.9, 0.05), M.glassDark, 0, 2.2, 5.76);
   for (const wz of [-2.6, -1.4, 4.8]) for (const wx of [-1.1, 1.1]) mesh(tr, new THREE.CylinderGeometry(0.5, 0.5, 0.35, 20), M2.rubber, wx, 0.5, wz, 0, 0, Math.PI / 2);
   // staff cars
@@ -362,23 +375,58 @@ export function deriveStageParams(v, o: Partial<StageParams> = {}): StageParams 
   const top = Math.max(core.max.y, next.max.y);
   const cx = core.max.x + 1.6, cz = core.min.z - 1.6, tx = (core.min.x + core.max.x) / 2, tz = (core.min.z + core.max.z) / 2;
   const dist = Math.hypot(tx - cx, tz - cz);
-  const crane = { x: r2(cx), z: r2(cz), h: r2(Math.max(12, top + 4)), ry: Math.atan2(tz - cz, -(tx - cx)), reach: r2(dist + 1.8),
-    hook: r2(dist * 0.75), loadY: r2(Math.min(top + 0.8, Math.max(12, top + 4) - 4.9)), ...o.crane };
+  // crane: clear of the built part, but no taller than just over the finished model, so the stage-5 props barely
+  // grow the framing box (low-rise models otherwise get a crane twice their height, clipped in short headers)
+  const full = riseBox(v.solid, -Infinity, Infinity);
+  const ch = Math.max(Math.min(Math.max(12, top + 4), full.max.y + 0.5), core.max.y + 1);
+  const crane = { x: r2(cx), z: r2(cz), h: r2(ch), ry: Math.atan2(tz - cz, -(tx - cx)), reach: r2(dist + 1.8),
+    hook: r2(dist * 0.75), loadY: r2(Math.max(1, Math.min(top + 0.8, ch - 4.9))), ...o.crane };
   return { footprint: fp, scaffold, crane, cabin: o.cabin ?? [r2(core.max.x - 1.2), r2(core.max.z + 1.8)], edgeAngle: o.edgeAngle };
+}
+
+// EdgesGeometry is the expensive part of a stage build (a tower has ~140 meshes but only a handful of distinct shapes).
+// Edge lists are cached by shape (geometry type + parameters, or uuid when it has none) and threshold, and shared
+// across meshes, models and remounts. They are plain arrays, never uploaded, so nothing here needs disposing.
+const EDGE_CACHE = new Map<string, Float32Array>();
+export const edgeCacheSize = () => EDGE_CACHE.size;
+function edgesOf(geo, angle): Float32Array {
+  const shape = geo.userData.shape ?? (geo.parameters && !(geo instanceof RoundedBoxGeometry) ? `${geo.type}:${JSON.stringify(geo.parameters)}` : geo.uuid);
+  const key = `${angle}|${shape}`;
+  let e = EDGE_CACHE.get(key);
+  if (!e) { const eg = new THREE.EdgesGeometry(geo, angle); e = eg.getAttribute('position').array as Float32Array; eg.dispose(); EDGE_CACHE.set(key, e); }
+  return e;
+}
+const _v = new THREE.Vector3();
+function mergeEdges(meshes, angle) {
+  const parts = meshes.map((m) => edgesOf(m.geometry, angle));
+  const out = new Float32Array(parts.reduce((n, a) => n + a.length, 0)); let k = 0;
+  meshes.forEach((m, i) => { const a = parts[i]; for (let j = 0; j < a.length; j += 3) { _v.set(a[j], a[j + 1], a[j + 2]).applyMatrix4(m.matrixWorld); out[k++] = _v.x; out[k++] = _v.y; out[k++] = _v.z; } });
+  return new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(out, 3));
+}
+/** Every ghost volume in one indexed, position-only geometry (the ghost material is unlit). */
+function mergeGhost(meshes) {
+  let nv = 0, ni = 0;
+  for (const m of meshes) { const g = m.geometry, c = g.getAttribute('position').count; nv += c; ni += g.index ? g.index.count : c; }
+  const pos = new Float32Array(nv * 3), idx = nv > 65535 ? new Uint32Array(ni) : new Uint16Array(ni); let pv = 0, pi = 0;
+  for (const m of meshes) {
+    const g = m.geometry, pa = g.getAttribute('position'), base = pv;
+    for (let j = 0; j < pa.count; j++) { _v.fromBufferAttribute(pa, j).applyMatrix4(m.matrixWorld); pos[pv * 3] = _v.x; pos[pv * 3 + 1] = _v.y; pos[pv * 3 + 2] = _v.z; pv++; }
+    if (g.index) for (let j = 0; j < g.index.count; j++) idx[pi++] = base + g.index.getX(j); else for (let j = 0; j < pa.count; j++) idx[pi++] = base + j;
+  }
+  return new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(pos, 3)).setIndex(new THREE.BufferAttribute(idx, 1));
 }
 
 export function makeStages(v, p: StageParams) {
   if (v.wire) return v;
   const geos = [];
   const G = (g) => { geos.push(g); return g; };
-  // wireframe hologram of the building: edges (same material as the villa) + ghosted volumes sharing the solid geometry
-  const wire = new THREE.Group(), lines = new THREE.Group(), ghost = new THREE.Group(); wire.add(lines, ghost); v.root.add(wire);
-  v.solid.traverse((o) => {
-    if (o.isMesh && o.geometry.type !== 'SphereGeometry' && o.geometry.type !== 'PlaneGeometry') {
-      const e = new THREE.LineSegments(G(new THREE.EdgesGeometry(o.geometry, p.edgeAngle ?? 25)), M.line); e.applyMatrix4(o.matrixWorld); lines.add(e);
-      const gm = new THREE.Mesh(o.geometry, M.ghost); gm.applyMatrix4(o.matrixWorld); ghost.add(gm);
-    }
-  });
+  // wireframe hologram of the building: edges (same material as the villa) + ghosted volumes, each baked into ONE
+  // world-space geometry (two draw calls however many parts the model has)
+  const meshes = [];
+  v.solid.traverse((o) => { if (o.isMesh && o.geometry.type !== 'SphereGeometry' && o.geometry.type !== 'PlaneGeometry') meshes.push(o); });
+  const lines = new THREE.LineSegments(G(mergeEdges(meshes, p.edgeAngle ?? 25)), M.line);
+  const ghost = new THREE.Mesh(G(mergeGhost(meshes)), M.ghost);
+  const wire = new THREE.Group(); wire.add(lines, ghost); v.root.add(wire);
   // survey: dashed footprint + corner pegs with blue flags
   const survey = new THREE.Group(), pegs = new THREE.Group(); v.root.add(survey);
   const [x0, z0, x1, z1] = p.footprint;
@@ -403,7 +451,7 @@ export function makeStages(v, p: StageParams) {
   const cable = new THREE.Mesh(G(new THREE.CylinderGeometry(0.015, 0.015, c.h - c.loadY - 0.4, 4)), M.frame); cable.position.set(-c.hook, (c.h + c.loadY + 0.5) / 2, 0); crane.add(cable);
   box(1.2, 0.5, 0.8, M.concrete2, -c.hook, c.loadY, 0); // load on the hook
   const cabin = new THREE.Group(); cabin.position.set(p.cabin[0], 0, p.cabin[1]); build.add(cabin);
-  const cm = new THREE.Mesh(G(new RoundedBoxGeometry(2.4, 1.1, 1.3, 3, 0.05)), M.yellow); cm.position.y = 0.55; cm.castShadow = cm.receiveShadow = true; cabin.add(cm);
+  const cm = new THREE.Mesh(G(rbox(2.4, 1.1, 1.3, 3, 0.05)), M.yellow); cm.position.y = 0.55; cm.castShadow = cm.receiveShadow = true; cabin.add(cm);
   for (const g of [wire, survey, build]) { g.userData.stageVariant = true; g.visible = false; }
   Object.assign(v, { wire, survey, build, stageGeos: geos });
   return v;
@@ -416,7 +464,7 @@ export function applyStage(v, stage) {
   if (on) {
     v.survey.visible = st <= 2; v.survey.children[1].visible = st === 1;
     v.wire.visible = st >= 2 && st <= 4; v.wire.children[1].visible = st >= 3;
-    const lm = st === 2 ? lineSoft : M.line; for (const l of v.wire.children[0].children) l.material = lm;
+    v.wire.children[0].material = st === 2 ? lineSoft : M.line;
     v.build.visible = st === 5;
   }
   v.solid.visible = !on || st >= 4;
@@ -432,7 +480,7 @@ export function applyStage(v, stage) {
 export function stageSignature(v) {
   const held = v.solid.children.filter((g) => g.userData.hold).length;
   return JSON.stringify({ survey: v.survey?.visible, pegs: v.survey?.children[1].visible, wire: v.wire?.visible, ghost: v.wire?.children[1].visible,
-    soft: v.wire?.children[0].children[0]?.material === lineSoft, solid: v.solid.visible, held, build: v.build?.visible });
+    soft: v.wire?.children[0].material === lineSoft, solid: v.solid.visible, held, build: v.build?.visible });
 }
 
 const SHARED = new Set<any>();
@@ -456,6 +504,31 @@ export const STAGE_OVERRIDES = {
     crane: { x: 7.4, z: -4.9, h: 12, ry: 0, reach: 7.85, hook: 6.0, loadY: 7.1 }, cabin: [7.0, 4.8], edgeAngle: 30 },
   shop: {}, tower: { edgeAngle: 10 }, factory: {}, reno: {}, // tower: its rounded floor plates' facets are shallower than 25°
 };
+/** Everything the stage props can occupy (survey pegs, scaffold, crane with its jib, cabin), from the parameters alone,
+ *  so a screen can frame them without building them. */
+export function stageExtent(p: StageParams): THREE.Box3 {
+  const b = new THREE.Box3(), P = (x, y, z) => b.expandByPoint(_v.set(x, y, z));
+  const [x0, z0, x1, z1] = p.footprint; for (const x of [x0, x1]) for (const z of [z0, z1]) { P(x, 0, z); P(x, 1.4, z); }
+  const s = p.scaffold; for (const x of [s.x0, s.x1]) for (const z of s.zs) { P(x, s.y0, z); P(x, s.y0 + s.h, z); }
+  const c = p.crane, Y = new THREE.Vector3(0, 1, 0);
+  for (const [lx, ly, lz] of [[0, 0, 0.25], [0, 0, -0.25], [-c.reach, c.h + 0.4, 0.2], [-c.reach, c.h + 0.4, -0.2], [1.7, c.h + 0.6, 0.5], [1.7, c.h + 0.6, -0.5]]) {
+    const q = new THREE.Vector3(lx, ly, lz).applyAxisAngle(Y, c.ry); P(c.x + q.x, q.y, c.z + q.z);
+  }
+  for (const dx of [-1.2, 1.2]) for (const dz of [-0.65, 0.65]) { P(p.cabin[0] + dx, 0, p.cabin[1] + dz); P(p.cabin[0] + dx, 1.1, p.cabin[1] + dz); }
+  return b;
+}
+
+/** The box a screen frames: the finished model and plot, plus (for the derived models) every stage prop, so the camera
+ *  is the same at every stage and nothing is clipped at any of them. The villa keeps its approved framing box. */
+export function framingBox(model, v): THREE.Box3 {
+  const sy = v.solid.children.map((c) => c.scale.y); v.solid.children.forEach((c) => { c.scale.y = 1; });
+  v.root.updateMatrixWorld(true);
+  const box = modelBox(v.root);
+  if (model !== 'villa') box.union(stageExtent(deriveStageParams(v, STAGE_OVERRIDES[model] ?? {})));
+  v.solid.children.forEach((c, i) => { c.scale.y = sy[i]; }); v.root.updateMatrixWorld(true);
+  return box;
+}
+
 /** Adds the stage variants to a built model (once). Measured at full height: the rise animation may already have
  *  squashed parts by the time a screen first asks for a stage. */
 export function stagesFor(model, v) {

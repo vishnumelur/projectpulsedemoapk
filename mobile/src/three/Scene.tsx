@@ -3,8 +3,8 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { useEffect, useMemo, useRef } from 'react';
 import { shouldUpdateShadows } from './shadow';
-import { buildVilla, buildShop, buildTower, buildFactory, buildReno, stagesFor, applyStage, disposeModel, M } from './models';
-import { Frame, frameFor, modelBox } from './frame';
+import { buildVilla, buildShop, buildTower, buildFactory, buildReno, stagesFor, applyStage, disposeModel, framingBox, M } from './models';
+import { Frame, frameFor } from './frame';
 
 export type ModelId = 'villa' | 'shop' | 'tower' | 'factory' | 'reno';
 export type StageView = 1 | 2 | 3 | 4 | 5 | 6 | 'solid';
@@ -16,7 +16,7 @@ const easeOutBack = (t: number) => { const c1 = 1.25, c3 = c1 + 1; return 1 + c3
 /** Bounds of each finished model, measured once (a model built only to be measured is freed straight away). */
 const BOX: Partial<Record<ModelId, THREE.Box3>> = {};
 function boxOf(model: ModelId, built?: any): THREE.Box3 {
-  if (!BOX[model]) { const m = built ?? BUILD[model](); BOX[model] = modelBox(m.root); if (!built) disposeModel(m); }
+  if (!BOX[model]) { const m = built ?? BUILD[model](); BOX[model] = framingBox(model, m); if (!built) disposeModel(m); }
   return BOX[model]!;
 }
 
@@ -28,10 +28,11 @@ export function Scene({ model, stage = 'solid', lights = 0.25, frame, spin = 0.1
   const { gl, scene, camera, size } = useThree();
   const m = useMemo(() => { const x: any = BUILD[model](); boxOf(model, x); return x; }, [model]);
   const warm = useMemo(() => { const w = M.warm.clone(); m.solid.traverse((o: any) => { if (o.isMesh && o.material === M.warm) o.material = w; }); return w; }, [m]);
-  useEffect(() => () => { disposeModel(m); warm.dispose(); }, [m, warm]); // geometries (stage variants included) + per-model materials
+  useEffect(() => () => disposeModel(m), [m]); // geometries (stage variants included) + per-model materials (the warm clone too)
   const yaw = useRef(yaw0); const riseT0 = useRef<number | null>(null); const buildT0 = useRef<number | null>(null);
 
-  const aspect = Math.round((size.width / Math.max(1, size.height)) * 100) / 100;
+  // before layout (0×0) or mid-transition the canvas can report no size: frame for a square until it has one
+  const aspect = size.width > 0 && size.height > 0 ? Math.round((size.width / size.height) * 100) / 100 : 1;
   const [fr, fy, fz] = frame.target;
   const view = useMemo(() => frameFor(frame, boxOf('villa'), MODEL_HEIGHT.villa, boxOf(model), MODEL_HEIGHT[model], aspect, model === 'villa'),
     // eslint-disable-next-line react-hooks/exhaustive-deps

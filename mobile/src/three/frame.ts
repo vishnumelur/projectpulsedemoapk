@@ -51,6 +51,7 @@ export function fitBox(box: THREE.Box3, height: number, aspect: number, fovDeg =
 
 /** The horizontal camera distance Scene uses for a framing radius (unchanged from the approved turntable). */
 export function radiusDistance(radius: number, aspect: number, fovDeg = 22): number {
+  if (!(aspect > 0) || !Number.isFinite(aspect)) aspect = 1;
   const vh = THREE.MathUtils.degToRad(fovDeg) / 2, hh = Math.atan(Math.tan(vh) * aspect);
   return Math.max(radius / Math.tan(vh), radius / Math.tan(hh));
 }
@@ -64,6 +65,7 @@ export const PAD = 1.1;
  *  The villa itself gets exactly `ref` (approved). Any other model is never closer than a padded fit around the
  *  actual target, so nothing (top, base or sides) is ever cut, however tall or wide it is. */
 export function frameFor(ref: Frame, refBox: THREE.Box3, refHeight: number, box: THREE.Box3, height: number, aspect: number, isRef = false) {
+  if (!(aspect > 0) || !Number.isFinite(aspect)) aspect = 1; // unlaid-out canvas: 0, NaN or Infinity
   if (isRef) return { distance: radiusDistance(ref.radius, aspect), target: ref.target, height: ref.height };
   const h = ref.height * (height / refHeight);
   const a = fitBox(refBox, ref.height, aspect), b = fitBox(box, h, aspect);
