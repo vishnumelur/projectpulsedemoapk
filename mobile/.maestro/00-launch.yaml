@@ -1,0 +1,35 @@
+# Section A — first launch: Splash -> A3 "Pulse greets you". Plan steps A1–A4.
+appId: host.exp.exponent
+name: "00 · Launch: Splash -> Pulse greets you"
+---
+- runFlow: common/launch.yaml
+# A1 Splash (gallery 01-splash): logo + "Project Pulse" (two lines), then fades to A3 on its own
+- runFlow:
+    when:
+      visible: "Project\\nPulse"
+    commands:
+      - takeScreenshot: A01-splash
+# A2 A3 "Pulse greets you" (gallery 02-welcome-role)
+- extendedWaitUntil:
+    visible: "Hi, I'm Pulse."
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible: "Your construction expert for Abu Dhabi. Are you planning a project, or are you an engineer\\?"
+- assertVisible: "I'm planning a project"
+- assertVisible: "I'm an engineer"
+- assertVisible: "1,200\\+ verified engineers"
+- assertVisible: "Abu Dhabi"
+- assertVisible: "Sign in"
+- takeScreenshot: A02-pulse-greets-you
+- runFlow: common/no-redbox.yaml
+# A3 old A2 photo welcome / photo-card role screen are gone from the flow
+- assertNotVisible: "Get started"
+- assertNotVisible: "(?s)What brings you.to Pulse\\?"
+# A4 "Sign in" (top right) opens the Sign in screen
+- tapOn: "Sign in"
+- extendedWaitUntil:
+    visible: "(?s)(Welcome back|Create your.account)"
+    timeout: 15000
+- takeScreenshot: A04-sign-in-from-header
+- assertVisible: "Welcome back"

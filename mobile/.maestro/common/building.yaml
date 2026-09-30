@@ -1,0 +1,118 @@
+# One building type through onboarding: 04 building type -> 04b chosen -> 05 stage (every stage) -> 06 -> Home -> Project.
+# env: PAGE (1-5), NAME (Villa…), LOWER (villa…), SUB (subtitle), ID (screenshot prefix)
+appId: host.exp.exponent
+---
+- runFlow: launch.yaml
+- tapOn: "I'm planning a project"
+- extendedWaitUntil:
+    visible: "(?s)(Welcome back|Create your.account)"
+    timeout: 15000
+- runFlow:
+    when:
+      visible: "Welcome back"
+    commands:
+      - tapOn: "Use the client demo account"
+      - tapOn:
+          text: "Sign in"
+          index: -1
+- runFlow:
+    when:
+      visible: "(?s)Create your.account"
+    commands:
+      - tapOn:
+          text: "Create account"
+          index: -1
+# D8.1 What are you building? (04-building-type)
+- extendedWaitUntil:
+    visible: "(?s)What are you.building\\?"
+    timeout: 30000
+- tapOn: "Page ${PAGE}"
+- extendedWaitUntil:
+    visible: "${NAME}"
+    timeout: 5000
+- assertVisible: "${SUB}"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: ${ID}-1-building-type
+# D8.2 Building chosen (04b)
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Lights on. Let's find your stage…"
+    timeout: 10000
+- takeScreenshot: ${ID}-2-chosen
+# D8.3 Stage (05-stage): each stage, screenshot of the model (compared afterwards: the model must change with the stage)
+- extendedWaitUntil:
+    visible: "(?s)Where is your.${LOWER} today\\?"
+    timeout: 15000
+- assertVisible: "Collecting contractor bids"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: ${ID}-3-stage-3-tender
+- tapOn: "Design"
+- extendedWaitUntil:
+    visible: "Drawings and permits"
+    timeout: 5000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: ${ID}-3-stage-2-design
+- tapOn: "Planning"
+- extendedWaitUntil:
+    visible: "Budget, plot and feasibility"
+    timeout: 5000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: ${ID}-3-stage-1-planning
+- tapOn: "Design"
+- tapOn: "Tender"
+- tapOn: "Contractor"
+- extendedWaitUntil:
+    visible: "Choosing who builds it"
+    timeout: 5000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: ${ID}-3-stage-4-contractor
+- tapOn: "Construction"
+- extendedWaitUntil:
+    visible: "Work under way on site"
+    timeout: 5000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: ${ID}-3-stage-5-construction
+- tapOn: "Handover"
+- extendedWaitUntil:
+    visible: "Finishing and moving in"
+    timeout: 5000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: ${ID}-3-stage-6-handover
+- runFlow: no-redbox.yaml
+# D8.4 Building your project… (06) -> Home for this building, at Handover
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Building your project…"
+    timeout: 10000
+- assertVisible: "✓ ${NAME} · Handover stage"
+- takeScreenshot: ${ID}-4-creating
+- extendedWaitUntil:
+    visible: "Quotes ready"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible: "${NAME} · Al Reem Island"
+- assertVisible: "Stage 6 of 6"
+- takeScreenshot: ${ID}-5-home
+- runFlow: no-redbox.yaml
+# D8.5 Home scrolls clear of the tab bar for this building
+- scroll
+- takeScreenshot: ${ID}-5b-home-scrolled
+# D8.6 Project header shows this building at its stage
+- tapOn:
+    text: "Project"
+    index: -1
+- extendedWaitUntil:
+    visible: "Milestones"
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: ${ID}-6-project
+- runFlow: no-redbox.yaml

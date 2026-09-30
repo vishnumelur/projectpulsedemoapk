@@ -1,0 +1,12 @@
+# Section D8 — building type "Tower" through onboarding, every stage, Home and Project. Plan step D8 (tower).
+appId: host.exp.exponent
+name: "43 · Building type: Tower"
+---
+- runFlow:
+    file: common/building.yaml
+    env:
+      PAGE: "3"
+      NAME: "Tower"
+      LOWER: "tower"
+      SUB: "Residential or commercial"
+      ID: "D8-tower"

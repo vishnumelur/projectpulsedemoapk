@@ -1,0 +1,76 @@
+# From A3 into the engineer portal as Omar.
+# Target (client Task 2): "I'm an engineer" -> Sign in (omar@projectpulse.ae / pulse2026) -> engineer portal.
+# Current build: -> Create your account -> E1 What do you do? -> E2 Your profile -> E3 Verified -> E4 Dashboard.
+appId: host.exp.exponent
+---
+- extendedWaitUntil:
+    visible: "I'm an engineer"
+    timeout: 20000
+- tapOn: "I'm an engineer"
+- extendedWaitUntil:
+    visible: "(?s)(Welcome back|Create your.account)"
+    timeout: 20000
+- runFlow:
+    when:
+      visible: "Welcome back"
+    commands:
+      - tapOn: "Use the engineer demo account"
+      - tapOn:
+          text: "Sign in"
+          index: -1
+- runFlow:
+    when:
+      visible: "(?s)Create your.account"
+    commands:
+      - tapOn:
+          text: "Create account"
+          index: -1
+- extendedWaitUntil:
+    visible: "(?s)(What do.you do\\?|Your profile|Good morning)"
+    timeout: 30000
+- takeScreenshot: C00-after-signin
+# E1 What do you do? (one tap, auto-advance)
+- runFlow:
+    when:
+      visible: "(?s)What do.you do\\?"
+    commands:
+      - takeScreenshot: C01-E1-role
+      - tapOn: "Engineer"
+      - extendedWaitUntil:
+          visible: "Your profile"
+          timeout: 15000
+# E2 Your profile: Continue opens the next unfinished row's sheet -> Save, until Submit for review
+- runFlow:
+    when:
+      visible: "Your profile"
+    commands:
+      - takeScreenshot: C02-E2-profile
+      - repeat:
+          while:
+            notVisible: "Submit for review"
+          times: 6
+          commands:
+            - tapOn: "Continue"
+            - extendedWaitUntil:
+                visible: "Save"
+                timeout: 8000
+            - tapOn: "Save"
+            - waitForAnimationToEnd:
+                timeout: 3000
+      - assertVisible: "5/5"
+      - assertVisible: "All set"
+      - tapOn: "Submit for review"
+      - extendedWaitUntil:
+          visible: "Under review"
+          timeout: 10000
+      - takeScreenshot: C03-E3-under-review
+      - extendedWaitUntil:
+          visible: "Go to dashboard"
+          timeout: 15000
+      - takeScreenshot: C04-E3-verified
+      - tapOn: "Go to dashboard"
+- extendedWaitUntil:
+    visible: "Good morning"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 4000

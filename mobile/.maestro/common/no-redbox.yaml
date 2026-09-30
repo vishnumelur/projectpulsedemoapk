@@ -1,0 +1,9 @@
+# Fails the flow if a React Native red error screen (or its "Log 1 of N" LogBox) is showing. Takes a screenshot if so.
+appId: host.exp.exponent
+---
+- runFlow:
+    when:
+      visible: "(Uncaught Error|Render Error|Log \\d+ of \\d+|Something went wrong.*)"
+    commands:
+      - takeScreenshot: REDBOX
+      - assertNotVisible: "(Uncaught Error|Render Error|Log \\d+ of \\d+|Something went wrong.*)"

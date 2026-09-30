@@ -1,0 +1,12 @@
+# Section D8 — building type "Renovation" through onboarding, every stage, Home and Project. Plan step D8 (reno).
+appId: host.exp.exponent
+name: "45 · Building type: Renovation"
+---
+- runFlow:
+    file: common/building.yaml
+    env:
+      PAGE: "5"
+      NAME: "Renovation"
+      LOWER: "renovation"
+      SUB: "Upgrade an existing property"
+      ID: "D8-reno"

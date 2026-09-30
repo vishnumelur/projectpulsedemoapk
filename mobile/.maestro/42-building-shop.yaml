@@ -1,0 +1,12 @@
+# Section D8 — building type "Shop" through onboarding, every stage, Home and Project. Plan step D8 (shop).
+appId: host.exp.exponent
+name: "42 · Building type: Shop"
+---
+- runFlow:
+    file: common/building.yaml
+    env:
+      PAGE: "2"
+      NAME: "Shop"
+      LOWER: "shop"
+      SUB: "Retail & F&B"
+      ID: "D8-shop"

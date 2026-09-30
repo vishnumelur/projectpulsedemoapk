@@ -1,0 +1,106 @@
+# Section D — cross-cutting checks on the client portal. Plan steps D1–D7.
+appId: host.exp.exponent
+name: "30 · Cross-cutting: back, seal, relaunch, tab bar"
+---
+- runFlow: common/launch.yaml
+- runFlow: common/to-client.yaml
+# D5 every tab screen scrolls clear of the floating tab bar (screenshots at the end of each scroll are reviewed)
+- scroll
+- scroll
+- takeScreenshot: D5-home-bottom
+- assertVisible: "Site visit"
+- tapOn:
+    text: "Project"
+    index: -1
+- extendedWaitUntil:
+    visible: "Milestones"
+    timeout: 10000
+- scroll
+- scroll
+- takeScreenshot: D5-project-bottom
+- assertVisible: "Construction starts"
+- tapOn:
+    text: "Experts"
+    index: -1
+- extendedWaitUntil:
+    visible: "For you"
+    timeout: 10000
+- scroll
+- scroll
+- scroll
+- takeScreenshot: D5-experts-bottom
+- tapOn:
+    text: "Inbox"
+    index: -1
+- extendedWaitUntil:
+    visible: "Messages"
+    timeout: 10000
+- scroll
+- scroll
+- takeScreenshot: D5-inbox-bottom
+- runFlow: common/no-redbox.yaml
+# D3 hardware back on a tab root goes to Home (or leaves the app); never into sign-in / onboarding
+- back
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: D3-back-from-inbox-root
+- assertNotVisible: "Welcome back"
+- assertNotVisible: "(?s)Create your.account"
+- assertNotVisible: "(?s)What are you.building\\?"
+- assertNotVisible: "Hi, I'm Pulse."
+# D1 back from Home never returns into sign-in / onboarding
+- runFlow:
+    when:
+      visible: "Quotes ready"
+    commands:
+      - back
+      - waitForAnimationToEnd:
+          timeout: 3000
+- takeScreenshot: D1-back-from-home
+- assertNotVisible: "Welcome back"
+- assertNotVisible: "(?s)Create your.account"
+- assertNotVisible: "(?s)Where is your.*today\\?"
+- assertNotVisible: "Building your project…"
+- assertNotVisible: "Hi, I'm Pulse."
+# D4 relaunch while signed in -> straight to the client portal (via Splash)
+- runFlow: common/launch.yaml
+- extendedWaitUntil:
+    visible: "Quotes ready"
+    timeout: 30000
+- takeScreenshot: D4-relaunch-signed-in
+- assertNotVisible: "Hi, I'm Pulse."
+# D4b same with a real cold start (bare URL, like the app icon)
+- stopApp: host.exp.exponent
+- openLink: ${APP_URL}
+# Expo Go's launcher sometimes closes on a bare URL right after a stop (seen 2026-10-01); one more open in that case
+- runFlow:
+    when:
+      notVisible: "(?s)(Quotes ready|Create your.account|Hi, I'm Pulse\\.|Welcome back|Project\\nPulse|Project Pulse)"
+    commands:
+      - openLink: ${APP_URL}
+- extendedWaitUntil:
+    visible: "(?s)(Quotes ready|Create your.account|Hi, I'm Pulse\\.|Welcome back)"
+    timeout: 60000
+- takeScreenshot: D4b-cold-relaunch-signed-in
+- assertVisible:
+    text: "Quotes ready"
+    optional: true   # soft check, reported as WARNED (QA-01)
+# back into the portal for D2 whatever D4b showed
+- runFlow:
+    when:
+      notVisible: "Quotes ready"
+    commands:
+      - runFlow: common/launch.yaml
+      - extendedWaitUntil:
+          visible: "Quotes ready"
+          timeout: 30000
+# D2 sealed portals: no route from the client portal to the engineer portal
+- tapOn:
+    point: "86%,9%"
+- extendedWaitUntil:
+    visible: "My projects"
+    timeout: 10000
+- takeScreenshot: D2-profile-no-portal-switch
+- assertNotVisible: "Switch to Expert app"
+- assertNotVisible: "Demo: see the engineer side"
+- runFlow: common/no-redbox.yaml

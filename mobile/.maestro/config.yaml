@@ -1,0 +1,5 @@
+# Project Pulse QA flows (client Task 7). Plan: docs/qa/test-plan.md. Runner: .maestro/run.sh
+flows:
+  - "*.yaml"
+executionOrder:
+  continueOnFailure: true

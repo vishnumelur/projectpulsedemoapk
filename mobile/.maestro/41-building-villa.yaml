@@ -1,0 +1,12 @@
+# Section D8 — building type "Villa" through onboarding, every stage, Home and Project. Plan step D8 (villa).
+appId: host.exp.exponent
+name: "41 · Building type: Villa"
+---
+- runFlow:
+    file: common/building.yaml
+    env:
+      PAGE: "1"
+      NAME: "Villa"
+      LOWER: "villa"
+      SUB: "Private residence"
+      ID: "D8-villa"

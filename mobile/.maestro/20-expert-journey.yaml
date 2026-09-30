@@ -1,0 +1,196 @@
+# Section C — engineer portal as Omar. Plan steps C1–C20.
+appId: host.exp.exponent
+name: "20 · Engineer journey (Omar)"
+---
+- runFlow: common/launch.yaml
+- runFlow: common/to-expert.yaml
+# C5 Dashboard (E4-dashboard)
+- takeScreenshot: C05-dashboard
+- assertVisible: "Good morning"
+- assertVisible: "Omar"
+- assertVisible: "This month"
+- assertVisible: "NEW REQUESTS · \\d+"
+- assertVisible: "Quote"
+- runFlow: common/no-redbox.yaml
+# C6 new request -> Send quote (E5-send-quote)
+- tapOn:
+    text: "Quote"
+    index: 0
+- extendedWaitUntil:
+    visible: "YOUR PRICE"
+    timeout: 10000
+- assertVisible: "WRITTEN BY PULSE"
+- assertVisible: "REPORT IN"
+- takeScreenshot: C06-send-quote
+# C7 price stepper
+- copyTextFrom: "Price AED.*"
+- tapOn: "Increase price"
+- tapOn: "Increase price"
+- tapOn: "Decrease price"
+- takeScreenshot: C07-price-stepper
+- assertNotVisible: "${maestro.copiedText}"
+# C8 delivery day chips
+- tapOn: "7 days"
+- tapOn: "3 days"
+- tapOn: "5 days"
+- takeScreenshot: C08-day-chips
+# C9 Send quote -> back on the dashboard
+- tapOn: "Send quote"
+- extendedWaitUntil:
+    visible: "Good morning"
+    timeout: 15000
+- takeScreenshot: C09-quote-sent
+- runFlow: common/no-redbox.yaml
+# C10 Requests tab
+- tapOn:
+    text: "Requests"
+    index: -1
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: C10-requests
+# C11 Jobs tab = Availability (E6-availability)
+- tapOn:
+    text: "Jobs"
+    index: -1
+- extendedWaitUntil:
+    visible: "Availability"
+    timeout: 10000
+- assertVisible: "Clients can book your open slots"
+- takeScreenshot: C11-availability
+# C12 an off slot opens with one tap
+- tapOn: "Off · tap to open"
+- waitForAnimationToEnd:
+    timeout: 2000
+- assertNotVisible: "Off · tap to open"
+- takeScreenshot: C12-slot-opened
+# C13 master toggle pauses then resumes all bookings
+- tapOn: "Pause all bookings"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: C13-paused
+- tapOn: "Pause all bookings"
+# C14 every day in the strip is tappable and shows its own slots (client Task 8)
+- tapOn: "Friday 10 Oct"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: C14-day-fri
+- assertVisible:
+    text: "Friday 10 Oct"
+    selected: true
+- assertVisible: "09:00"
+- assertNotVisible: "Sara · Bid review visit"
+# C14b the strip scrolls both ways with momentum and snap; a far day is tappable too
+- swipe:
+    from: "Friday 10 Oct"
+    direction: LEFT
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: C14b-strip-scrolled-forward
+# back the other way until Thursday is on screen again
+- repeat:
+    while:
+      notVisible: "Thursday 9 Oct"
+    times: 4
+    commands:
+      - swipe:
+          from: "(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday) \\d+ \\w+"
+          direction: RIGHT
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: C14c-strip-scrolled-back
+- tapOn: "Thursday 9 Oct"
+- waitForAnimationToEnd:
+    timeout: 2000
+# C15 booked slot -> Job & deliverables (E7-deliverables)
+- tapOn: "Sara · Bid review visit"
+- extendedWaitUntil:
+    visible: "DELIVERABLES"
+    timeout: 10000
+- assertVisible: "Bid review report\\.pdf"
+- takeScreenshot: C15-deliverables
+# C16 upload: "Add file or photos" adds a photo to the row
+- tapOn: "Add file or photos"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: C16-upload
+# C17 Mark as complete -> back on Availability (by design, pro/job/[id].tsx goBack); reopening the job shows Delivered
+- tapOn: "Mark as complete"
+- extendedWaitUntil:
+    visible: "Availability"
+    timeout: 10000
+- takeScreenshot: C17-after-complete
+- tapOn: "Sara · Bid review visit"
+- extendedWaitUntil:
+    visible: "Delivered"
+    timeout: 10000
+- takeScreenshot: C17b-delivered
+- runFlow: common/no-redbox.yaml
+- back
+- waitForAnimationToEnd:
+    timeout: 3000
+# C18 Earnings (E8-earnings): Week / Month / Year, scrolls clear of the tab bar
+- tapOn:
+    text: "Earnings"
+    index: -1
+- extendedWaitUntil:
+    visible: "Ready to withdraw"
+    timeout: 10000
+- takeScreenshot: C18-earnings-month
+- tapOn: "Week"
+- takeScreenshot: C18b-earnings-week
+- tapOn: "Year"
+- takeScreenshot: C18c-earnings-year
+- tapOn: "Month"
+- scroll
+- takeScreenshot: C18d-earnings-scrolled
+# C19 Withdraw -> confirmation sheet -> confirm
+- scrollUntilVisible:
+    element: "Withdraw"
+    direction: UP
+    timeout: 5000
+- tapOn: "Withdraw"
+- extendedWaitUntil:
+    visible: "Withdraw to bank"
+    timeout: 5000
+- assertVisible: "Emirates NBD •••• 2210 · arrives in 1–2 working days"
+- takeScreenshot: C19-withdraw-sheet
+- tapOn: "Withdraw AED.*"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: C19b-withdrawn
+- assertNotVisible: "Withdraw to bank"
+- runFlow: common/no-redbox.yaml
+# C20 Inbox
+- tapOn:
+    text: "Inbox"
+    index: -1
+- extendedWaitUntil:
+    visible: "Messages"
+    timeout: 10000
+- takeScreenshot: C20-inbox
+# C21 Log out: Dashboard "Account" (avatar) -> confirm sheet -> Sign in (client Task 2)
+- tapOn:
+    text: "Home"
+    index: -1
+- extendedWaitUntil:
+    visible: "Good morning"
+    timeout: 10000
+- tapOn: "Account"
+- extendedWaitUntil:
+    visible: "Log out of Project Pulse\\?"
+    timeout: 5000
+- assertVisible: "Cancel"
+- takeScreenshot: C21-logout-sheet
+- tapOn:
+    text: "Log out"
+    index: -1
+- extendedWaitUntil:
+    visible: "Welcome back"
+    timeout: 10000
+- takeScreenshot: C21b-after-logout
+# C22 back after log out never returns into the portal
+- back
+- waitForAnimationToEnd:
+    timeout: 3000
+- assertNotVisible: "Good morning"
+- takeScreenshot: C22-back-after-logout

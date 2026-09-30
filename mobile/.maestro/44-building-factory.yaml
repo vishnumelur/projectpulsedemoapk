@@ -1,0 +1,12 @@
+# Section D8 — building type "Factory" through onboarding, every stage, Home and Project. Plan step D8 (factory).
+appId: host.exp.exponent
+name: "44 · Building type: Factory"
+---
+- runFlow:
+    file: common/building.yaml
+    env:
+      PAGE: "4"
+      NAME: "Factory"
+      LOWER: "factory"
+      SUB: "Industrial & warehouse"
+      ID: "D8-factory"

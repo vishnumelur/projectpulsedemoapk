@@ -1,0 +1,46 @@
+# From the A3 "Pulse greets you" screen into the client portal as Sara.
+# Target (client Task 2): reply -> Sign in with the demo account sara@projectpulse.ae / pulse2026 -> Home.
+# Until Task 2 merges the reply leads to the old "Create your account" screen; that path is kept so the portal can still be
+# tested, and the sign-in steps themselves are asserted in 00-launch.yaml.
+appId: host.exp.exponent
+---
+- extendedWaitUntil:
+    visible: "I'm planning a project"
+    timeout: 20000
+- tapOn: "I'm planning a project"
+- extendedWaitUntil:
+    visible: "(?s)(Welcome back|Create your.account)"
+    timeout: 20000
+- runFlow:
+    when:
+      visible: "Welcome back"
+    commands:
+      - tapOn: "Use the client demo account"
+      - tapOn:
+          text: "Sign in"
+          index: -1
+- runFlow:
+    when:
+      visible: "(?s)Create your.account"
+    commands:
+      - tapOn:
+          text: "Create account"
+          index: -1
+# first-run onboarding (building type -> stage -> building your project), if the build still routes through it
+- extendedWaitUntil:
+    visible: "(?s)(What are you.building\\?|Good (morning|afternoon|evening))"
+    timeout: 30000
+- runFlow:
+    when:
+      visible: "(?s)What are you.building\\?"
+    commands:
+      - tapOn: "Continue"
+      - extendedWaitUntil:
+          visible: "(?s)Where is your.*today\\?"
+          timeout: 20000
+      - tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Quotes ready"
+    timeout: 30000
+- waitForAnimationToEnd:
+    timeout: 4000

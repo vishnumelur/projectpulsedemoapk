@@ -1,0 +1,13 @@
+# Opens Pulse from Home's Ask bar. Its copy ("Ask Pulse anything…") is GradientText, which is invisible to accessibility
+# (issue QA-05), so the bar is tapped by position: between the Next step card and "NEEDS YOU".
+appId: host.exp.exponent
+---
+- scrollUntilVisible:
+    element: "NEEDS YOU"
+    direction: DOWN
+    timeout: 5000
+- tapOn:
+    point: "50%,68%"
+- extendedWaitUntil:
+    visible: "(?s)(or just ask\\. Type, or hold the mic to speak|What would you.like to know\\?)"
+    timeout: 15000

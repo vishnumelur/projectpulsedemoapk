@@ -1,0 +1,15 @@
+# Expo Go chrome that can cover the app after a wipe: the dev-menu intro sheet and the dev menu itself.
+appId: host.exp.exponent
+---
+- runFlow:
+    when:
+      visible: "This is the developer menu.*"
+    commands:
+      - tapOn:
+          text: "Continue"
+          below: "This is the developer menu.*"
+- runFlow:
+    when:
+      visible: "Toggle performance monitor"
+    commands:
+      - tapOn: "Close"

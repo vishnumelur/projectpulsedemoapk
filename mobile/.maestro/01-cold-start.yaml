@@ -1,0 +1,19 @@
+# Section A / D — a real cold start: Expo Go opened on the bare project URL (no path), like tapping the app icon.
+# Plan steps A0 and D4. Expected: Splash, then A3 (fresh install) or the signed-in portal.
+appId: host.exp.exponent
+name: "01 · Cold start with no deep-link path"
+---
+- runFlow:
+    file: common/launch.yaml
+    env:
+      LAUNCH_PATH: ""
+- takeScreenshot: A00-cold-start
+- runFlow: common/no-redbox.yaml
+- extendedWaitUntil:
+    visible: "(?s)(Project\\nPulse|Hi, I'm Pulse\\.)"
+    timeout: 15000
+- extendedWaitUntil:
+    visible: "Hi, I'm Pulse."
+    timeout: 20000
+- assertNotVisible: "(?s)Create your.account"
+- takeScreenshot: A00-cold-start-a3

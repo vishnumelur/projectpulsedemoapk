@@ -1,0 +1,20 @@
+# Open the app inside Expo Go.
+#   APP_URL  exp://<lan-ip>:8190 (set by run.sh)
+#   LAUNCH_PATH  "/--/?qa=1" (run.sh default). A path is needed today because a bare exp:// URL skips Splash (issue QA-01).
+#   CLEAR  "true" wipes Expo Go completely (slow, ~2.5 min re-download; run.sh resets only the demo data instead).
+appId: host.exp.exponent
+---
+- runFlow:
+    when:
+      true: ${CLEAR == 'true'}
+    commands:
+      - clearState: host.exp.exponent
+- stopApp: host.exp.exponent
+- openLink: ${APP_URL}${LAUNCH_PATH}
+- runFlow:
+    file: dismiss-expo.yaml
+- extendedWaitUntil:
+    visible: "(?s)(Project\\nPulse|Hi, I.m Pulse\\.|Welcome back|Create your.account|Good (morning|afternoon|evening)|What are you.building\\?)"
+    timeout: 300000
+- runFlow:
+    file: dismiss-expo.yaml

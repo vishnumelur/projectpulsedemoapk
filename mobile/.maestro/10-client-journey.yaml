@@ -1,0 +1,399 @@
+# Section B — client portal, every client screen by tapping only, in journey order. Plan steps B1–B40.
+appId: host.exp.exponent
+name: "10 · Client journey (Sara)"
+---
+- runFlow: common/launch.yaml
+- runFlow: common/to-client.yaml
+# B1 Home (08-home): greeting, villa card, stage track, next step, Needs you
+- takeScreenshot: B01-home
+- assertVisible: "Good (morning|afternoon|evening)"
+- assertVisible: "Villa · Al Reem Island"
+- assertVisible: "Tender"
+- assertVisible: "Stage 3 of 6"
+- assertVisible: "Next: Contractor"
+- assertVisible: "NEXT STEP.*"
+- assertVisible: "Start"
+- assertVisible: "NEEDS YOU"
+- assertVisible: "Quotes ready"
+- runFlow: common/no-redbox.yaml
+
+# ---- Ask Pulse: normal question -> answer -> Request a quote -> Sent
+# B2 Pulse opening (09-pulse-opening)
+- runFlow: common/ask-bar.yaml
+- takeScreenshot: B02-pulse-opening
+- assertVisible: "What would you like"
+- assertVisible: "Review my 3 contractor bids"
+- assertVisible: "Book a site visit"
+- assertVisible: "Check my budget"
+# B3 Ask (09a-ask)
+- tapOn: "or just ask\\. Type, or hold the mic to speak"
+- extendedWaitUntil:
+    visible: "(?s)What would you.like to know\\?"
+    timeout: 10000
+- assertVisible: "Answers from Project Pulse experts"
+- assertVisible: "Tender stage"
+- takeScreenshot: B03-ask
+# B4 Thinking (09b) -> B5 Answer (09c)
+- tapOn: "Ask about your project"
+- inputText: "Do I need a soil test?"
+# the input is controlled: wait until the JS state holds the whole question before sending
+- extendedWaitUntil:
+    visible: "Do I need a soil test\\?"
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 2000
+- pressKey: Enter
+- takeScreenshot: B04-thinking
+- extendedWaitUntil:
+    visible: "YOU'LL NEED"
+    timeout: 25000
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible: "Do I need a soil test\\?"
+- assertVisible: "Geotechnical engineer"
+- assertVisible: "◆ Project Pulse Villa Guide"
+- assertVisible: "14 verified · from AED 1,800"
+- takeScreenshot: B05-answer
+- runFlow: common/no-redbox.yaml
+# B6 Request a quote (10-request-quote)
+- tapOn: "Request a quote"
+- extendedWaitUntil:
+    visible: "WRITTEN BY PULSE"
+    timeout: 10000
+- assertVisible: "Al Reem Island"
+- assertVisible: "5 experts"
+- tapOn: "Within 2 weeks"
+- takeScreenshot: B06-request-quote
+# B7 Sent (10b-sent)
+- tapOn: "Send request"
+- extendedWaitUntil:
+    visible: "Sent to 5 experts"
+    timeout: 15000
+- assertVisible: "You choose"
+- takeScreenshot: B07-sent
+# B8 Done -> Home, no red screen
+- tapOn: "Done"
+- extendedWaitUntil:
+    visible: "Quotes ready"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: B08-home-after-sent
+- runFlow: common/no-redbox.yaml
+
+# ---- Ask Pulse: safety question -> Flagged
+# B9 Flagged (09d-flagged)
+- runFlow: common/ask-bar.yaml
+- tapOn: "or just ask\\. Type, or hold the mic to speak"
+- extendedWaitUntil:
+    visible: "Ask about your project"
+    timeout: 10000
+- tapOn: "Ask about your project"
+- inputText: "Can I remove this wall?"
+# the input is controlled: wait until the JS state holds the whole question before sending
+- extendedWaitUntil:
+    visible: "Can I remove this wall\\?"
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 2000
+- pressKey: Enter
+- extendedWaitUntil:
+    visible: "(?s)An engineer will.answer this one"
+    timeout: 25000
+- waitForAnimationToEnd:
+    timeout: 4000
+- assertVisible: "(?s).*Rashid from Project Pulse.*"
+- assertVisible: "(?s).*Reply by email.*within 24h.*"
+- assertVisible: "Got it"
+- assertVisible: "Book a structural engineer instead"
+- assertNotVisible: "YOU'LL NEED"
+- takeScreenshot: B09-flagged
+# B10 Got it -> Home
+- tapOn: "Got it"
+- extendedWaitUntil:
+    visible: "Quotes ready"
+    timeout: 15000
+- runFlow: common/no-redbox.yaml
+
+# ---- Experts -> Profile -> service -> Book -> time -> Pay -> Booked -> Job -> Report -> Review
+# B11 Experts tab (11-experts)
+- tapOn:
+    text: "Experts"
+    index: -1
+- extendedWaitUntil:
+    visible: "For you"
+    timeout: 10000
+- assertVisible: "Engineers"
+- assertVisible: "Architects"
+- takeScreenshot: B11-experts
+- tapOn: "Architects"
+- takeScreenshot: B11b-experts-architects
+- tapOn: "For you"
+# B12 Expert profile (12-expert-profile)
+- tapOn: "Omar.*"
+- extendedWaitUntil:
+    visible: "CHOOSE A SERVICE"
+    timeout: 10000
+- assertVisible: "Verified by Project Pulse"
+- assertVisible: "Bid review \\+ visit"
+- takeScreenshot: B12-expert-profile
+# B13 choose a service: price on the Book button follows it
+- tapOn: "Site visit only"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: B13-service-chosen
+# B14 Book -> Pick a time (14a-pick-time)
+- tapOn: "Book.*"
+- extendedWaitUntil:
+    visible: "Omar's free times on Thursday"
+    timeout: 10000
+- tapOn: "Friday 10 Oct"
+- extendedWaitUntil:
+    visible: "Omar's free times on Friday"
+    timeout: 5000
+- takeScreenshot: B14a-pick-time-friday
+- tapOn: "Thursday 9 Oct"
+- extendedWaitUntil:
+    visible: "Omar's free times on Thursday"
+    timeout: 5000
+- tapOn: "15:00"
+- takeScreenshot: B14-pick-time
+# B15 Continue -> Payment sheet (14b-payment)
+- tapOn: "Continue · AED.*"
+- extendedWaitUntil:
+    visible: "Pay securely"
+    timeout: 10000
+- assertVisible: "Held until job sign-off"
+- assertVisible: "•••• 4242"
+- takeScreenshot: B15-payment
+# B16 Pay -> Booked (14c-booked)
+- tapOn: "Pay AED.*"
+- extendedWaitUntil:
+    visible: "You're booked"
+    timeout: 15000
+- assertVisible: "Add to calendar"
+- takeScreenshot: B16-booked
+# B17 Track this job (15-job-tracking)
+- tapOn: "Track this job"
+- extendedWaitUntil:
+    visible: "Latest"
+    timeout: 10000
+- assertVisible: "On site now"
+- takeScreenshot: B17-job-tracking
+- runFlow: common/no-redbox.yaml
+# B18 Report ready (15b-report) -- the seeded job-1 has the report
+- back
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: B18a-back-from-job
+- runFlow:
+    when:
+      notVisible: "Site visit"
+    commands:
+      - tapOn:
+          text: "Home"
+          index: -1
+- tapOn: "Site visit.*"
+- extendedWaitUntil:
+    visible: "View report"
+    timeout: 10000
+- tapOn: "View report"
+- extendedWaitUntil:
+    visible: "Report ready"
+    timeout: 10000
+- assertVisible: "PULSE SUMMARY"
+- assertVisible: "Bid review report"
+- assertVisible: "Ask for changes"
+- takeScreenshot: B18-report
+# B19 Approve & release payment -> Review (16-review)
+- tapOn: "Approve & release payment"
+- extendedWaitUntil:
+    visible: "WHAT STOOD OUT\\?"
+    timeout: 15000
+- tapOn: "4 stars"
+- tapOn: "5 stars"
+- tapOn: "Professional"
+- takeScreenshot: B19-review
+- tapOn: "Submit review"
+- extendedWaitUntil:
+    visible: "(Thanks, Sara|Quotes ready)"
+    timeout: 10000
+- extendedWaitUntil:
+    visible: "Quotes ready"
+    timeout: 15000
+- runFlow: common/no-redbox.yaml
+
+# ---- Quotes -> Compare -> Accept
+# B20 Quotes (13-quotes) from Home "Quotes ready"
+- tapOn: "Quotes ready"
+- extendedWaitUntil:
+    visible: "Your best match"
+    timeout: 10000
+- takeScreenshot: B20-quotes
+- tapOn: "Compare"
+- extendedWaitUntil:
+    visible: "Side by side"
+    timeout: 5000
+- takeScreenshot: B21-compare
+- tapOn: "Close comparison"
+- tapOn: "Accept & book"
+- extendedWaitUntil:
+    visible: ".*free times on Thursday"
+    timeout: 10000
+- takeScreenshot: B22-accept-pick-time
+- back
+- back
+- waitForAnimationToEnd:
+    timeout: 3000
+- runFlow:
+    when:
+      notVisible: "Quotes ready"
+    commands:
+      - tapOn:
+          text: "Home"
+          index: -1
+- runFlow: common/no-redbox.yaml
+
+# ---- Project record
+# B23 Project · Milestones (17-project-milestones)
+- tapOn:
+    text: "Project"
+    index: -1
+- extendedWaitUntil:
+    visible: "Milestones"
+    timeout: 10000
+- assertVisible: "Plot purchased"
+- takeScreenshot: B23-project-milestones
+# B24 Budget (17b-budget)
+- tapOn: "Budget"
+- extendedWaitUntil:
+    visible: "of 2.4M"
+    timeout: 5000
+- takeScreenshot: B24-project-budget
+# B25 Site + photo viewer (17c-site)
+- tapOn: "Site"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: B25-project-site
+- tapOn:
+    point: "50%,75%"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: B25b-photo-viewer
+- assertVisible:
+    text: "Close"
+    optional: true   # soft check, reported as WARNED
+- tapOn:
+    text: "Close"
+    optional: true
+# B26 Docs
+- tapOn: "Docs"
+- waitForAnimationToEnd:
+    timeout: 3000
+- assertVisible: "PDF"
+- takeScreenshot: B26-project-docs
+# B27 Decisions: tab fully visible, titles not cut
+- tapOn: "Decisions"
+- waitForAnimationToEnd:
+    timeout: 3000
+- assertVisible:
+    text: "Upgrade to solar-ready roof"
+    optional: true   # soft check, reported as WARNED
+- assertVisible:
+    text: "Shortlist 3 contractors"
+    optional: true   # soft check, reported as WARNED
+- takeScreenshot: B27-project-decisions
+# B28 swipe between tabs (right from Decisions -> Docs; then back to Milestones and swipe left -> Budget)
+- tapOn: "Milestones"
+- assertVisible: "Plot purchased"
+- swipe:
+    start: "85%,70%"
+    end: "15%,70%"
+    duration: 300
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: B28-swipe-left-from-milestones
+- assertVisible:
+    text: "of 2.4M"
+    optional: true   # soft check, reported as WARNED
+- swipe:
+    start: "15%,70%"
+    end: "85%,70%"
+    duration: 300
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: B28b-swipe-right-back
+- assertVisible:
+    text: "Plot purchased"
+    optional: true   # soft check, reported as WARNED
+- runFlow: common/no-redbox.yaml
+
+# ---- Inbox -> Chat -> Updates
+# B29 Inbox (18-inbox)
+- tapOn:
+    text: "Inbox"
+    index: -1
+- extendedWaitUntil:
+    visible: "Messages"
+    timeout: 10000
+- assertVisible: "Project Pulse team"
+- takeScreenshot: B29-inbox
+# B30 Chat (18b-chat)
+- tapOn: "Omar Haddad"
+- extendedWaitUntil:
+    visible: "Message…"
+    timeout: 10000
+- takeScreenshot: B30-chat
+- tapOn: "Message…"
+- inputText: "See you on Thursday"
+- tapOn: "Send"
+- extendedWaitUntil:
+    visible: "See you on Thursday"
+    timeout: 5000
+- hideKeyboard
+- takeScreenshot: B30b-chat-sent
+- back
+- waitForAnimationToEnd:
+    timeout: 3000
+# B31 Updates (19-updates)
+- tapOn: "Updates.*"
+- waitForAnimationToEnd:
+    timeout: 3000
+- assertVisible: "Today"
+- takeScreenshot: B31-updates
+- runFlow: common/no-redbox.yaml
+
+# ---- Profile -> Log out
+# B32 Profile (20-profile) from the Home avatar
+- tapOn:
+    text: "Home"
+    index: -1
+- extendedWaitUntil:
+    visible: "Quotes ready"
+    timeout: 10000
+- tapOn:
+    point: "86%,9%"
+- extendedWaitUntil:
+    visible: "My projects"
+    timeout: 10000
+- assertVisible: "Payments"
+- assertVisible: "Notifications"
+- assertVisible: "Language"
+- takeScreenshot: B32-profile
+# B32b no portal switch on Profile (Task 2 removed "Switch to Expert app")
+- assertNotVisible: "Switch to Expert app"
+# B33 Log out -> confirm sheet -> Sign in (client Task 2)
+- tapOn: "Log out"
+- extendedWaitUntil:
+    visible: "Log out of Project Pulse\\?"
+    timeout: 5000
+- takeScreenshot: B33-logout-confirm
+- tapOn:
+    text: "Log out"
+    index: -1
+- extendedWaitUntil:
+    visible: "Welcome back"
+    timeout: 10000
+- takeScreenshot: B33b-after-logout
+- back
+- assertNotVisible: "Quotes ready"

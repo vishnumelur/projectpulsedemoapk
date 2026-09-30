@@ -1,0 +1,67 @@
+# Section A — sealed demo login (client Task 2). Plan steps A5–A10.
+appId: host.exp.exponent
+name: "02 · Sign in with the demo accounts"
+---
+- runFlow: common/launch.yaml
+- extendedWaitUntil:
+    visible: "I'm planning a project"
+    timeout: 20000
+# A5 the reply flies up and opens Sign in (content top-aligned) with Sara pre-selected
+- tapOn: "I'm planning a project"
+- extendedWaitUntil:
+    visible: "(?s)(Welcome back|Create your.account)"
+    timeout: 15000
+- takeScreenshot: A05-sign-in
+- assertVisible: "Welcome back"
+- assertVisible: "Sign in to Project Pulse"
+- assertVisible: "Forgot password\\?"
+- assertVisible: "DEMO ACCOUNTS"
+- assertVisible: "Sara Al Mansoori"
+- assertVisible: "sara@projectpulse\\.ae"
+- assertVisible: "Omar Haddad"
+- assertVisible: "omar@projectpulse\\.ae"
+- assertVisible: "Password: pulse2026"
+# A5b the planning reply pre-selected the client demo account
+- assertVisible:
+    text: "Use the client demo account"
+    selected: true
+# A6 wrong credentials: calm error text, stays on Sign in (engineer account, wrong password)
+- tapOn: "Use the engineer demo account"
+- tapOn: "Password"
+- eraseText: 30
+- inputText: "wrongpass"
+- hideKeyboard
+- tapOn:
+    text: "Sign in"
+    index: -1
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible: "That password isn't right\\. Try again\\."
+    timeout: 5000
+- takeScreenshot: A06-wrong-password
+- assertVisible: "Welcome back"
+- assertNotVisible: "Quotes ready"
+- assertNotVisible: "Good (morning|afternoon|evening)"
+# A7 "Forgot password?" is inert
+- tapOn: "Forgot password\\?"
+- assertVisible: "Welcome back"
+# A8 tap the client demo row: fields fill; Sign in -> client Home (never the engineer portal)
+- tapOn: "Use the client demo account"
+- tapOn:
+    text: "Sign in"
+    index: -1
+- extendedWaitUntil:
+    visible: "(?s)(Quotes ready|What are you.building\\?)"
+    timeout: 30000
+- takeScreenshot: A08-signed-in-client
+- assertNotVisible: "Good morning"
+# A9 history replaced: hardware back never returns to Sign in / A3 / onboarding
+- back
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: A09-back-after-sign-in
+- assertNotVisible: "Welcome back"
+- assertNotVisible: "Hi, I'm Pulse."
+- assertNotVisible: "(?s)Create your.account"
+- runFlow: common/no-redbox.yaml
