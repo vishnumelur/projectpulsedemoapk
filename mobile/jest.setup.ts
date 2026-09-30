@@ -15,16 +15,16 @@ const mockFx = (name: string) => () => {
   const C = (p: any) => require('react').createElement(View, { testID: name }, p.children);
   return { __esModule: true, [name]: C, default: C };
 };
-jest.mock(__dirname + '/src/fx/Orb', () => {
+jest.mock('@/fx/Orb', () => {
   const { View } = require('react-native');
   const C = (p: any) => require('react').createElement(View, { testID: 'Orb' }, p.children);
   return { __esModule: true, Orb: C, Halo: () => null, default: C };
 }, { virtual: true });
 jest.mock('@/fx/Aurora', () => mockFx('Aurora')(), { virtual: true });
-jest.mock(__dirname + '/src/fx/IridescentBorder', () => mockFx('IridescentBorder')(), { virtual: true });
-jest.mock(__dirname + '/src/fx/ProgressRing', () => mockFx('ProgressRing')(), { virtual: true });
+jest.mock('@/fx/IridescentBorder', () => mockFx('IridescentBorder')(), { virtual: true });
+jest.mock('@/fx/ProgressRing', () => mockFx('ProgressRing')(), { virtual: true });
 jest.mock(__dirname + '/src/three/ModelView', () => mockFx('ModelView')(), { virtual: true });
-jest.mock(__dirname + '/src/fx/GradientText', () => {
+jest.mock('@/fx/GradientText', () => {
   const { Text } = require('react-native');
   const G = (p: any) => require('react').createElement(Text, null, p.children);
   return { __esModule: true, GradientText: G, default: G };
