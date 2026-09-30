@@ -198,7 +198,7 @@ export default function Project() {
     </View>
   );
   const head = tab === 'Milestones' ? (<>
-    <View style={{ height: s(118), marginHorizontal: -s(20) }}><ModelView model={projectType} stage={projectType === 'villa' ? stage : 'solid'} radius={8.5} target={[0, 2.8, 0]} spin={0.12} shadows={false} /></View>
+    <View style={{ height: s(118), marginHorizontal: -s(20) }}><ModelView model={projectType} stage={stage} radius={8.5} target={[0, 2.8, 0]} spin={0.12} shadows={false} /></View>
     <T size={20} w={700} ls={-0.035} lh={1.1}>{`${name} · Al Reem`}</T>
     <L size={11} c={C.mute} style={{ marginTop: s(4.5) }}>{`${STAGES[stage - 1]} · step ${stage} of 6`}</L>
   </>) : compactHeader(tab);

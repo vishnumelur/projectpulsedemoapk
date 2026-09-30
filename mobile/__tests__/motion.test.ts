@@ -10,7 +10,7 @@ const MOTION = 'theme/motion.ts';
 /** Files other agents are rebuilding right now (client Task 9 brief). Remove each entry once its rebuild merges. */
 const PENDING = [
   // still to merge / non-UI
-  /^store\//, /^three\//,
+  /^store\//,
 ];
 const pending = (rel: string) => PENDING.some((p) => (typeof p === 'string' ? p === rel : p.test(rel)));
 
