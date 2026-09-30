@@ -19,12 +19,14 @@ function Grow({ children }: { children: React.ReactNode }) {
 }
 const ROLES = [['Engineer', 'Civil · Structural · MEP'], ['Architect', 'Design & drawings'], ['Interior designer', 'Fit-out & finishes'], ['Contractor', 'Build & renovate']] as const;
 export default function ExpertRole() {
+  // First screen after Sign in: history was reset, so there is nothing to go back to (never back into the login).
+  const [hasBack] = useState(() => router.canGoBack?.() ?? true);
   const [on, setOn] = useState<string>('Engineer');
   const [picked, setPicked] = useState(false);
   const pick = (r: string) => { setOn(r); setPicked(true); Haptics.selectionAsync(); setTimeout(() => router.push('/expert-setup'), 600); };
   return (
     <Screen bg="aurora">
-      <Header center={<T size={9.5} w={700} ls={0.14} c={C.mute}>1 OF 2</T>} />
+      <Header back={hasBack} center={<T size={9.5} w={700} ls={0.14} c={C.mute}>1 OF 2</T>} />
       <T size={26} w={700} ls={-0.035} lh={1.1} style={{ marginTop: s(16) }}>{'What do\nyou do?'}</T>
       <View style={{ marginTop: s(18) }}>
         {ROLES.map(([name, sub], i) => (

@@ -2,7 +2,7 @@
 export const GALLERY = [
   { id: '01-splash', label: 'Splash', href: '/?stay=1' }, { id: '02-welcome-role', label: 'Welcome', href: '/onboarding/welcome' },
   { id: '02b-role', label: 'Role', href: '/onboarding/role' },
-  { id: '03-sign-up', label: 'Sign up', href: '/onboarding/signup' }, { id: '04-building-type', label: 'What are you building?', href: '/onboarding/building' },
+  { id: '03-sign-up', label: 'Sign in', href: '/onboarding/signup' }, { id: '04-building-type', label: 'What are you building?', href: '/onboarding/building' },
   { id: '04b-building-chosen', label: 'Building chosen', href: '/onboarding/chosen?stay=1' }, { id: '05-stage', label: 'Stage', href: '/onboarding/stage?stage=5' },
   { id: '06-building-your-project', label: 'Building your project', href: '/onboarding/creating?stay=1' },
   { id: '08-home', label: 'Home', href: '/home' }, { id: '09-pulse-opening', label: 'Pulse opening', href: '/pulse' },

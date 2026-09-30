@@ -31,7 +31,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <Stack screenOptions={{ headerShown: false, animation: 'fade', contentStyle: { backgroundColor: '#F7F8FC' } }}>
-          {/* the role card expands to full screen, then sign up cross-fades in over it (kept explicit for that hand-over) */}
+          {/* Sign in cross-fades in over the start screen (kept explicit for that hand-over) */}
           <Stack.Screen name="onboarding/signup" options={{ animation: 'fade' }} />
         </Stack>
         <NoticeBanner />

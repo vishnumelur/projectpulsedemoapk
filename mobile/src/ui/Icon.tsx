@@ -3,7 +3,7 @@ import { s } from '@/theme/scale';
 import { C } from '@/theme/tokens';
 
 export type IconName = 'home' | 'proj' | 'exp' | 'inbox' | 'req' | 'jobs' | 'earn' | 'mic' | 'send' | 'search' | 'chev'
-  | 'cal' | 'shield' | 'shieldCheck' | 'check' | 'mail' | 'edit' | 'chat' | 'swap' | 'arrowR';
+  | 'cal' | 'shield' | 'shieldCheck' | 'check' | 'mail' | 'edit' | 'chat' | 'swap' | 'arrowR' | 'eye' | 'eyeOff';
 
 export function Icon({ name, size = 18, color = C.navy, stroke = 1.9 }: { name: IconName; size?: number; color?: string; stroke?: number }) {
   const p = { fill: 'none', stroke: color, strokeWidth: stroke, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
@@ -27,6 +27,8 @@ export function Icon({ name, size = 18, color = C.navy, stroke = 1.9 }: { name: 
     mail: <><Rect {...p} x={3} y={5} width={18} height={14} rx={2.5} /><Path {...p} d="M3.5 6.5l8.5 6 8.5-6" /></>,
     edit: <Path {...p} d="M4 20h4L19 9l-4-4L4 16z" />,
     swap: <Path {...p} d="M7 7h11l-3-3M17 17H6l3 3" />,
+    eye: <><Path {...p} d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" /><Circle {...p} cx={12} cy={12} r={3} /></>,
+    eyeOff: <><Path {...p} d="M9.9 5.8A9.6 9.6 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-2.6 3.4M6.6 6.9C4 8.6 2.5 12 2.5 12S6 18.5 12 18.5c1.8 0 3.3-.5 4.6-1.3" /><Path {...p} d="M9.9 9.9a3 3 0 0 0 4.2 4.2" /><Path {...p} d="M3.5 3.5l17 17" /></>,
     arrowR: <Path {...p} d="M5 12h14M13 6l6 6-6 6" />,
   };
   return <Svg width={s(size)} height={s(size)} viewBox="0 0 24 24">{d[name]}</Svg>;

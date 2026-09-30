@@ -31,7 +31,7 @@ export const EXPERTS: Expert[] = [
 /** Market average used for "N% below average price" (Quotes 13: 2,200 vs 2,500 = 12%). */
 export const MARKET_AVG: Record<string, number> = { 'bid-review': 2500, 'soil-test': 2200 };
 
-export const CLIENT = { name: 'Sara Al Mansoori', first: 'Sara', email: 'sara@almansoori.ae', photo: 'sara' as const };
+export const CLIENT = { name: 'Sara Al Mansoori', first: 'Sara', email: 'sara@projectpulse.ae', photo: 'sara' as const };
 export const PROJECT = { type: 'villa' as BuildingType, stage: 3 as Stage, name: 'Villa · Al Reem', place: 'Al Reem Island',
   budget: 2_400_000, committed: 1_630_000 };
 

@@ -1,5 +1,6 @@
 import { View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
+import { resetTo } from '@/nav/back';
 import { useEffect } from 'react';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Screen } from '@/ui/Screen';
@@ -16,7 +17,7 @@ export default function Creating() {
   const name = BUILDINGS.find((b) => b.id === type)!.name;
   useEffect(() => {
     if (p.stay) return;
-    const t = setTimeout(() => { useDemo.getState().completeClientOnboarding(type, stage); router.replace('/home'); }, 2600);
+    const t = setTimeout(() => { useDemo.getState().completeClientOnboarding(type, stage); resetTo('/home'); }, 2600);
     return () => clearTimeout(t);
   }, [p.stay]);
   const lines = [`✓ ${name} · ${STAGES[stage - 1]} stage`, '✓ 6 milestones created', '✓ Pulse tuned to your stage', '◌ Matching experts near Al Reem…'];
