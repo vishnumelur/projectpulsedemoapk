@@ -18,3 +18,24 @@ test('milestones, budget and site tabs show the approved content', async () => {
   await fireEvent.press(screen.getByText('Decisions'));
   expect(screen.getByText('Shortlist 3 contractors')).toBeTruthy();
 });
+
+test('?tab=site selects the Site tab initially', async () => {
+  mockParams = { tab: 'site' }; await render(<Project />);
+  expect(screen.getByText('Today · Site visit')).toBeTruthy();
+});
+
+test('pressing a site photo opens the full-screen viewer', async () => {
+  mockParams = { tab: 'site' }; await render(<Project />);
+  expect(screen.queryByLabelText('Close')).toBeNull();
+  await fireEvent.press(screen.getByText('2 Oct'));
+  expect(screen.getByLabelText('Close')).toBeTruthy();
+  expect(screen.getAllByText('2 Oct').length).toBe(2);
+  await fireEvent.press(screen.getByLabelText('Close'));
+  expect(screen.queryByLabelText('Close')).toBeNull();
+});
+
+test('pressing a budget category shows its payments', async () => {
+  mockParams = { tab: 'budget' }; await render(<Project />);
+  await fireEvent.press(screen.getByText('Structure'));
+  for (const t of ['Structure · payments', 'Gulf Foundations', 'AED 400,000', 'Emirates Steel', 'AED 310,000', 'Al Noor Concrete', 'AED 200,000']) expect(screen.getByText(t)).toBeTruthy();
+});
