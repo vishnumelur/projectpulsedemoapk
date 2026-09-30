@@ -1,0 +1,80 @@
+<style>
+  canvas.cv { display:block; width:100%; height:100%; touch-action:none; cursor:grab; }
+  .eyebrow { font-size:9px; letter-spacing:.16em; font-weight:700; color:#6b7196; }
+  .bigT { font-size:27px; font-weight:700; letter-spacing:-.035em; line-height:1.05; }
+  .free { position:relative; height:290px; margin:6px -16px 0; }
+  .pdots { display:flex; gap:5px; justify-content:center; margin-top:10px; } .pdots i { width:5px; height:5px; border-radius:5px; background:#cfd4e6; transition:all .5s cubic-bezier(.22,1,.36,1); } .pdots i.on { width:16px; background:#16205A; }
+  .fade { transition:opacity .22s ease, transform .5s cubic-bezier(.22,1,.36,1); } .fade.out { opacity:0; transform:translateY(6px); }
+  .pickwrap { position:relative; overflow:hidden; height:38px; margin:2px -16px 0; -webkit-mask-image:linear-gradient(90deg,transparent,#000 30%,#000 70%,transparent); mask-image:linear-gradient(90deg,transparent,#000 30%,#000 70%,transparent); }
+  .pickrow { display:flex; align-items:center; height:100%; white-space:nowrap; transition:transform .8s cubic-bezier(.22,1,.36,1); }
+  .pickrow span { flex:0 0 118px; text-align:center; font-size:15px; font-weight:600; color:#b3b8cf; letter-spacing:-.02em; transition:font-size .6s cubic-bezier(.22,1,.36,1), color .6s; cursor:pointer; }
+  .pickrow span.on { font-size:23px; font-weight:700; color:#16205A; letter-spacing:-.035em; }
+  .pdesc { text-align:center; font-size:11px; color:#6b7196; margin-top:4px; height:16px; transition:opacity .2s ease, transform .5s cubic-bezier(.22,1,.36,1); } .pdesc.out { opacity:0; transform:translateY(5px); }
+  .tick { width:44px; height:44px; border-radius:50%; background:#0000FE; color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 12px 30px rgba(0,0,254,.35); }
+  .gal { display:flex; gap:18px; flex-wrap:wrap; margin-top:14px; }
+  .gal > div { width:260px; }
+  .gal .c { height:270px; border-radius:26px; background:radial-gradient(90% 70% at 50% 40%, #ffffff, #eef1fb 70%); }
+  .gal b { display:block; text-align:center; font-size:16px; color:#16205A; margin-top:8px; letter-spacing:-.02em; } .gal small { display:block; text-align:center; font-size:11.5px; color:#6b7196; }
+  .hero { width:100%; max-width:1100px; height:460px; border-radius:30px; margin-top:14px; background:radial-gradient(80% 70% at 50% 35%, #ffffff, #eaeefa 75%); position:relative; overflow:hidden; }
+  .hero .note { position:absolute; left:22px; bottom:18px; font-size:12px; color:#6b7196; background:rgba(255,255,255,.8); padding:8px 12px; border-radius:12px; backdrop-filter:blur(10px); max-width:560px; line-height:1.5; }
+</style>
+
+<h2>Realistic 3D: the full building set</h2>
+<p class="subtitle">The layout is the same as before. The models are now far more detailed, with bevelled concrete, travertine stone cladding, timber louvres, furnished interiors you can see through the glass, a glass-balustrade terrace, a rooftop pergola, a pool with loungers and an umbrella, a driveway and boundary walls, and soft shadows. <b>Drag any model to rotate it.</b></p>
+
+<div class="row" style="margin-top:20px">
+  <div class="col">
+    <div class="phone"><div class="scr">
+      <aur/><sb/>
+      <div class="body">
+        <div class="hd"><div class="back glass">‹</div><span class="eyebrow">1 OF 2</span><span style="width:32px"></span></div>
+        <div class="bigT" style="margin-top:14px">What are you<br>building?</div>
+        <div class="free" style="height:262px"><canvas class="cv" id="cv-villa"></canvas></div>
+        <div style="text-align:center;margin-top:-4px"><div id="bname" class="fade" style="font-size:26px;font-weight:700;letter-spacing:-.035em">Villa</div><div id="bsub" class="xs" style="margin-top:2px">Private residence</div></div>
+        <div class="pdots" id="bdots"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+        <div class="btn" style="margin-top:auto;margin-bottom:18px">Continue</div>
+      </div>
+    </div></div>
+    <div class="cap"><b>4 · What are you building?</b><p>This phone swipes through all five buildings automatically, the way a user would.</p><p class="mo">✦ Each model assembles itself in with a spring as it arrives, and the name cross-fades.</p></div>
+  </div>
+
+  <div class="col">
+    <div class="phone"><div class="scr">
+      <aur3/><sb/>
+      <div class="body" style="align-items:center">
+        <div class="tick" style="margin-top:34px;animation:pop2 .7s cubic-bezier(.2,1.5,.4,1) both">✓</div>
+        <div style="margin:10px -16px 0;position:relative;width:calc(100% + 32px);height:320px"><canvas class="cv" id="cv-chosen"></canvas></div>
+        <div class="bigT" style="margin-top:6px">Villa</div>
+        <div class="sm" style="margin-top:4px">Lights on. Let's find your stage…</div>
+      </div>
+    </div></div>
+    <div class="cap"><b>4b · Chosen</b><p>The interior lights warm up and the furniture glows through the glass.</p></div>
+  </div>
+
+  <div class="col">
+    <div class="phone"><div class="scr">
+      <aur/><sb/>
+      <div class="body">
+        <div class="hd"><div class="back glass">‹</div><span class="eyebrow">2 OF 2</span><span style="width:32px"></span></div>
+        <div class="bigT" style="margin-top:14px">Where is your<br>villa today?</div>
+        <div class="free" style="height:262px"><canvas class="cv" id="cv-stage"></canvas></div>
+        <div class="pickwrap"><div class="pickrow" id="pick"><span>Planning</span><span>Design</span><span>Tender</span><span>Contractor</span><span>Construction</span><span>Handover</span></div></div>
+        <div class="pdesc" id="pdesc">Collecting contractor bids</div>
+        <div class="btn" style="margin-top:auto;margin-bottom:18px">Continue</div>
+      </div>
+    </div></div>
+    <div class="cap"><b>5 · Stage (alignment fixed)</b><p>Each stage name now has a fixed-width slot, so the chosen stage always sits exactly centred. The description swaps cleanly instead of overlapping.</p></div>
+  </div>
+</div>
+
+<h4 class="grp">The building set (drag to rotate)</h4>
+<div class="gal">
+  <div><div class="c"><canvas class="cv" data-model="Villa"></canvas></div><b>Villa</b><small>Cantilevered modern villa with pool</small></div>
+  <div><div class="c"><canvas class="cv" data-model="Shop"></canvas></div><b>Shop</b><small>Flagship store: double-height glass under a cantilevered roof</small></div>
+  <div><div class="c"><canvas class="cv" data-model="Tower"></canvas></div><b>Tower</b><small>Twisting glass tower on a podium</small></div>
+  <div><div class="c"><canvas class="cv" data-model="Factory"></canvas></div><b>Factory</b><small>Logistics hall, solar roof, glass offices and docks</small></div>
+  <div><div class="c"><canvas class="cv" data-model="Renovation"></canvas></div><b>Renovation</b><small>Half original, half renewed, with the scaffold on the seam</small></div>
+</div>
+
+<h4 class="grp">Villa close-up</h4>
+<div class="hero"><canvas class="cv" id="cv-hero"></canvas><div class="note">Look for: travertine stone walls, timber louvres on the upper floor, the sofa, kitchen island and pendant lights through the glass, the glass balustrade terrace, the rooftop pergola, and the loungers with an umbrella by the pool.</div></div>

@@ -1,0 +1,385 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Project Pulse</title><style>body{margin:0;background:#f3f4f8;padding:28px 36px;font-family:Hanken Grotesk,system-ui}.subtitle{color:#666;font-size:15px;line-height:1.5;max-width:1100px}h2{font-size:26px;color:#16205A;margin:0 0 6px}</style><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  .pp * { box-sizing:border-box; font-family:'Hanken Grotesk', system-ui, sans-serif; margin:0; }
+  .pp { --navy:#16205A; --blue:#0000FE; --cyan:#31D1FF; --grey:#EAEAEA; --mute:#6b7196; --line:#E6E8F0; --bg:#F7F8FC; }
+  .pp h4.grp { font-size:13px; letter-spacing:.14em; color:#0000FE; margin:26px 0 4px; text-transform:uppercase; }
+  .row { display:flex; gap:26px; flex-wrap:wrap; justify-content:flex-start; margin-top:14px; }
+  .col { width:270px; display:flex; flex-direction:column; gap:10px; }
+  .cap b { color:#16205A; font-size:14px; } .cap p { font-size:12px; color:#555; line-height:1.45; margin-top:3px; }
+  .cap .mo { font-size:11.5px; color:#0000FE; margin-top:5px; line-height:1.4; }
+  .phone { width:270px; height:570px; border-radius:40px; background:#0b0b0f; padding:8px; box-shadow:0 24px 60px rgba(22,32,90,.25), inset 0 0 0 1.5px #2a2a33; }
+  .scr { width:100%; height:100%; border-radius:33px; overflow:hidden; position:relative; background:var(--bg); color:var(--navy); display:flex; flex-direction:column; }
+  .island { position:absolute; top:8px; left:50%; transform:translateX(-50%); width:76px; height:21px; background:#000; border-radius:20px; z-index:20; }
+  .sb { height:30px; flex-shrink:0; display:flex; justify-content:space-between; align-items:center; padding:3px 22px 0; font-size:11px; font-weight:600; position:relative; z-index:10; }
+  .body { flex:1; position:relative; z-index:2; padding:0 16px; display:flex; flex-direction:column; min-height:0; }
+  .aur { position:absolute; border-radius:50%; filter:blur(45px); z-index:0; }
+  .a-c { width:230px; height:200px; background:var(--cyan); right:-90px; top:-60px; opacity:.42; animation:drift2 12s ease-in-out infinite; }
+  .a-b { width:200px; height:190px; background:var(--blue); left:-110px; top:-30px; opacity:.18; animation:drift 14s ease-in-out infinite; }
+  .a-v { width:170px; height:170px; background:#b9a8ff; left:50px; top:200px; opacity:.22; animation:drift 16s ease-in-out infinite; }
+  @keyframes drift { 0%,100%{transform:translate(0,0)} 50%{transform:translate(35px,25px)} }
+  @keyframes drift2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-35px,20px)} }
+  .glass { background:rgba(255,255,255,.66); border:1px solid rgba(255,255,255,.95); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); box-shadow:0 6px 24px rgba(22,32,90,.07); }
+  .card { background:#fff; border-radius:18px; box-shadow:0 4px 18px rgba(22,32,90,.06); }
+  h1.t { font-size:22px; font-weight:700; letter-spacing:-.03em; line-height:1.12; }
+  h2.t { font-size:17px; font-weight:700; letter-spacing:-.02em; }
+  .grad { background:linear-gradient(90deg,#0000FE,#31D1FF); -webkit-background-clip:text; color:transparent; }
+  .sm { font-size:11px; color:var(--mute); } .xs { font-size:9.5px; color:var(--mute); }
+  .lbl { font-size:9px; letter-spacing:.13em; font-weight:700; color:var(--blue); text-transform:uppercase; }
+  .btn { background:#0000FE; box-shadow:0 10px 24px rgba(0,0,254,.28); color:#fff; border-radius:16px; padding:13px; text-align:center; font-size:12.5px; font-weight:700; }
+  .btn.blue {}
+  .btn.ghost { background:transparent; color:var(--navy); border:1.5px solid var(--line); }
+  .inp { background:#fff; border:1.5px solid var(--line); border-radius:14px; padding:11px 12px; font-size:11.5px; color:#9aa0bd; }
+  .inp.f { border-color:var(--blue); color:var(--navy); box-shadow:0 0 0 4px rgba(0,0,254,.08); }
+  .chip { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:600; padding:6px 10px; border-radius:20px; background:#fff; border:1px solid var(--line); color:var(--navy); white-space:nowrap; }
+  .chip.on { background:var(--navy); color:#fff; border-color:var(--navy); }
+  .chip.b { background:rgba(0,0,254,.07); color:var(--blue); border-color:transparent; }
+  .av { border-radius:50%; background:linear-gradient(135deg,#c9d3ff,#8fa3ff); flex-shrink:0; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; }
+  .ver { display:inline-flex; width:13px; height:13px; border-radius:50%; background:var(--blue); color:#fff; font-size:8px; align-items:center; justify-content:center; vertical-align:-1px; }
+  .star { color:#f5b301; }
+  .hd { display:flex; align-items:center; justify-content:space-between; padding:6px 0 0; }
+  .back { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; }
+  .dots { display:flex; gap:5px; } .dots i { width:6px; height:6px; border-radius:6px; background:#d3d7e6; } .dots i.on { width:18px; background:var(--blue); }
+  .prog { height:4px; border-radius:4px; background:#e3e6f0; overflow:hidden; } .prog i { display:block; height:100%; background:linear-gradient(90deg,#0000FE,#31D1FF); border-radius:4px; }
+  .tb { position:absolute; left:12px; right:12px; bottom:12px; height:54px; border-radius:27px; display:flex; justify-content:space-around; align-items:center; z-index:15; }
+  .tb .t { display:flex; flex-direction:column; align-items:center; gap:2px; font-size:8px; color:#8a90b0; font-weight:600; }
+  .tb .t i { width:18px; height:18px; border-radius:6px; background:#d6d9e6; } .tb .t.on { color:var(--blue); } .tb .t.on i { background:var(--blue); }
+  .li { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--line); }
+  .li:last-child { border-bottom:0; }
+  .ic { width:34px; height:34px; border-radius:11px; background:rgba(0,0,254,.07); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+  .tag { font-size:8.5px; font-weight:700; padding:3px 7px; border-radius:8px; }
+  .tag.g { background:#e5f8ee; color:#119a55; } .tag.o { background:#fff3e0; color:#d27b00; } .tag.b { background:rgba(0,0,254,.08); color:var(--blue); } .tag.r { background:#ffe9ea; color:#d6343f; }
+  .seg { display:flex; background:#eceef5; border-radius:12px; padding:3px; gap:2px; } .seg span { flex:1; text-align:center; font-size:9.5px; font-weight:600; padding:6px 0; border-radius:9px; color:var(--mute); } .seg span.on { background:#fff; color:var(--navy); box-shadow:0 2px 6px rgba(0,0,0,.06); }
+  .sheet { position:absolute; left:0; right:0; bottom:0; background:#fff; border-radius:26px 26px 0 0; box-shadow:0 -10px 40px rgba(22,32,90,.18); z-index:30; padding:10px 16px 18px; }
+  .sheet .grab { width:36px; height:4px; border-radius:4px; background:#d3d7e6; margin:0 auto 12px; }
+  .dim { position:absolute; inset:0; background:rgba(22,32,90,.25); z-index:25; }
+
+  /* orb */
+  .orb { position:relative; border-radius:50%; flex-shrink:0; }
+  .orb .core { position:absolute; inset:0; border-radius:50%; overflow:hidden; background:#0a1a8a; box-shadow:0 0 30px rgba(49,209,255,.45), 0 12px 40px rgba(0,0,254,.3); }
+  .orb .b { position:absolute; border-radius:50%; filter:blur(8px); mix-blend-mode:screen; }
+  .orb .b1 { width:80%; height:80%; left:-10%; top:5%; background:#0000FE; animation:o1 6s ease-in-out infinite; }
+  .orb .b2 { width:70%; height:70%; right:-15%; top:-5%; background:#31D1FF; animation:o2 7s ease-in-out infinite; }
+  .orb .b3 { width:60%; height:60%; left:20%; bottom:-20%; background:#7a5cff; animation:o3 5s ease-in-out infinite; }
+  .orb .b4 { width:45%; height:45%; left:30%; top:25%; background:#fff; opacity:.55; animation:o4 4s ease-in-out infinite; }
+  .orb .sh { position:absolute; inset:0; border-radius:50%; background:radial-gradient(circle at 30% 25%, rgba(255,255,255,.75), rgba(255,255,255,0) 35%); }
+  .orb.br { animation:breathe 4s ease-in-out infinite; } .orb.th { animation:breathe 1.1s ease-in-out infinite; }
+  .orb.fast .b { animation-duration:1.6s; }
+  @keyframes o1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(25%,15%) scale(1.15)} }
+  @keyframes o2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-30%,25%) scale(.85)} }
+  @keyframes o3 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-15%,-35%) scale(1.2)} }
+  @keyframes o4 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(15%,-10%) scale(.7)} }
+  @keyframes breathe { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+  .halo { position:absolute; inset:-16px; border-radius:50%; border:1px solid rgba(0,0,254,.14); animation:halo 4s ease-out infinite; } .halo.h2 { animation-delay:2s; }
+  @keyframes halo { 0%{transform:scale(.8); opacity:1} 100%{transform:scale(1.35); opacity:0} }
+  /* edge glow */
+  .edge { position:absolute; inset:0; border-radius:33px; z-index:40; pointer-events:none; overflow:hidden; }
+  .edge .spin { position:absolute; inset:-60%; background:conic-gradient(from 0deg,#0000FE,#31D1FF,#b56bff,#ff7ad9,#31D1FF,#0000FE); animation:spin 3.5s linear infinite; }
+  .edge .mask { position:absolute; inset:4px; border-radius:29px; background:#FBFCFF; }
+  .edge.bl { filter:blur(14px); opacity:.7; } .edge.bl .mask { inset:11px; }
+  .edge.soft { opacity:.0; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .cur { display:inline-block; width:6px; height:12px; background:var(--blue); vertical-align:-2px; animation:blink 1s steps(2) infinite; margin-left:2px; border-radius:2px; }
+  @keyframes blink { 50% { opacity:0 } }
+  .wave { display:flex; gap:3px; align-items:center; height:20px; }
+  .wave i { width:3px; border-radius:3px; background:linear-gradient(#31D1FF,#0000FE); animation:w 1s ease-in-out infinite; }
+  .wave i:nth-child(2){animation-delay:.1s} .wave i:nth-child(3){animation-delay:.2s} .wave i:nth-child(4){animation-delay:.3s} .wave i:nth-child(5){animation-delay:.4s} .wave i:nth-child(6){animation-delay:.5s} .wave i:nth-child(7){animation-delay:.6s}
+  @keyframes w { 0%,100%{height:4px} 50%{height:20px} }
+  /* entrance hints */
+  .up { animation:up 1s cubic-bezier(.22,1,.36,1) both; } .d1{animation-delay:.1s} .d2{animation-delay:.2s} .d3{animation-delay:.3s} .d4{animation-delay:.4s} .d5{animation-delay:.5s}
+  @keyframes up { from { opacity:0; transform:translateY(14px) } to { opacity:1; transform:none } }
+  .logo-l { animation:slideL 2.4s cubic-bezier(.2,.8,.2,1) infinite; } .logo-r { animation:slideR 2.4s cubic-bezier(.2,.8,.2,1) infinite; }
+  @keyframes slideL { 0%{transform:translateX(-40px); opacity:0} 35%,85%{transform:none; opacity:1} 100%{opacity:0} }
+  @keyframes slideR { 0%,15%{transform:translateY(40px); opacity:0} 45%,85%{transform:none; opacity:1} 100%{opacity:0} }
+  .tick { width:74px; height:74px; border-radius:50%; background:linear-gradient(135deg,#0000FE,#31D1FF); display:flex; align-items:center; justify-content:center; color:#fff; font-size:34px; box-shadow:0 14px 40px rgba(0,0,254,.35); animation:pop 1.8s cubic-bezier(.2,1.4,.4,1) infinite; }
+  @keyframes pop { 0%{transform:scale(.3); opacity:0} 30%,90%{transform:scale(1); opacity:1} 100%{opacity:0} }
+  .conf { position:absolute; width:6px; height:10px; border-radius:2px; animation:fall 2.4s linear infinite; }
+  @keyframes fall { 0%{transform:translateY(-20px) rotate(0); opacity:1} 100%{transform:translateY(420px) rotate(540deg); opacity:0} }
+  .lineart path, .lineart rect, .lineart circle { fill:none; stroke:#16205A; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+  .sel .lineart path, .sel .lineart rect, .sel .lineart circle { stroke:#0000FE; stroke-dasharray:220; animation:draw 3.2s cubic-bezier(.65,0,.35,1) infinite; }
+  @keyframes draw { 0%{stroke-dashoffset:220} 55%,100%{stroke-dashoffset:0} }
+  .tile { border-radius:22px; padding:14px; position:relative; transition:all .5s cubic-bezier(.22,1,.36,1); }
+  .tile.sel { background:#fff; box-shadow:0 0 0 1.5px #0000FE, 0 14px 34px rgba(0,0,254,.18); transform:translateY(-2px); }
+  .tile .nm { font-size:13px; font-weight:700; margin-top:8px; letter-spacing:-.01em; }
+  .ck { position:absolute; top:10px; right:10px; width:18px; height:18px; border-radius:50%; background:#0000FE; color:#fff; font-size:10px; display:flex; align-items:center; justify-content:center; animation:pop2 .6s cubic-bezier(.2,1.5,.4,1) both; }
+  @keyframes pop2 { from{transform:scale(0)} to{transform:scale(1)} }
+  .arr { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+  .shimmer { position:relative; overflow:hidden; } .shimmer:after { content:''; position:absolute; top:0; bottom:0; width:40%; left:-50%; background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent); animation:shim 3s cubic-bezier(.4,0,.2,1) infinite; }
+  @keyframes shim { 0%{left:-50%} 60%,100%{left:120%} }
+.i-home{--m:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%27M3.5%2010.5%2012%203.5l8.5%207V20a1%201%200%200%201-1%201H15v-6H9v6H4.5a1%201%200%200%201-1-1z%27/%3E%3C/svg%3E")}
+.i-proj{--m:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%27M12%203%203%208l9%205%209-5-9-5z%27/%3E%3Cpath%20d%3D%27M3%2012.5l9%205%209-5%27/%3E%3Cpath%20d%3D%27M3%2017l9%205%209-5%27/%3E%3C/svg%3E")}
+.i-exp{--m:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%279%27%20cy%3D%278%27%20r%3D%273.5%27/%3E%3Cpath%20d%3D%27M2.5%2020c.8-3.5%203.4-5.5%206.5-5.5s5.7%202%206.5%205.5%27/%3E%3Cpath%20d%3D%27M16%204.5a3.5%203.5%200%200%201%200%207%27/%3E%3Cpath%20d%3D%27M18.5%2014.8c1.6.8%202.7%202.6%203%205.2%27/%3E%3C/svg%3E")}
+.i-inbox{--m:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%27M20.5%2012a8.5%208.5%200%200%201-12.4%207.5L3.5%2021l1.5-4.6A8.5%208.5%200%201%201%2020.5%2012z%27/%3E%3C/svg%3E")}
+.i-req{--m:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%274%27%20y%3D%273.5%27%20width%3D%2716%27%20height%3D%2717%27%20rx%3D%272.5%27/%3E%3Cpath%20d%3D%27M8%209h8M8%2013h8M8%2017h5%27/%3E%3C/svg%3E")}
+.i-jobs{--m:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%273%27%20y%3D%277%27%20width%3D%2718%27%20height%3D%2713%27%20rx%3D%272.5%27/%3E%3Cpath%20d%3D%27M9%207V5a2%202%200%200%201%202-2h2a2%202%200%200%201%202%202v2%27/%3E%3Cpath%20d%3D%27M3%2013h18%27/%3E%3C/svg%3E")}
+.i-earn{--m:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%27M4%2020V10M10%2020V4M16%2020v-8M22%2020H2%27/%3E%3C/svg%3E")}
+.tb .t i { background:#a3a9c4 !important; border-radius:0 !important; -webkit-mask:var(--m) center/contain no-repeat; mask:var(--m) center/contain no-repeat; width:20px !important; height:20px !important; }
+.tb .t.on i { background:#0000FE !important; }
+</style>
+</head><body><div class="pp"><style>
+  canvas.cv { display:block; width:100%; height:100%; }
+  .ph { border-radius:50%; background-size:cover; background-position:center; flex-shrink:0; }
+  .v2 .body { padding:0 20px; }
+  .bigT { font-size:24px; font-weight:700; letter-spacing:-.035em; line-height:1.05; }
+  .lab { font-size:9px; letter-spacing:.14em; font-weight:700; color:#6b7196; margin:12px 0 8px; }
+  .seg6 { display:flex; gap:3px; margin-top:8px; } .seg6 i { flex:1; height:4px; border-radius:4px; background:#dfe3ee; } .seg6 i.on { background:#0000FE; } .seg6 i.cur { background:#31D1FF; box-shadow:0 0 8px #31D1FF; }
+  .chips2 { display:flex; gap:6px; margin-top:8px; overflow:hidden; } .chips2 span { white-space:nowrap; font-size:10px; font-weight:600; color:#0000FE; background:rgba(0,0,254,.06); padding:6px 10px; border-radius:14px; }
+  .lst { border-radius:20px; padding:0 14px; }
+  .lr { display:flex; align-items:center; gap:11px; padding:11px 0; border-bottom:1px solid rgba(22,32,90,.07); } .lr:last-child { border:0; }
+  .lr .ic2 { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .lr b { font-size:12px; display:block; letter-spacing:-.01em; } .lr .ch { margin-left:auto; color:#b3b8cf; font-size:15px; }
+  .fchips { display:flex; gap:6px; margin-top:12px; overflow:hidden; position:relative; } .fchips span { white-space:nowrap; font-size:10.5px; font-weight:600; padding:7px 12px; border-radius:16px; color:#16205A; position:relative; z-index:1; }
+  .fchips .liq { position:absolute; left:0; top:0; height:100%; width:62px; border-radius:16px; background:#16205A; z-index:0; animation:liq 6s cubic-bezier(.65,0,.35,1) infinite; }
+  @keyframes liq { 0%,28%{left:0;width:62px} 38%,62%{left:68px;width:82px} 72%,100%{left:0;width:62px} }
+  .fchips span.on { color:#fff; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px 10px; margin-top:14px; }
+  .gt .ph2 { height:124px; border-radius:18px; background-size:cover; background-position:center 20%; position:relative; }
+  .gt .ph2 > span { position:absolute; left:8px; top:8px; font-size:9px; font-weight:700; padding:3px 7px; border-radius:10px; }
+  .gt b { display:block; font-size:12px; margin-top:7px; white-space:nowrap; letter-spacing:-.01em; } .gt .xs { white-space:nowrap; } .gt .p { font-size:11px; font-weight:700; margin-top:3px; }
+
+  /* ===== motion language v2 (from the reference) ===== */
+  @property --a { syntax:'<angle>'; inherits:false; initial-value:0deg; }
+  /* fluid iridescent blob */
+  .blob { position:relative; flex-shrink:0; }
+  .blob .f { position:absolute; inset:0; border-radius:46% 54% 58% 42% / 48% 42% 58% 52%;
+     background:conic-gradient(from var(--a), #0000FE, #31D1FF, #b9a8ff, #6f7bff, #31D1FF, #0000FE);
+     filter:blur(var(--bl,5px)) saturate(1.2); animation:morph 7s ease-in-out infinite, rot 6s linear infinite; }
+  .blob .c { position:absolute; inset:22%; border-radius:50%; background:radial-gradient(circle, rgba(255,255,255,.95), rgba(255,255,255,0) 70%); filter:blur(3px); animation:morph 5s ease-in-out infinite reverse; }
+  .blob .g { position:absolute; inset:-35%; border-radius:50%; background:radial-gradient(circle, rgba(49,209,255,.35), rgba(0,0,254,.12) 45%, transparent 70%); filter:blur(8px); }
+  .blob.think .f { animation:morph 1.6s ease-in-out infinite, rot 1.4s linear infinite; }
+  .blob.ring .f { -webkit-mask:radial-gradient(circle, transparent 36%, #000 40%); mask:radial-gradient(circle, transparent 36%, #000 40%); }
+  .blob.ring .c { opacity:0; }
+  @keyframes morph { 0%,100%{border-radius:46% 54% 58% 42% / 48% 42% 58% 52%; transform:scale(1)} 33%{border-radius:58% 42% 44% 56% / 42% 58% 42% 58%; transform:scale(1.04) rotate(8deg)} 66%{border-radius:40% 60% 54% 46% / 56% 46% 54% 44%; transform:scale(.97) rotate(-6deg)} }
+  @keyframes rot { to { --a:360deg; } }
+  /* shimmer text */
+  .shim { background:linear-gradient(90deg,#16205A 0%,#16205A 35%,#31D1FF 45%,#0000FE 52%,#b9a8ff 58%,#16205A 68%,#16205A 100%); background-size:250% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation:shim 3.2s ease-in-out infinite; }
+  .shim.lt { background-image:linear-gradient(90deg,#9aa0bd 0%,#9aa0bd 35%,#31D1FF 45%,#0000FE 52%,#b9a8ff 58%,#9aa0bd 68%,#9aa0bd 100%); }
+  @keyframes shim { 0%{background-position:100% 0} 100%{background-position:-50% 0} }
+  /* iridescent animated border */
+  .irid { position:relative; }
+  .irid:before { content:''; position:absolute; inset:-2px; border-radius:inherit; padding:2px; background:conic-gradient(from var(--a), #0000FE, #31D1FF, #b9a8ff, #0000FE);
+     -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; animation:rot 4s linear infinite; z-index:2; pointer-events:none; }
+  .irid:after { content:''; position:absolute; inset:6px; border-radius:inherit; background:conic-gradient(from var(--a), #0000FE, #31D1FF, #b9a8ff, #0000FE); filter:blur(16px); opacity:.35; z-index:-1; animation:rot 4s linear infinite; }
+  .match { font-size:9px; font-weight:700; padding:3px 8px; border-radius:10px; background:#fff; }
+  /* project card with model breaking out of the frame */
+  .projc2 { position:relative; border-radius:22px; padding:54px 12px 10px; margin-top:58px; }
+  .track { position:relative; display:flex; justify-content:space-between; align-items:center; margin:10px 6px 0; height:28px; }
+  .track .tl { position:absolute; left:4px; right:4px; top:10px; height:2px; background:#e1e5f0; border-radius:2px; }
+  .track .tf { position:absolute; left:4px; top:10px; height:2px; width:40%; border-radius:2px; background:linear-gradient(90deg,#0000FE,#31D1FF); }
+  .track > i { position:relative; z-index:1; width:8px; height:8px; border-radius:50%; background:#fff; border:1.5px solid #cfd4e6; align-self:flex-start; margin-top:6px; }
+  .track > i.dn { background:#0000FE; border-color:#0000FE; }
+  .nowb { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; align-self:flex-start; margin-top:3px; }
+  .nowb .blob:before { content:''; position:absolute; inset:-6px; border-radius:50%; border:1px solid rgba(0,0,254,.25); animation:halo 2.4s ease-out infinite; }
+  .nowl { font-size:8.5px; font-weight:700; color:#0000FE; margin-top:3px; }
+  .nextrow { display:flex; align-items:center; gap:9px; margin-top:8px; padding:7px 12px 7px 7px; border-radius:14px; background:linear-gradient(100deg, rgba(0,0,254,.06), rgba(49,209,255,.08)); }
+  .nextrow .na { width:28px; height:28px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,254,.12); flex-shrink:0; }
+  .projc2 .mdl { position:absolute; left:50%; margin-left:-95px; top:-74px; width:190px; height:140px; }
+  .askbar2 { display:flex; align-items:center; gap:10px; padding:6px 6px 6px 8px; border-radius:24px; }
+  .askbar2 .t { flex:1; font-size:12px; }
+  .askbar2 .mic { width:32px; height:32px; border-radius:50%; background:#16205A; display:flex; align-items:center; justify-content:center; }
+  /* demo: think ring + counter */
+  .vline { width:1px; height:46px; background:linear-gradient(#b9a8ff, rgba(185,168,255,0)); margin:10px auto 0; }
+  .cnt { margin:6px auto 0; width:58px; height:58px; border-radius:50%; background:#fff; box-shadow:0 8px 24px rgba(22,32,90,.08); display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .cnt b { font-size:15px; letter-spacing:-.02em; font-variant-numeric:tabular-nums; } .cnt span { font-size:6.5px; letter-spacing:.12em; color:#6b7196; font-weight:700; }
+  /* demo: orb -> card morph */
+  .morphbox { position:absolute; left:50%; top:118px; transform:translateX(-50%); width:96px; height:96px; border-radius:50%; overflow:hidden; animation:tocard 7s cubic-bezier(.22,1,.36,1) infinite; background:#fff; box-shadow:0 20px 50px rgba(0,0,254,.15); }
+  .morphbox .blob { position:absolute; inset:0; animation:blobout 7s cubic-bezier(.22,1,.36,1) infinite; }
+  .morphbox .cardc { position:absolute; inset:0; padding:16px; opacity:0; animation:cardin 7s cubic-bezier(.22,1,.36,1) infinite; }
+  .morphbox .glowtop { position:absolute; left:0; right:0; top:0; height:70px; background:linear-gradient(120deg, rgba(49,209,255,.35), rgba(185,168,255,.35), rgba(0,0,254,.2)); filter:blur(10px); }
+  @keyframes tocard { 0%,38%{width:96px;height:96px;border-radius:50%;top:118px} 52%,90%{width:214px;height:236px;border-radius:24px;top:96px} 100%{width:96px;height:96px;border-radius:50%;top:118px} }
+  @keyframes blobout { 0%,40%{opacity:1; transform:scale(1)} 52%,92%{opacity:0; transform:scale(1.8)} 100%{opacity:1; transform:scale(1)} }
+  @keyframes cardin { 0%,50%{opacity:0; transform:translateY(10px)} 60%,88%{opacity:1; transform:none} 96%,100%{opacity:0} }
+  .partc { position:absolute; inset:0; z-index:5; pointer-events:none; }
+.pick1 { animation:press 5s ease-in-out infinite; } @keyframes press { 0%,40%{transform:none; box-shadow:0 6px 24px rgba(22,32,90,.07)} 46%{transform:scale(.97)} 52%,85%{transform:none; box-shadow:0 0 0 1.5px #0000FE, 0 10px 24px rgba(0,0,254,.15)} 100%{transform:none} }
+</style>
+<style>
+  .aiw { background:#fff !important; }
+  .blob.soft .f { filter:blur(11px) saturate(1.25); }
+  .blob.soft.ring .f { -webkit-mask:radial-gradient(circle, transparent 22%, rgba(0,0,0,.55) 38%, #000 52%); mask:radial-gradient(circle, transparent 22%, rgba(0,0,0,.55) 38%, #000 52%); }
+  .blob.soft .g { inset:-45%; filter:blur(14px); }
+  .stgpill { margin-left:auto; display:flex; align-items:center; gap:5px; font-size:10.5px; font-weight:700; color:#16205A; background:#f4f5fa; padding:7px 11px; border-radius:16px; }
+  .dock { position:absolute; left:0; right:0; bottom:0; padding:14px 20px 20px; z-index:15; }
+  .aiw .edge .mask { background:#fff; }
+  .aiw .edge { opacity:.85; }
+  .aihd { display:flex; align-items:center; gap:8px; padding:8px 0 0; }
+  .aihd .nm { font-size:13px; font-weight:700; letter-spacing:-.01em; }
+  .stg { margin-left:auto; display:flex; align-items:center; gap:4px; font-size:10px; font-weight:700; color:#0000FE; background:rgba(0,0,254,.06); padding:6px 10px; border-radius:14px; }
+  .kb { font-size:9px; color:#8a90b0; margin-top:6px; display:flex; align-items:center; gap:5px; }
+  .ub { align-self:flex-end; max-width:78%; background:#16205A; color:#fff; padding:10px 13px; border-radius:18px 18px 5px 18px; font-size:11.5px; line-height:1.45; }
+  .ctx { align-self:flex-end; margin-top:6px; font-size:9px; color:#6b7196; display:flex; gap:4px; align-items:center; }
+  .ans { font-size:11.8px; line-height:1.6; color:#16205A; }
+  .ans b { font-weight:700; }
+  .src { display:inline-flex; align-items:center; gap:5px; font-size:9px; font-weight:700; color:#0000FE; background:rgba(0,0,254,.06); padding:4px 9px; border-radius:10px; margin-top:8px; }
+  .reccard { position:relative; border-radius:22px; background:#fff; box-shadow:0 18px 40px rgba(0,0,254,.12), 0 0 0 1px rgba(0,0,254,.06); overflow:hidden; padding:14px; }
+  .reccard .gt2 { position:absolute; left:0; right:0; top:0; height:64px; background:linear-gradient(120deg, rgba(49,209,255,.32), rgba(185,168,255,.32), rgba(0,0,254,.16)); filter:blur(10px); }
+  .avs { display:flex; } .avs .ph { width:26px; height:26px; border:2px solid #fff; margin-left:-8px; } .avs .ph:first-child { margin-left:0; }
+  .fu { display:flex; gap:6px; margin-top:10px; overflow:hidden; } .fu span { white-space:nowrap; font-size:9.5px; font-weight:600; color:#16205A; border:1px solid #e3e6f0; padding:6px 10px; border-radius:14px; }
+  .inbar { display:flex; align-items:center; gap:8px; padding:6px 6px 6px 14px; border-radius:22px; background:#f4f5fa; font-size:11.5px; color:#16205A; }
+  .inbar .snd { width:32px; height:32px; border-radius:50%; background:#0000FE; display:flex; align-items:center; justify-content:center; margin-left:auto; box-shadow:0 6px 14px rgba(0,0,254,.3); }
+  .stgrow { display:flex; gap:6px; margin-bottom:10px; overflow:hidden; } .stgrow span { white-space:nowrap; font-size:10px; font-weight:600; padding:6px 11px; border-radius:14px; color:#6b7196; background:#f4f5fa; } .stgrow span.on { background:#16205A; color:#fff; }
+  .stline { font-size:10.5px; height:16px; position:relative; }
+  .stline span { position:absolute; left:0; right:0; opacity:0; animation:st 6s infinite; } .stline span:nth-child(2){animation-delay:2s} .stline span:nth-child(3){animation-delay:4s}
+  @keyframes st { 0%{opacity:0; transform:translateY(5px)} 5%,28%{opacity:1; transform:none} 33%,100%{opacity:0; transform:translateY(-5px)} }
+  .flag { border-radius:22px; padding:16px; background:#fff; box-shadow:0 14px 34px rgba(22,32,90,.1); position:relative; overflow:hidden; }
+  .flag:before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:linear-gradient(#16205A,#0000FE); }
+  .shield { width:40px; height:40px; border-radius:14px; background:#16205A; display:flex; align-items:center; justify-content:center; }
+  .fl-row { display:flex; justify-content:space-between; font-size:10px; padding:8px 0; border-top:1px solid #eef0f6; color:#6b7196; } .fl-row b { color:#16205A; }
+  .qsum { border-radius:18px; padding:14px; background:linear-gradient(135deg, rgba(0,0,254,.04), rgba(49,209,255,.07)); border:1px solid rgba(0,0,254,.08); }
+  .kv { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #eef0f6; font-size:11.5px; } .kv span { color:#6b7196; } .kv b { font-weight:700; }
+  .seg3 { display:flex; background:#f1f3f9; border-radius:12px; padding:3px; } .seg3 span { flex:1; text-align:center; font-size:10px; font-weight:600; padding:7px 0; border-radius:9px; color:#6b7196; } .seg3 span.on { background:#fff; color:#16205A; box-shadow:0 2px 8px rgba(22,32,90,.08); }
+  .tickc { width:88px; height:88px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; }
+  .flowstrip { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; font-size:12px; color:#777; }
+  .orbit { position:relative; width:200px; height:200px; }
+  .otrack { position:absolute; inset:14px; border-radius:50%; border:1px dashed rgba(0,0,254,.18); }
+  .ov { position:absolute; left:50%; top:50%; width:0; height:0; animation:orb 24s linear infinite; transform:rotate(calc(var(--i) * 72deg)); }
+  @keyframes orb { from { transform:rotate(calc(var(--i) * 72deg)); } to { transform:rotate(calc(var(--i) * 72deg + 360deg)); } }
+  .ovi { position:absolute; left:-17px; top:-103px; animation:counter 24s linear infinite; }
+  @keyframes counter { from { transform:rotate(calc(var(--i) * -72deg)); } to { transform:rotate(calc(var(--i) * -72deg - 360deg)); } }
+  .ovi .ph { box-shadow:0 0 0 2.5px #fff, 0 6px 16px rgba(22,32,90,.15); }
+  .otk { position:absolute; right:-4px; bottom:-3px; width:15px; height:15px; border-radius:50%; background:#0000FE; color:#fff; font-size:8px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; animation:tk 4s calc(var(--i) * .35s) cubic-bezier(.2,1.5,.4,1) infinite both; }
+  @keyframes tk { 0%,8%{transform:scale(0)} 16%,92%{transform:scale(1)} 100%{transform:scale(0)} }
+  .steps3 { display:flex; width:100%; margin-top:22px; position:relative; }
+  .steps3:before { content:''; position:absolute; left:16%; right:16%; top:5px; height:2px; background:#e6e9f2; }
+  .steps3 .s { flex:1; display:flex; flex-direction:column; align-items:center; position:relative; }
+  .steps3 i { width:12px; height:12px; border-radius:50%; background:#fff; border:2px solid #d3d8e8; }
+  .steps3 .s.on i { background:#0000FE; border-color:#0000FE; box-shadow:0 0 0 4px rgba(0,0,254,.12); }
+  .steps3 b { font-size:11px; margin-top:7px; } .steps3 span { font-size:9px; color:#8a90b0; margin-top:1px; }
+  .blob.calm .f { animation:morph 12s ease-in-out infinite, rot 14s linear infinite; opacity:.75; }
+</style>
+
+<h2>Batch 3a, simplified: the Pulse AI guide</h2>
+<p class="subtitle">This is the flow the client asked to see first: <b>pick your stage → ask → Pulse answers from Project Pulse's own knowledge → recommends the right engineer → request a quote in one tap.</b> Structural, legal and safety questions are safely flagged to a human. The screens use the approved motion language: fluid blob, ring and counter, the ring morphing into the card, shimmer, and a soft Siri edge glow while Pulse thinks.</p>
+<div class="flowstrip"><span class="chip b">Opening (approved)</span>→<span class="chip b">9a Ask</span>→<span class="chip b">9b Thinking</span>→<span class="chip b">9c Answer + recommendation</span>→<span class="chip b">10 Request quote</span>→<span class="chip b">10b Sent</span><span style="margin-left:14px">Safety path:</span><span class="chip" style="background:#16205A;color:#fff">9d Flagged to the team</span></div>
+
+<div class="row v2" style="margin-top:20px">
+
+  <!-- 9a ASK -->
+  <div class="col">
+    <div class="phone"><div class="scr aiw">
+      <div class="island"></div><div class="sb"><span>9:41</span><span>5G ▮</span></div>
+      <div class="body">
+        <div class="aihd"><div class="back" style="background:#f4f5fa">‹</div><span class="nm">Pulse</span><span class="stgpill">Design stage <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#16205A" stroke-width="3" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+          <div class="blob soft" style="width:96px;height:96px"><div class="g"></div><div class="f"></div><div class="c"></div></div>
+          <div style="margin-top:30px;font-size:16px;font-weight:600;letter-spacing:-.02em;line-height:1.4">What would you<br>like to know?</div>
+          <div class="xs" style="margin-top:8px">Answers from Project Pulse experts</div>
+        </div>
+        <div style="margin-bottom:20px"><div class="inbar" style="white-space:nowrap">Do I need a soil test?<span class="cur" style="background:#0000FE"></span><span class="snd"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span></div></div>
+      </div>
+    </div></div>
+    <div class="cap"><b>9a · Ask</b><p>Just the orb, one question and the input. Your stage sits quietly in the header ("Design stage ▾"). Tap it only if you want a different phase.</p><p class="mo">✦ The orb breathes softly. On Send, the question floats up and the orb drifts into its thinking state.</p></div>
+  </div>
+
+  <!-- 9b THINKING -->
+  <div class="col">
+    <div class="phone"><div class="scr aiw">
+      <div class="island"></div><div class="sb"><span>9:41</span><span>5G ▮</span></div>
+      <div class="body" style="align-items:center;text-align:center">
+        <div class="aihd" style="align-self:stretch"><div class="back" style="background:#f4f5fa">‹</div></div>
+        <div style="margin-top:62px" class="blob soft"><div style="width:132px;height:132px"></div><div class="g"></div><div class="f"></div><div class="c"></div></div>
+        <div style="margin-top:34px;font-size:14px;font-weight:500;letter-spacing:-.01em;color:#8a90b0">Do I need a <span class="shim" style="font-weight:600">soil test</span>?</div>
+        <div class="xs" style="margin-top:6px;color:#b3b8cf">Finding your answer…</div>
+        <div class="vline" style="margin-top:22px;height:60px"></div>
+        <div class="cnt" style="width:52px;height:52px;box-shadow:0 6px 20px rgba(22,32,90,.06)"><b id="n9b" style="font-size:13px">0</b><span>GUIDES</span></div>
+      </div>
+    </div></div>
+    <div class="cap"><b>9b · Thinking</b><p>Styled directly on your reference: a clean white screen, the <b>same slow, soft orb as the Ask screen</b>, your question in light type with the key words shimmering, and a thin line down to a small counter. There's no border, no bubble and no clutter.</p><p class="mo">✦ The orb keeps its slow, calm movement and the counter ticks. When the answer is ready, the orb rises and morphs into the answer card.</p></div>
+  </div>
+
+  <!-- 9c ANSWER -->
+  <div class="col">
+    <div class="phone"><div class="scr aiw">
+      <div class="island"></div><div class="sb"><span>9:41</span><span>5G ▮</span></div>
+      <div class="body">
+        <div class="aihd"><div class="back" style="background:#f4f5fa">‹</div><span class="nm">Pulse</span></div>
+        <div style="display:flex;flex-direction:column;margin-top:14px"><div class="ub">Do I need a soil test?</div></div>
+        <div class="ans" style="margin-top:14px;font-size:12.5px"><b>Yes.</b> A soil test is needed before your villa's structure is designed. It decides the foundation.<span class="cur"></span></div>
+        <div><span class="src">◆ Project Pulse Villa Guide</span></div>
+        <div class="reccard irid" style="margin-top:14px;border-radius:22px">
+          <div class="gt2"></div>
+          <div style="position:relative">
+            <div class="lbl">You'll need</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px"><div style="font-size:15px;font-weight:700;letter-spacing:-.02em">Geotechnical engineer</div></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:8px"><div class="avs"><div class="ph" style="background-image:url(https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=faces)"></div><div class="ph" style="background-image:url(https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop&crop=faces)"></div><div class="ph" style="background-image:url(https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=faces)"></div></div><span class="xs" style="white-space:nowrap">14 verified · from AED 1,800</span></div>
+            <div class="btn" style="margin-top:12px;padding:11px">Request a quote</div>
+          </div>
+        </div>
+              </div>
+    </div></div>
+    <div class="cap"><b>9c · Answer + recommendation</b><p>The answer streams in word by word and <b>cites its Project Pulse source</b>. Then the ring morphs into the <b>recommendation card</b>: the type of engineer you need, how many verified ones are nearby, the starting price, and <b>one tap to Request a quote</b>. </p><p class="mo">✦ The text fades in word by word, the source chip pops, and the card grows out of the ring with an iridescent border.</p></div>
+  </div>
+</div>
+
+<div class="row v2" style="margin-top:26px">
+  <!-- 10 REQUEST QUOTE -->
+  <div class="col">
+    <div class="phone"><div class="scr aiw">
+      <div class="island"></div><div class="sb"><span>9:41</span><span>5G ▮</span></div>
+      <div class="body">
+        <div class="hd"><div class="back" style="background:#f4f5fa">‹</div><span style="width:32px"></span></div>
+        <div class="bigT" style="margin-top:12px">Request a quote</div>
+        <div class="qsum" style="margin-top:14px">
+          <div style="display:flex;align-items:center;gap:6px;font-size:9px;font-weight:700;color:#0000FE;letter-spacing:.08em"><div class="blob" style="width:12px;height:12px;--bl:1.5px"><div class="f"></div></div>WRITTEN BY PULSE</div>
+          <div style="font-size:11.5px;line-height:1.55;margin-top:8px;color:#16205A">Soil investigation and geotechnical report for a 5-bedroom villa on Al Reem Island, needed before structural design.</div>
+          <div style="font-size:10px;font-weight:700;color:#0000FE;margin-top:8px">Edit</div>
+        </div>
+        <div style="margin-top:6px">
+          <div class="kv"><span>Location</span><b>Al Reem Island</b></div>
+          <div class="kv" style="border:0;padding-bottom:6px"><span>When</span></div>
+          <div class="seg3"><span>ASAP</span><span class="on">Within 2 weeks</span><span>Flexible</span></div>
+          <div class="kv" style="margin-top:4px"><span>Sending to</span><div style="display:flex;align-items:center;gap:6px"><div class="avs"><div class="ph" style="width:22px;height:22px;background-image:url(https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=faces)"></div><div class="ph" style="width:22px;height:22px;background-image:url(https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop&crop=faces)"></div><div class="ph" style="width:22px;height:22px;background-image:url(https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=faces)"></div></div><b>5 experts</b></div></div>
+        </div>
+      </div>
+      <div class="dock" style="background:linear-gradient(to top,#fff 60%,rgba(255,255,255,0))"><div class="btn">Send request</div></div>
+    </div></div>
+    <div class="cap"><b>10 · Request a quote (pre-filled)</b><p>No form to fill in. <b>Pulse writes the request</b> from your conversation and project. Location comes from the project. Pick when you need it, then <b>Send</b>. It goes to the 5 best-matched verified experts.</p><p class="mo">✦ The summary types itself in with a shimmer, then settles. The segmented control slides.</p></div>
+  </div>
+
+  <!-- 10b SENT -->
+  <div class="col">
+    <div class="phone"><div class="scr aiw">
+      <div class="island"></div><div class="sb"><span>9:41</span><span>5G ▮</span></div>
+      <div class="body" style="align-items:center;text-align:center">
+        <div class="orbit" style="margin-top:40px">
+          <div class="otrack"></div>
+          <div class="blob soft" style="width:78px;height:78px;position:absolute;left:50%;top:50%;margin:-39px 0 0 -39px"><div class="g"></div><div class="f"></div><div class="c"></div></div>
+          <div class="ov" style="--i:0"><div class="ovi"><div class="ph" style="width:34px;height:34px;background-image:url(https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&h=120&fit=crop&crop=faces)"></div><span class="otk">✓</span></div></div><div class="ov" style="--i:1"><div class="ovi"><div class="ph" style="width:34px;height:34px;background-image:url(https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&h=120&fit=crop&crop=faces)"></div><span class="otk">✓</span></div></div><div class="ov" style="--i:2"><div class="ovi"><div class="ph" style="width:34px;height:34px;background-image:url(https://images.unsplash.com/photo-1560250097-0b93528c311a?w=120&h=120&fit=crop&crop=faces)"></div><span class="otk">✓</span></div></div><div class="ov" style="--i:3"><div class="ovi"><div class="ph" style="width:34px;height:34px;background-image:url(https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&h=120&fit=crop&crop=faces)"></div><span class="otk">✓</span></div></div><div class="ov" style="--i:4"><div class="ovi"><div class="ph" style="width:34px;height:34px;background-image:url(https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&h=120&fit=crop&crop=faces)"></div><span class="otk">✓</span></div></div>
+        </div>
+        <div class="bigT" style="margin-top:22px;font-size:23px">Sent to 5 experts</div>
+        <div class="sm" style="margin-top:6px">Quotes usually arrive <span class="shim" style="font-weight:600">within 24 hours</span></div>
+        <div class="steps3">
+          <div class="s on"><i></i><b>Sent</b><span>Now</span></div>
+          <div class="s"><i></i><b>Quotes</b><span>~24h</span></div>
+          <div class="s"><i></i><b>You choose</b><span>Then</span></div>
+        </div>
+        <div style="width:100%;margin-top:auto;margin-bottom:20px"><div class="btn">Done</div></div>
+      </div>
+    </div></div>
+    <div class="cap"><b>10b · Sent</b><p>You <b>see</b> your request reach people: the five matched experts orbit the orb and each <b>gets a tick</b> as the request lands with them. Below is a three-step "what happens next" line and one <b>Done</b> button.</p><p class="mo">✦ The avatars glide out from the orb onto the orbit, tick one by one with light haptics, then keep drifting slowly around it.</p></div>
+  </div>
+
+  <!-- 9d FLAGGED -->
+  <div class="col">
+    <div class="phone"><div class="scr aiw">
+      <div class="island"></div><div class="sb"><span>9:41</span><span>5G ▮</span></div>
+      <div class="body" style="align-items:center;text-align:center">
+        <div class="aihd" style="align-self:stretch"><div class="back" style="background:#f4f5fa">‹</div></div>
+        <div style="margin-top:20px;font-size:13px;color:#8a90b0">"Can I remove the kitchen wall?"</div>
+        <div style="margin-top:30px;position:relative;width:104px;height:104px">
+          <div class="blob soft calm" style="width:104px;height:104px;position:absolute;inset:0"><div class="g"></div><div class="f"></div><div class="c"></div></div>
+          <div class="ph" style="position:absolute;left:50%;top:50%;width:58px;height:58px;margin:-29px 0 0 -29px;background-image:url(https://images.unsplash.com/photo-1560250097-0b93528c311a?w=160&h=160&fit=crop&crop=faces);box-shadow:0 0 0 3px #fff, 0 10px 24px rgba(22,32,90,.18)"></div>
+        </div>
+        <div class="bigT" style="margin-top:24px;font-size:21px;line-height:1.2">An engineer will<br>answer this one</div>
+        <div class="sm" style="margin-top:10px;line-height:1.55;max-width:210px">Wall changes affect your building's structure, so <b style="color:#16205A">Rashid from Project Pulse</b> will reply to you personally.</div>
+        <div class="glass" style="margin-top:18px;display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:14px;font-size:10.5px;font-weight:600">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0000FE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 6.5l8.5 6 8.5-6"/></svg>
+          Reply by email <span style="color:#8a90b0;font-weight:500">· within 24h</span>
+        </div>
+        <div style="width:100%;margin-top:auto;margin-bottom:18px"><div class="btn">Got it</div><div class="sm" style="margin-top:12px;font-weight:600;color:#0000FE">Book a structural engineer instead</div></div>
+      </div>
+    </div></div>
+    <div class="cap"><b>9d · Flagged to a human</b><p>This is in the same light, calm style as the rest of Pulse. The soft orb holds a <b>real person's photo</b>, so you know a human engineer is taking over. There's one plain sentence of explanation, when to expect the reply, and <b>Got it</b>. Booking an engineer is a quiet secondary option.</p><p class="mo">✦ The orb slows right down and the engineer's photo fades in at its centre. A soft haptic plays. There's no thinking animation, because this is enforced by the app, not the AI.</p></div>
+  </div>
+</div>
+</div><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script><script type="module">const n = document.getElementById('n9b'), t0 = performance.now();
+(function tick(now) { const t = ((now - t0) % 6000) / 6000; n.textContent = Math.round(1240 * Math.min(1, t / 0.8)).toLocaleString(); requestAnimationFrame(tick); })(t0);
+</script></body></html>

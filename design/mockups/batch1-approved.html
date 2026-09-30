@@ -1,0 +1,668 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Project Pulse</title><style>body{margin:0;background:#f3f4f8;padding:28px 36px;font-family:Hanken Grotesk,system-ui}.subtitle{color:#666;font-size:15px;line-height:1.5;max-width:1100px}h2{font-size:26px;color:#16205A;margin:0 0 6px}</style><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  .pp * { box-sizing:border-box; font-family:'Hanken Grotesk', system-ui, sans-serif; margin:0; }
+  .pp { --navy:#16205A; --blue:#0000FE; --cyan:#31D1FF; --grey:#EAEAEA; --mute:#6b7196; --line:#E6E8F0; --bg:#F7F8FC; }
+  .pp h4.grp { font-size:13px; letter-spacing:.14em; color:#0000FE; margin:26px 0 4px; text-transform:uppercase; }
+  .row { display:flex; gap:26px; flex-wrap:wrap; justify-content:flex-start; margin-top:14px; }
+  .col { width:270px; display:flex; flex-direction:column; gap:10px; }
+  .cap b { color:#16205A; font-size:14px; } .cap p { font-size:12px; color:#555; line-height:1.45; margin-top:3px; }
+  .cap .mo { font-size:11.5px; color:#0000FE; margin-top:5px; line-height:1.4; }
+  .phone { width:270px; height:570px; border-radius:40px; background:#0b0b0f; padding:8px; box-shadow:0 24px 60px rgba(22,32,90,.25), inset 0 0 0 1.5px #2a2a33; }
+  .scr { width:100%; height:100%; border-radius:33px; overflow:hidden; position:relative; background:var(--bg); color:var(--navy); display:flex; flex-direction:column; }
+  .island { position:absolute; top:8px; left:50%; transform:translateX(-50%); width:76px; height:21px; background:#000; border-radius:20px; z-index:20; }
+  .sb { height:30px; flex-shrink:0; display:flex; justify-content:space-between; align-items:center; padding:3px 22px 0; font-size:11px; font-weight:600; position:relative; z-index:10; }
+  .body { flex:1; position:relative; z-index:2; padding:0 16px; display:flex; flex-direction:column; min-height:0; }
+  .aur { position:absolute; border-radius:50%; filter:blur(45px); z-index:0; }
+  .a-c { width:230px; height:200px; background:var(--cyan); right:-90px; top:-60px; opacity:.42; animation:drift2 12s ease-in-out infinite; }
+  .a-b { width:200px; height:190px; background:var(--blue); left:-110px; top:-30px; opacity:.18; animation:drift 14s ease-in-out infinite; }
+  .a-v { width:170px; height:170px; background:#b9a8ff; left:50px; top:200px; opacity:.22; animation:drift 16s ease-in-out infinite; }
+  @keyframes drift { 0%,100%{transform:translate(0,0)} 50%{transform:translate(35px,25px)} }
+  @keyframes drift2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-35px,20px)} }
+  .glass { background:rgba(255,255,255,.66); border:1px solid rgba(255,255,255,.95); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); box-shadow:0 6px 24px rgba(22,32,90,.07); }
+  .card { background:#fff; border-radius:18px; box-shadow:0 4px 18px rgba(22,32,90,.06); }
+  h1.t { font-size:22px; font-weight:700; letter-spacing:-.03em; line-height:1.12; }
+  h2.t { font-size:17px; font-weight:700; letter-spacing:-.02em; }
+  .grad { background:linear-gradient(90deg,#0000FE,#31D1FF); -webkit-background-clip:text; color:transparent; }
+  .sm { font-size:11px; color:var(--mute); } .xs { font-size:9.5px; color:var(--mute); }
+  .lbl { font-size:9px; letter-spacing:.13em; font-weight:700; color:var(--blue); text-transform:uppercase; }
+  .btn { background:#0000FE; box-shadow:0 10px 24px rgba(0,0,254,.28); color:#fff; border-radius:16px; padding:13px; text-align:center; font-size:12.5px; font-weight:700; }
+  .btn.blue {}
+  .btn.ghost { background:transparent; color:var(--navy); border:1.5px solid var(--line); }
+  .inp { background:#fff; border:1.5px solid var(--line); border-radius:14px; padding:11px 12px; font-size:11.5px; color:#9aa0bd; }
+  .inp.f { border-color:var(--blue); color:var(--navy); box-shadow:0 0 0 4px rgba(0,0,254,.08); }
+  .chip { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:600; padding:6px 10px; border-radius:20px; background:#fff; border:1px solid var(--line); color:var(--navy); white-space:nowrap; }
+  .chip.on { background:var(--navy); color:#fff; border-color:var(--navy); }
+  .chip.b { background:rgba(0,0,254,.07); color:var(--blue); border-color:transparent; }
+  .av { border-radius:50%; background:linear-gradient(135deg,#c9d3ff,#8fa3ff); flex-shrink:0; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; }
+  .ver { display:inline-flex; width:13px; height:13px; border-radius:50%; background:var(--blue); color:#fff; font-size:8px; align-items:center; justify-content:center; vertical-align:-1px; }
+  .star { color:#f5b301; }
+  .hd { display:flex; align-items:center; justify-content:space-between; padding:6px 0 0; }
+  .back { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; }
+  .dots { display:flex; gap:5px; } .dots i { width:6px; height:6px; border-radius:6px; background:#d3d7e6; } .dots i.on { width:18px; background:var(--blue); }
+  .prog { height:4px; border-radius:4px; background:#e3e6f0; overflow:hidden; } .prog i { display:block; height:100%; background:linear-gradient(90deg,#0000FE,#31D1FF); border-radius:4px; }
+  .tb { position:absolute; left:12px; right:12px; bottom:12px; height:54px; border-radius:27px; display:flex; justify-content:space-around; align-items:center; z-index:15; }
+  .tb .t { display:flex; flex-direction:column; align-items:center; gap:2px; font-size:8px; color:#8a90b0; font-weight:600; }
+  .tb .t i { width:18px; height:18px; border-radius:6px; background:#d6d9e6; } .tb .t.on { color:var(--blue); } .tb .t.on i { background:var(--blue); }
+  .li { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--line); }
+  .li:last-child { border-bottom:0; }
+  .ic { width:34px; height:34px; border-radius:11px; background:rgba(0,0,254,.07); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+  .tag { font-size:8.5px; font-weight:700; padding:3px 7px; border-radius:8px; }
+  .tag.g { background:#e5f8ee; color:#119a55; } .tag.o { background:#fff3e0; color:#d27b00; } .tag.b { background:rgba(0,0,254,.08); color:var(--blue); } .tag.r { background:#ffe9ea; color:#d6343f; }
+  .seg { display:flex; background:#eceef5; border-radius:12px; padding:3px; gap:2px; } .seg span { flex:1; text-align:center; font-size:9.5px; font-weight:600; padding:6px 0; border-radius:9px; color:var(--mute); } .seg span.on { background:#fff; color:var(--navy); box-shadow:0 2px 6px rgba(0,0,0,.06); }
+  .sheet { position:absolute; left:0; right:0; bottom:0; background:#fff; border-radius:26px 26px 0 0; box-shadow:0 -10px 40px rgba(22,32,90,.18); z-index:30; padding:10px 16px 18px; }
+  .sheet .grab { width:36px; height:4px; border-radius:4px; background:#d3d7e6; margin:0 auto 12px; }
+  .dim { position:absolute; inset:0; background:rgba(22,32,90,.25); z-index:25; }
+
+  /* orb */
+  .orb { position:relative; border-radius:50%; flex-shrink:0; }
+  .orb .core { position:absolute; inset:0; border-radius:50%; overflow:hidden; background:#0a1a8a; box-shadow:0 0 30px rgba(49,209,255,.45), 0 12px 40px rgba(0,0,254,.3); }
+  .orb .b { position:absolute; border-radius:50%; filter:blur(8px); mix-blend-mode:screen; }
+  .orb .b1 { width:80%; height:80%; left:-10%; top:5%; background:#0000FE; animation:o1 6s ease-in-out infinite; }
+  .orb .b2 { width:70%; height:70%; right:-15%; top:-5%; background:#31D1FF; animation:o2 7s ease-in-out infinite; }
+  .orb .b3 { width:60%; height:60%; left:20%; bottom:-20%; background:#7a5cff; animation:o3 5s ease-in-out infinite; }
+  .orb .b4 { width:45%; height:45%; left:30%; top:25%; background:#fff; opacity:.55; animation:o4 4s ease-in-out infinite; }
+  .orb .sh { position:absolute; inset:0; border-radius:50%; background:radial-gradient(circle at 30% 25%, rgba(255,255,255,.75), rgba(255,255,255,0) 35%); }
+  .orb.br { animation:breathe 4s ease-in-out infinite; } .orb.th { animation:breathe 1.1s ease-in-out infinite; }
+  .orb.fast .b { animation-duration:1.6s; }
+  @keyframes o1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(25%,15%) scale(1.15)} }
+  @keyframes o2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-30%,25%) scale(.85)} }
+  @keyframes o3 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-15%,-35%) scale(1.2)} }
+  @keyframes o4 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(15%,-10%) scale(.7)} }
+  @keyframes breathe { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+  .halo { position:absolute; inset:-16px; border-radius:50%; border:1px solid rgba(0,0,254,.14); animation:halo 4s ease-out infinite; } .halo.h2 { animation-delay:2s; }
+  @keyframes halo { 0%{transform:scale(.8); opacity:1} 100%{transform:scale(1.35); opacity:0} }
+  /* edge glow */
+  .edge { position:absolute; inset:0; border-radius:33px; z-index:40; pointer-events:none; overflow:hidden; }
+  .edge .spin { position:absolute; inset:-60%; background:conic-gradient(from 0deg,#0000FE,#31D1FF,#b56bff,#ff7ad9,#31D1FF,#0000FE); animation:spin 3.5s linear infinite; }
+  .edge .mask { position:absolute; inset:4px; border-radius:29px; background:#FBFCFF; }
+  .edge.bl { filter:blur(14px); opacity:.7; } .edge.bl .mask { inset:11px; }
+  .edge.soft { opacity:.0; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .cur { display:inline-block; width:6px; height:12px; background:var(--blue); vertical-align:-2px; animation:blink 1s steps(2) infinite; margin-left:2px; border-radius:2px; }
+  @keyframes blink { 50% { opacity:0 } }
+  .wave { display:flex; gap:3px; align-items:center; height:20px; }
+  .wave i { width:3px; border-radius:3px; background:linear-gradient(#31D1FF,#0000FE); animation:w 1s ease-in-out infinite; }
+  .wave i:nth-child(2){animation-delay:.1s} .wave i:nth-child(3){animation-delay:.2s} .wave i:nth-child(4){animation-delay:.3s} .wave i:nth-child(5){animation-delay:.4s} .wave i:nth-child(6){animation-delay:.5s} .wave i:nth-child(7){animation-delay:.6s}
+  @keyframes w { 0%,100%{height:4px} 50%{height:20px} }
+  /* entrance hints */
+  .up { animation:up 1s cubic-bezier(.22,1,.36,1) both; } .d1{animation-delay:.1s} .d2{animation-delay:.2s} .d3{animation-delay:.3s} .d4{animation-delay:.4s} .d5{animation-delay:.5s}
+  @keyframes up { from { opacity:0; transform:translateY(14px) } to { opacity:1; transform:none } }
+  .logo-l { animation:slideL 2.4s cubic-bezier(.2,.8,.2,1) infinite; } .logo-r { animation:slideR 2.4s cubic-bezier(.2,.8,.2,1) infinite; }
+  @keyframes slideL { 0%{transform:translateX(-40px); opacity:0} 35%,85%{transform:none; opacity:1} 100%{opacity:0} }
+  @keyframes slideR { 0%,15%{transform:translateY(40px); opacity:0} 45%,85%{transform:none; opacity:1} 100%{opacity:0} }
+  .tick { width:74px; height:74px; border-radius:50%; background:linear-gradient(135deg,#0000FE,#31D1FF); display:flex; align-items:center; justify-content:center; color:#fff; font-size:34px; box-shadow:0 14px 40px rgba(0,0,254,.35); animation:pop 1.8s cubic-bezier(.2,1.4,.4,1) infinite; }
+  @keyframes pop { 0%{transform:scale(.3); opacity:0} 30%,90%{transform:scale(1); opacity:1} 100%{opacity:0} }
+  .conf { position:absolute; width:6px; height:10px; border-radius:2px; animation:fall 2.4s linear infinite; }
+  @keyframes fall { 0%{transform:translateY(-20px) rotate(0); opacity:1} 100%{transform:translateY(420px) rotate(540deg); opacity:0} }
+  .lineart path, .lineart rect, .lineart circle { fill:none; stroke:#16205A; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+  .sel .lineart path, .sel .lineart rect, .sel .lineart circle { stroke:#0000FE; stroke-dasharray:220; animation:draw 3.2s cubic-bezier(.65,0,.35,1) infinite; }
+  @keyframes draw { 0%{stroke-dashoffset:220} 55%,100%{stroke-dashoffset:0} }
+  .tile { border-radius:22px; padding:14px; position:relative; transition:all .5s cubic-bezier(.22,1,.36,1); }
+  .tile.sel { background:#fff; box-shadow:0 0 0 1.5px #0000FE, 0 14px 34px rgba(0,0,254,.18); transform:translateY(-2px); }
+  .tile .nm { font-size:13px; font-weight:700; margin-top:8px; letter-spacing:-.01em; }
+  .ck { position:absolute; top:10px; right:10px; width:18px; height:18px; border-radius:50%; background:#0000FE; color:#fff; font-size:10px; display:flex; align-items:center; justify-content:center; animation:pop2 .6s cubic-bezier(.2,1.5,.4,1) both; }
+  @keyframes pop2 { from{transform:scale(0)} to{transform:scale(1)} }
+  .arr { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+  .shimmer { position:relative; overflow:hidden; } .shimmer:after { content:''; position:absolute; top:0; bottom:0; width:40%; left:-50%; background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent); animation:shim 3s cubic-bezier(.4,0,.2,1) infinite; }
+  @keyframes shim { 0%{left:-50%} 60%,100%{left:120%} }
+</style>
+</head><body><div class="pp"><style>
+  canvas.cv { display:block; width:100%; height:100%; touch-action:none; cursor:grab; }
+  .eyebrow { font-size:9px; letter-spacing:.16em; font-weight:700; color:#6b7196; }
+  .bigT { font-size:27px; font-weight:700; letter-spacing:-.035em; line-height:1.05; }
+  .free { position:relative; height:290px; margin:6px -16px 0; }
+  .pdots { display:flex; gap:5px; justify-content:center; margin-top:10px; } .pdots i { width:5px; height:5px; border-radius:5px; background:#cfd4e6; transition:all .5s cubic-bezier(.22,1,.36,1); } .pdots i.on { width:16px; background:#16205A; }
+  .fade { transition:opacity .22s ease, transform .5s cubic-bezier(.22,1,.36,1); } .fade.out { opacity:0; transform:translateY(6px); }
+  .pickwrap { position:relative; overflow:hidden; height:38px; margin:2px -16px 0; -webkit-mask-image:linear-gradient(90deg,transparent,#000 30%,#000 70%,transparent); mask-image:linear-gradient(90deg,transparent,#000 30%,#000 70%,transparent); }
+  .pickrow { display:flex; align-items:center; height:100%; white-space:nowrap; transition:transform .8s cubic-bezier(.22,1,.36,1); }
+  .pickrow span { flex:0 0 118px; text-align:center; font-size:15px; font-weight:600; color:#b3b8cf; letter-spacing:-.02em; transition:font-size .6s cubic-bezier(.22,1,.36,1), color .6s; cursor:pointer; }
+  .pickrow span.on { font-size:23px; font-weight:700; color:#16205A; letter-spacing:-.035em; }
+  .pdesc { text-align:center; font-size:11px; color:#6b7196; margin-top:4px; height:16px; transition:opacity .2s ease, transform .5s cubic-bezier(.22,1,.36,1); } .pdesc.out { opacity:0; transform:translateY(5px); }
+  .tick { width:44px; height:44px; border-radius:50%; background:#0000FE; color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 12px 30px rgba(0,0,254,.35); }
+  .gal { display:flex; gap:18px; flex-wrap:wrap; margin-top:14px; }
+  .gal > div { width:260px; }
+  .gal .c { height:270px; border-radius:26px; background:radial-gradient(90% 70% at 50% 40%, #ffffff, #eef1fb 70%); }
+  .gal b { display:block; text-align:center; font-size:16px; color:#16205A; margin-top:8px; letter-spacing:-.02em; } .gal small { display:block; text-align:center; font-size:11.5px; color:#6b7196; }
+  .hero { width:100%; max-width:1100px; height:460px; border-radius:30px; margin-top:14px; background:radial-gradient(80% 70% at 50% 35%, #ffffff, #eaeefa 75%); position:relative; overflow:hidden; }
+  .hero .note { position:absolute; left:22px; bottom:18px; font-size:12px; color:#6b7196; background:rgba(255,255,255,.8); padding:8px 12px; border-radius:12px; backdrop-filter:blur(10px); max-width:560px; line-height:1.5; }
+</style>
+
+<h2>Realistic 3D: the full building set</h2>
+<p class="subtitle">The layout is the same as before. The models are now far more detailed, with bevelled concrete, travertine stone cladding, timber louvres, furnished interiors you can see through the glass, a glass-balustrade terrace, a rooftop pergola, a pool with loungers and an umbrella, a driveway and boundary walls, and soft shadows. <b>Drag any model to rotate it.</b></p>
+
+<div class="row" style="margin-top:20px">
+  <div class="col">
+    <div class="phone"><div class="scr">
+      <div class="aur a-c"></div><div class="aur a-b"></div><div class="island"></div><div class="sb"><span>9:41</span><span>5G ▮</span></div>
+      <div class="body">
+        <div class="hd"><div class="back glass">‹</div><span class="eyebrow">1 OF 2</span><span style="width:32px"></span></div>
+        <div class="bigT" style="margin-top:14px">What are you<br>building?</div>
+        <div class="free" style="height:262px"><canvas class="cv" id="cv-villa"></canvas></div>
+        <div style="text-align:center;margin-top:-4px"><div id="bname" class="fade" style="font-size:26px;font-weight:700;letter-spacing:-.035em">Villa</div><div id="bsub" class="xs" style="margin-top:2px">Private residence</div></div>
+        <div class="pdots" id="bdots"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+        <div class="btn" style="margin-top:auto;margin-bottom:18px">Continue</div>
+      </div>
+    </div></div>
+    <div class="cap"><b>4 · What are you building?</b><p>This phone swipes through all five buildings automatically, the way a user would.</p><p class="mo">✦ Each model assembles itself in with a spring as it arrives, and the name cross-fades.</p></div>
+  </div>
+
+  <div class="col">
+    <div class="phone"><div class="scr">
+      <div class="aur a-c"></div><div class="aur a-b"></div><div class="aur a-v"></div><div class="island"></div><div class="sb"><span>9:41</span><span>5G ▮</span></div>
+      <div class="body" style="align-items:center">
+        <div class="tick" style="margin-top:34px;animation:pop2 .7s cubic-bezier(.2,1.5,.4,1) both">✓</div>
+        <div style="margin:10px -16px 0;position:relative;width:calc(100% + 32px);height:320px"><canvas class="cv" id="cv-chosen"></canvas></div>
+        <div class="bigT" style="margin-top:6px">Villa</div>
+        <div class="sm" style="margin-top:4px">Lights on. Let's find your stage…</div>
+      </div>
+    </div></div>
+    <div class="cap"><b>4b · Chosen</b><p>The interior lights warm up and the furniture glows through the glass.</p></div>
+  </div>
+
+  <div class="col">
+    <div class="phone"><div class="scr">
+      <div class="aur a-c"></div><div class="aur a-b"></div><div class="island"></div><div class="sb"><span>9:41</span><span>5G ▮</span></div>
+      <div class="body">
+        <div class="hd"><div class="back glass">‹</div><span class="eyebrow">2 OF 2</span><span style="width:32px"></span></div>
+        <div class="bigT" style="margin-top:14px">Where is your<br>villa today?</div>
+        <div class="free" style="height:262px"><canvas class="cv" id="cv-stage"></canvas></div>
+        <div class="pickwrap"><div class="pickrow" id="pick"><span>Planning</span><span>Design</span><span>Tender</span><span>Contractor</span><span>Construction</span><span>Handover</span></div></div>
+        <div class="pdesc" id="pdesc">Collecting contractor bids</div>
+        <div class="btn" style="margin-top:auto;margin-bottom:18px">Continue</div>
+      </div>
+    </div></div>
+    <div class="cap"><b>5 · Stage (alignment fixed)</b><p>Each stage name now has a fixed-width slot, so the chosen stage always sits exactly centred. The description swaps cleanly instead of overlapping.</p></div>
+  </div>
+</div>
+
+<h4 class="grp">The building set (drag to rotate)</h4>
+<div class="gal">
+  <div><div class="c"><canvas class="cv" data-model="Villa"></canvas></div><b>Villa</b><small>Cantilevered modern villa with pool</small></div>
+  <div><div class="c"><canvas class="cv" data-model="Shop"></canvas></div><b>Shop</b><small>Flagship store: double-height glass under a cantilevered roof</small></div>
+  <div><div class="c"><canvas class="cv" data-model="Tower"></canvas></div><b>Tower</b><small>Twisting glass tower on a podium</small></div>
+  <div><div class="c"><canvas class="cv" data-model="Factory"></canvas></div><b>Factory</b><small>Logistics hall, solar roof, glass offices and docks</small></div>
+  <div><div class="c"><canvas class="cv" data-model="Renovation"></canvas></div><b>Renovation</b><small>Half original, half renewed, with the scaffold on the seam</small></div>
+</div>
+
+<h4 class="grp">Villa close-up</h4>
+<div class="hero"><canvas class="cv" id="cv-hero"></canvas><div class="note">Look for: travertine stone walls, timber louvres on the upper floor, the sofa, kitchen island and pendant lights through the glass, the glass balustrade terrace, the rooftop pergola, and the loungers with an umbrella by the pool.</div></div>
+</div><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script><script type="module">import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+// ---------- procedural textures ----------
+function noiseTex(size = 256, base = 200, amp = 40, rep = 4) {
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const x = c.getContext('2d'); const d = x.createImageData(size, size);
+  for (let i = 0; i < d.data.length; i += 4) { const v = base + (Math.random() - 0.5) * amp; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
+  x.putImageData(d, 0, 0);
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep, rep); return t;
+}
+function stripeTex(n = 24, rep = 1) { // corrugated / ribbed cladding bump
+  const c = document.createElement('canvas'); c.width = 256; c.height = 8; const x = c.getContext('2d');
+  for (let i = 0; i < n; i++) { const g = x.createLinearGradient(i * 256 / n, 0, (i + 1) * 256 / n, 0); g.addColorStop(0, '#444'); g.addColorStop(.5, '#fff'); g.addColorStop(1, '#444'); x.fillStyle = g; x.fillRect(i * 256 / n, 0, 256 / n, 8); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep, 1); return t;
+}
+const nz = noiseTex(), nzFine = noiseTex(256, 190, 70, 10);
+
+const std = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.8, ...o });
+export const M = {
+  concrete: std(0xf2f0eb, { roughness: 0.78, bumpMap: nz, bumpScale: 0.6 }),
+  concrete2: std(0xe2e0da, { roughness: 0.9, bumpMap: nz, bumpScale: 0.6 }),
+  traver: std(0xdccfb8, { roughness: 0.62, bumpMap: nzFine, bumpScale: 0.8 }),
+  paving: std(0xe9e4da, { roughness: 0.92, bumpMap: nzFine, bumpScale: 0.4 }),
+  asphalt: std(0x8d9097, { roughness: 0.95, bumpMap: nzFine, bumpScale: 0.6 }),
+  drive: std(0x7a7d84, { roughness: 0.9, bumpMap: nzFine, bumpScale: 0.5 }),
+  lawn: std(0x9fbb82, { roughness: 1, bumpMap: nzFine, bumpScale: 1 }),
+  hedge: std(0x6f8f55, { roughness: 1, bumpMap: nzFine, bumpScale: 2 }),
+  frame: std(0x2b303b, { roughness: 0.32, metalness: 0.75 }),
+  alu: std(0xc9cdd3, { roughness: 0.35, metalness: 0.8 }),
+  champ: std(0xcdb898, { roughness: 0.38, metalness: 0.7 }),
+  glass: new THREE.MeshPhysicalMaterial({ color: 0xdff4ff, roughness: 0.02, metalness: 0, transmission: 0.88, thickness: 0.25, ior: 1.5, envMapIntensity: 1.6, specularIntensity: 1 }),
+  glassDark: new THREE.MeshPhysicalMaterial({ color: 0x7fa6c9, roughness: 0.05, metalness: 0.2, transmission: 0.35, thickness: 0.3, envMapIntensity: 1.8 }),
+  wood: std(0xa8744f, { roughness: 0.55, bumpMap: nzFine, bumpScale: 0.5 }),
+  woodIn: std(0xc79a6d, { roughness: 0.6 }),
+  water: new THREE.MeshPhysicalMaterial({ color: 0x46cbea, roughness: 0.03, transmission: 0.25, thickness: 0.4, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 2.2 }),
+  tile: std(0xbfeaf6, { roughness: 0.4 }),
+  frond: new THREE.MeshStandardMaterial({ color: 0x5f8248, roughness: 0.85, side: THREE.DoubleSide }),
+  trunk: std(0x8b6b4a, { roughness: 1, bumpMap: nzFine, bumpScale: 3 }),
+  leaf: std(0x7f9f6c, { roughness: 0.95, flatShading: true }),
+  blue: std(0x0000fe, { roughness: 0.35, metalness: 0.2 }),
+  navy: std(0x16205a, { roughness: 0.55, metalness: 0.2 }),
+  fabric: std(0x2a3570, { roughness: 1 }),
+  white: std(0xfafafa, { roughness: 0.5 }),
+  render: std(0xe8d9bd, { roughness: 0.95, bumpMap: nzFine, bumpScale: 1.2 }),
+  cladding: std(0xd9dde2, { roughness: 0.42, metalness: 0.55, bumpMap: stripeTex(40, 6), bumpScale: 3 }),
+  shutter: std(0x6c717a, { roughness: 0.5, metalness: 0.5, bumpMap: stripeTex(20, 1), bumpScale: 2 }),
+  yellow: std(0xf2b705, { roughness: 0.45, metalness: 0.3 }),
+  orange: std(0xd98a1c, { roughness: 0.5, metalness: 0.4 }),
+  warm: new THREE.MeshStandardMaterial({ color: 0xfff1d6, emissive: 0xffc46b, emissiveIntensity: 0.0, roughness: 1 }),
+  bulb: new THREE.MeshStandardMaterial({ color: 0xfff3dd, emissive: 0xffc46b, emissiveIntensity: 1.2 }),
+  ghost: new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3, depthWrite: false }),
+  line: new THREE.LineBasicMaterial({ color: 0x0000fe, transparent: true, opacity: 0.85 }),
+  ghostLine: new THREE.LineDashedMaterial({ color: 0x0000fe, dashSize: 0.25, gapSize: 0.18 }),
+};
+
+// ---------- primitives ----------
+export function part(parent, w, h, d, mat, x, y, z, o = {}) {
+  const g = new THREE.Group(); g.position.set(x, y, z);
+  const r = o.round ?? 0;
+  const geo = r > 0 ? new RoundedBoxGeometry(w, h, d, 3, Math.min(r, w / 2.01, h / 2.01, d / 2.01)) : new THREE.BoxGeometry(w, h, d);
+  const m = new THREE.Mesh(geo, mat); m.position.y = h / 2;
+  if (o.ry) g.rotation.y = o.ry; if (o.rx) m.rotation.x = o.rx; if (o.rz) m.rotation.z = o.rz;
+  m.castShadow = o.cast !== false && mat !== M.glass; m.receiveShadow = true; g.add(m);
+  g.userData.rise = o.rise ?? null; parent.add(g); return g;
+}
+function cyl(parent, r1, r2, h, mat, x, y, z, o = {}) {
+  const g = new THREE.Group(); g.position.set(x, y, z);
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(r1, r2, h, o.seg ?? 24), mat); m.position.y = h / 2; m.castShadow = true; m.receiveShadow = true; g.add(m);
+  g.userData.rise = o.rise ?? null; parent.add(g); return g;
+}
+function bars(parent, from, to, step, fn, rise) {
+  const g = new THREE.Group(); g.userData.rise = rise; parent.add(g);
+  for (let v = from; v <= to + 1e-6; v += step) fn(g, v);
+  return g;
+}
+export function palm(parent, x, z, s = 1, rise = 1.1) {
+  const g = new THREE.Group(); g.position.set(x, 0, z); g.userData.rise = rise; parent.add(g);
+  const lean = (Math.random() - 0.5) * 0.5, segs = 9, H = 4.2 * s; let px = 0, pz = 0;
+  for (let i = 0; i < segs; i++) {
+    const t = i / segs, h = H / segs;
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(0.17 * s * (1 - t * 0.35), 0.2 * s * (1 - t * 0.3), h * 1.02, 10), M.trunk);
+    px = lean * t * t * 1.6 * s; m.position.set(px, i * h + h / 2, pz); m.castShadow = true; g.add(m);
+  }
+  const top = new THREE.Vector3(px, H, pz);
+  const n = 11;
+  for (let i = 0; i < n; i++) {
+    const L = (1.9 + Math.random() * 0.5) * s, geo = new THREE.PlaneGeometry(0.42 * s, L, 1, 8);
+    const p = geo.attributes.position;
+    for (let k = 0; k < p.count; k++) { const yy = p.getY(k) + L / 2; const tt = yy / L; p.setZ(k, -tt * tt * 1.3 * s); p.setX(k, p.getX(k) * Math.sin(Math.PI * Math.min(1, tt * 1.15 + 0.08))); }
+    geo.translate(0, L / 2, 0); geo.computeVertexNormals();
+    const f = new THREE.Mesh(geo, M.frond); f.castShadow = true;
+    const hold = new THREE.Group(); hold.position.copy(top); hold.rotation.y = (i / n) * Math.PI * 2 + Math.random() * 0.2;
+    f.rotation.x = -Math.PI / 2 + 0.55 + Math.random() * 0.35; hold.add(f); g.add(hold);
+  }
+  const nut = new THREE.Mesh(new THREE.SphereGeometry(0.28 * s, 12, 10), M.trunk); nut.position.copy(top); g.add(nut);
+  return g;
+}
+export function shrub(parent, x, z, s = 1, rise = 1.15) {
+  const g = new THREE.Group(); g.position.set(x, 0, z); g.userData.rise = rise; parent.add(g);
+  for (let i = 0; i < 3; i++) { const m = new THREE.Mesh(new THREE.IcosahedronGeometry((0.45 + Math.random() * 0.2) * s, 1), M.leaf); m.position.set((Math.random() - 0.5) * 0.6 * s, 0.4 * s, (Math.random() - 0.5) * 0.6 * s); m.scale.y = 0.8; m.castShadow = true; g.add(m); }
+  return g;
+}
+function contact(root, w, d, op = 0.35) { // soft ambient-occlusion blob under a building
+  const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d');
+  const g = x.createRadialGradient(64, 64, 10, 64, 64, 64); g.addColorStop(0, `rgba(22,32,90,${op})`); g.addColorStop(1, 'rgba(22,32,90,0)'); x.fillStyle = g; x.fillRect(0, 0, 128, 128);
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }));
+  m.rotation.x = -Math.PI / 2; m.position.y = -0.41; root.add(m);
+}
+function plot(root, w, d, mat = M.paving) {
+  contact(root, w * 1.5, d * 1.6, 0.28);
+  part(root, w, 0.4, d, mat, 0, -0.4, 0, { round: 0.12, cast: false });
+}
+
+// ---------- VILLA ----------
+export function buildVilla() {
+  const root = new THREE.Group(), solid = new THREE.Group(); root.add(solid);
+  plot(root, 18, 13);
+  part(root, 6.4, 0.05, 4.6, M.lawn, -5.6, 0, -3.7, { cast: false });
+  part(root, 3.2, 0.03, 6.2, M.drive, -7.1, 0, 3.0, { cast: false });
+  // boundary walls + hedge
+  part(solid, 18, 1.0, 0.25, M.concrete2, 0, 0, -6.35, { rise: 1.05, round: 0.04 });
+  part(solid, 0.25, 1.0, 12.4, M.concrete2, 8.88, 0, 0, { rise: 1.05, round: 0.04 });
+  part(solid, 0.25, 1.0, 12.4, M.concrete2, -8.88, 0, 0, { rise: 1.05, round: 0.04 });
+  part(solid, 7, 0.55, 0.6, M.hedge, -1.8, 0, 6.1, { rise: 1.1, round: 0.2 });
+  // pool, deck, loungers, umbrella
+  part(solid, 7.2, 0.1, 4.3, M.wood, 4.6, 0, 3.8, { rise: 0.9, cast: false });
+  part(solid, 5.3, 0.2, 2.7, M.traver, 4.7, 0.02, 3.6, { rise: 0.92, round: 0.05, cast: false });
+  part(solid, 4.7, 0.21, 2.1, M.water, 4.7, 0.03, 3.6, { rise: 0.95, cast: false });
+  for (const lx of [3.2, 4.5]) { part(solid, 0.65, 0.18, 1.7, M.white, lx, 0.1, 5.35, { rise: 1.0, round: 0.06 }); part(solid, 0.65, 0.06, 0.6, M.white, lx, 0.28, 4.75, { rise: 1.0, rx: -0.6 }); }
+  cyl(solid, 0.03, 0.03, 2.2, M.frame, 6.2, 0.1, 5.3, { rise: 1.0 });
+  const um = new THREE.Mesh(new THREE.ConeGeometry(1.1, 0.4, 24, 1, true), M.white); um.position.set(6.2, 2.4, 5.3); um.castShadow = true; um.material.side = THREE.DoubleSide; const ug = new THREE.Group(); ug.userData.rise = 1.02; ug.add(um); solid.add(ug);
+  // ground floor
+  part(solid, 9.8, 0.3, 6.4, M.traver, -0.6, 0, 0, { rise: 0.0, round: 0.06 });
+  const inner = new THREE.Group(); inner.userData.rise = 0.12; solid.add(inner);
+  part(inner, 7.2, 0.04, 4.8, M.woodIn, 0.2, 0.3, 0.1, { cast: false });
+  part(inner, 7.2, 3.0, 0.12, M.concrete, 0.2, 0.3, -2.2);
+  part(inner, 2.3, 0.45, 0.95, M.fabric, 1.6, 0.34, 0.7, { round: 0.12 }); part(inner, 2.3, 0.45, 0.22, M.fabric, 1.6, 0.6, 0.28, { round: 0.08 });
+  part(inner, 0.95, 0.45, 1.6, M.fabric, 0.2, 0.34, 0.45, { round: 0.12 });
+  part(inner, 1.9, 0.92, 0.75, M.white, -1.6, 0.34, -0.9, { round: 0.04 });
+  part(inner, 1.0, 0.04, 1.8, M.woodIn, 1.6, 0.8, 1.9, { cast: false });
+  for (const bx of [-2.2, -1.6, -1.0]) { const b = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 12), M.bulb); b.position.set(bx, 2.55, -0.9); inner.add(b); }
+  const warmPanel = part(inner, 7.0, 0.04, 4.6, M.warm, 0.2, 3.2, 0.1, { cast: false });
+  part(solid, 7.4, 3.0, 5.0, M.glass, 0.2, 0.3, 0.2, { rise: 0.15 });
+  bars(solid, -3.5, 3.9, 1.235, (g, v) => { const m = new THREE.Mesh(new THREE.BoxGeometry(0.07, 3.0, 0.08), M.frame); m.position.set(v, 1.8, 2.72); m.castShadow = true; g.add(m); }, 0.2);
+  bars(solid, -2.3, 2.7, 1.25, (g, v) => { const m = new THREE.Mesh(new THREE.BoxGeometry(0.08, 3.0, 0.07), M.frame); m.position.set(3.92, 1.8, v); g.add(m); }, 0.2);
+  part(solid, 2.4, 3.0, 6.0, M.traver, -4.3, 0.3, 0, { rise: 0.1, round: 0.05 });
+  part(solid, 0.95, 2.4, 0.08, M.blue, -2.3, 0.3, 2.74, { rise: 0.3 });
+  const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.35, 0.08), M.bulb); lamp.position.set(-3.2, 2.1, 3.02); const lg = new THREE.Group(); lg.userData.rise = 0.3; lg.add(lamp); solid.add(lg);
+  // terrace balustrade over ground floor front
+  part(solid, 9.4, 1.0, 0.05, M.glass, -0.6, 3.3, 3.05, { rise: 0.55 });
+  part(solid, 9.4, 0.05, 0.08, M.alu, -0.6, 4.3, 3.05, { rise: 0.55 });
+  // upper floor
+  part(solid, 10.8, 3.0, 4.9, M.concrete, 0.9, 3.3, -0.6, { rise: 0.4, round: 0.08 });
+  part(solid, 8.6, 1.45, 0.1, M.glass, 1.5, 4.05, 1.87, { rise: 0.5 });
+  const upIn = part(solid, 8.4, 1.45, 0.06, M.warm, 1.5, 4.05, 1.3, { rise: 0.5, cast: false });
+  part(solid, 8.7, 0.07, 0.16, M.frame, 1.5, 4.0, 1.9, { rise: 0.5 }); part(solid, 8.7, 0.07, 0.16, M.frame, 1.5, 5.5, 1.9, { rise: 0.5 });
+  bars(solid, -3.4, -0.4, 0.28, (g, v) => { const m = new THREE.Mesh(new THREE.BoxGeometry(0.09, 1.5, 0.22), M.wood); m.position.set(v, 4.78, 2.02); m.castShadow = true; g.add(m); }, 0.55);
+  part(solid, 0.1, 1.45, 3.4, M.glass, 6.32, 4.05, -0.6, { rise: 0.5 });
+  part(solid, 11.3, 0.3, 5.5, M.concrete, 0.9, 6.3, -0.6, { rise: 0.6, round: 0.08 });
+  part(solid, 5.4, 0.06, 4.6, M.wood, 3.6, 3.24, -0.6, { rise: 0.45, cast: false });
+  // rooftop pergola
+  bars(solid, -3.8, 0.2, 0.36, (g, v) => { const m = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.12, 3.8), M.wood); m.position.set(v, 7.9, -0.6); m.castShadow = true; g.add(m); }, 0.7);
+  for (const [px, pz] of [[-3.8, -2.3], [-3.8, 1.1], [0.2, -2.3], [0.2, 1.1]]) cyl(solid, 0.06, 0.06, 1.3, M.frame, px, 6.6, pz, { rise: 0.68, seg: 8 });
+  part(solid, 0.3, 6.9, 3.4, M.traver, -5.55, 0, -0.8, { rise: 0.25, round: 0.05 });
+  // landscape
+  return { root, solid, warm: M.warm, inner, upIn };
+}
+
+export function villaStages(v) {
+  // wireframe hologram of the building
+  const wire = new THREE.Group(); v.root.add(wire);
+  v.root.updateMatrixWorld(true);
+  v.solid.traverse(o => {
+    if (o.isMesh && o.geometry.type !== 'SphereGeometry' && o.geometry.type !== 'PlaneGeometry') {
+      const e = new THREE.LineSegments(new THREE.EdgesGeometry(o.geometry, 30), M.line); e.applyMatrix4(o.matrixWorld); wire.add(e);
+      const gm = new THREE.Mesh(o.geometry, M.ghost); gm.applyMatrix4(o.matrixWorld); wire.add(gm);
+    }
+  });
+  const survey = new THREE.Group(); v.root.add(survey);
+  const fp = [[-5.5, -3.2], [4.3, -3.2], [4.3, 3.2], [-5.5, 3.2], [-5.5, -3.2]].map(([x, z]) => new THREE.Vector3(x, 0.03, z));
+  const dl = new THREE.Line(new THREE.BufferGeometry().setFromPoints(fp), M.ghostLine); dl.computeLineDistances(); survey.add(dl);
+  for (const [x, z] of fp.slice(0, 4)) {
+    const s = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.2, 8), M.wood); s.position.set(x, 0.6, z); s.castShadow = true; survey.add(s);
+    const f = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 16), M.blue); f.position.set(x, 1.25, z); survey.add(f);
+  }
+  const build = new THREE.Group(); v.root.add(build);
+  for (let x = -4.4; x <= 6.4; x += 1.35) for (const z of [2.05, -3.2]) cyl(build, 0.04, 0.04, 3.6, M.orange, x, 3.3, z, { seg: 6 });
+  for (const y of [4.3, 5.5, 6.7]) for (const z of [2.05, -3.2]) { const r = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 10.9, 6), M.orange); r.rotation.z = Math.PI / 2; r.position.set(1.0, y, z); build.add(r); }
+  part(build, 0.5, 12, 0.5, M.yellow, 7.4, 0, -4.9); part(build, 9.5, 0.4, 0.4, M.yellow, 4.3, 12, -4.9); part(build, 1, 1, 1, M.navy, 8.6, 11.6, -4.9);
+  const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 4.5, 4), M.frame); cable.position.set(1.4, 9.8, -4.9); build.add(cable);
+  part(build, 1.2, 0.5, 0.8, M.concrete2, 1.4, 7.1, -4.9);
+  part(build, 2.4, 1.1, 1.3, M.yellow, 7.0, 0, 4.8, { round: 0.05 });
+  Object.assign(v, { wire, survey, build });
+  return v;
+}
+
+// ---------- TOWER ----------
+export function buildTower() {
+  const root = new THREE.Group(), solid = new THREE.Group(); root.add(solid);
+  plot(root, 15, 15);
+  part(solid, 10, 3.6, 10, M.glassDark, 0, 0, 0, { rise: 0, round: 0.2 });
+  part(solid, 10.4, 0.4, 10.4, M.concrete, 0, 3.6, 0, { rise: 0.05, round: 0.1 });
+  const n = 22;
+  for (let i = 0; i < n; i++) {
+    const g = new THREE.Group(); g.position.y = 4 + i * 1.05; g.rotation.y = i * 0.035; g.userData.rise = 0.1 + i * 0.035; solid.add(g);
+    const slab = new THREE.Mesh(new RoundedBoxGeometry(6.2, 0.2, 6.2, 3, 0.09), M.white); slab.position.y = 0.1; slab.castShadow = slab.receiveShadow = true; g.add(slab);
+    const gl = new THREE.Mesh(new RoundedBoxGeometry(5.8, 0.85, 5.8, 3, 0.3), M.glassDark); gl.position.y = 0.625; g.add(gl);
+    for (const [fx, fz] of [[2.95, 0], [-2.95, 0], [0, 2.95], [0, -2.95]]) { const f = new THREE.Mesh(new THREE.BoxGeometry(fz ? 0.08 : 0.35, 0.85, fz ? 0.35 : 0.08), M.alu); f.position.set(fx, 0.625, fz); g.add(f); }
+  }
+  part(solid, 4.6, 1.6, 4.6, M.navy, 0, 4 + n * 1.05, 0, { rise: 0.9, round: 0.1, ry: n * 0.035 });
+  cyl(solid, 0.05, 0.14, 4.5, M.alu, 0, 5.6 + n * 1.05, 0, { rise: 0.95, seg: 8 });
+  part(solid, 5, 0.15, 2, M.water, 0, 0, 6, { rise: 0.9, cast: false });
+  return { root, solid };
+}
+
+// ---------- helpers for new models ----------
+const M2 = {
+  solar: new THREE.MeshPhysicalMaterial({ color: 0x1b2a6b, roughness: 0.15, metalness: 0.6, clearcoat: 1, clearcoatRoughness: 0.05 }),
+  rubber: std(0x1d1f24, { roughness: 0.9 }),
+  old: std(0xd8c39f, { roughness: 1, bumpMap: nzFine, bumpScale: 2.2 }),
+  oldTrim: std(0xc7ad84, { roughness: 1, bumpMap: nzFine, bumpScale: 1.5 }),
+  brick: std(0xb5654a, { roughness: 0.95, bumpMap: nzFine, bumpScale: 1.5 }),
+  plank: std(0xc49a62, { roughness: 0.8 }),
+  mesh: new THREE.MeshStandardMaterial({ color: 0x9aa1ab, roughness: 0.6, metalness: 0.6, transparent: true, opacity: 0.35 }),
+  car1: std(0xf4f5f7, { roughness: 0.25, metalness: 0.5 }), car2: std(0x16205a, { roughness: 0.25, metalness: 0.5 }), car3: std(0xa9adb4, { roughness: 0.25, metalness: 0.7 }),
+  hazard: std(0x222222, { roughness: 0.6 }),
+};
+function grp(parent, rise) { const g = new THREE.Group(); g.userData.rise = rise; parent.add(g); return g; }
+function mesh(parent, geo, mat, x, y, z, rx = 0, ry = 0, rz = 0) { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.set(rx, ry, rz); m.castShadow = true; m.receiveShadow = true; parent.add(m); return m; }
+function archGeo(w, h, depth = 0.08) {
+  const s = new THREE.Shape(); s.moveTo(-w / 2, 0); s.lineTo(w / 2, 0); s.lineTo(w / 2, h - w / 2); s.absarc(0, h - w / 2, w / 2, 0, Math.PI, false); s.lineTo(-w / 2, 0);
+  return new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: false, curveSegments: 16 });
+}
+function car(parent, x, z, mat, ry = 0, rise = 1.0) {
+  const g = grp(parent, rise); g.position.set(x, 0, z); g.rotation.y = ry;
+  mesh(g, new RoundedBoxGeometry(1.8, 0.62, 4.1, 3, 0.22), mat, 0, 0.55, 0);
+  mesh(g, new RoundedBoxGeometry(1.6, 0.55, 2.2, 3, 0.22), M.glassDark, 0, 1.05, -0.2);
+  for (const [wx, wz] of [[-0.85, 1.3], [0.85, 1.3], [-0.85, -1.3], [0.85, -1.3]]) mesh(g, new THREE.CylinderGeometry(0.33, 0.33, 0.24, 18), M2.rubber, wx, 0.33, wz, 0, 0, Math.PI / 2);
+  return g;
+}
+function bollard(parent, x, z, rise = 0.95) { const g = grp(parent, rise); g.position.set(x, 0, z); mesh(g, new THREE.CylinderGeometry(0.1, 0.1, 0.9, 12), M.yellow, 0, 0.45, 0); mesh(g, new THREE.CylinderGeometry(0.105, 0.105, 0.12, 12), M2.hazard, 0, 0.62, 0); return g; }
+
+// ---------- SHOP: flagship retail ----------
+export function buildShop() {
+  const root = new THREE.Group(), solid = new THREE.Group(); root.add(solid);
+  plot(root, 18, 13);
+  part(root, 18, 0.02, 3.4, M.drive, 0, 0, 4.8, { cast: false });
+  for (let x = -7.5; x <= 7.5; x += 2.5) part(root, 0.08, 0.025, 2.6, M.white, x, 0, 4.8, { cast: false });
+  // stepped plinth
+  part(solid, 13.4, 0.25, 8.4, M.traver, 0.3, 0, -1.4, { rise: 0, round: 0.05 });
+  part(solid, 4.2, 0.12, 1.2, M.traver, -1.2, 0, 3.2, { rise: 0.02, round: 0.04 });
+  // interior: double height with mezzanine, lit shelving and plinths
+  const inner = grp(solid, 0.1);
+  part(inner, 11.6, 6.4, 0.15, M.white, 0.6, 0.25, -5.1);
+  part(inner, 11.6, 0.18, 3.2, M.white, 0.6, 3.3, -3.5);
+  part(inner, 11.4, 0.9, 0.05, M.glass, 0.6, 3.48, -1.9);
+  for (const sx of [-3.4, -0.6, 2.2, 5.0]) { part(inner, 2.2, 2.6, 0.5, M.woodIn, sx, 0.25, -4.7, { round: 0.03 }); for (const sy of [0.9, 1.7]) part(inner, 2.1, 0.04, 0.45, M.bulb, sx, 0.25 + sy, -4.5, { cast: false }); }
+  for (const [px, pz] of [[-2.2, -0.4], [0.9, 0.2], [3.8, -0.6]]) { part(inner, 1.0, 0.8, 1.0, M.white, px, 0.25, pz, { round: 0.06 }); part(inner, 0.4, 0.5, 0.4, M.blue, px, 1.05, pz, { round: 0.08 }); }
+  for (const bx of [-2, 0.6, 3.2]) { const b = new THREE.Mesh(new THREE.SphereGeometry(0.22, 18, 14), M.bulb); b.position.set(bx, 5.4, -0.4); inner.add(b); }
+  part(inner, 11.6, 0.04, 7.4, M.warm, 0.6, 6.6, -1.4, { cast: false });
+  // double-height glazing with slim mullions
+  part(solid, 11.8, 6.4, 7.6, M.glass, 0.6, 0.25, -1.4, { rise: 0.2 });
+  bars(solid, -5.3, 6.5, 1.475, (g, v) => { mesh(g, new THREE.BoxGeometry(0.07, 6.4, 0.12), M.frame, v, 3.45, 2.42); }, 0.25);
+  part(solid, 11.9, 0.1, 0.14, M.frame, 0.6, 3.3, 2.42, { rise: 0.25 });
+  // monolithic white frame: solid left wall + deep cantilevered roof
+  part(solid, 1.2, 7.2, 8.4, M.concrete, -5.9, 0.25, -1.4, { rise: 0.3, round: 0.08 });
+  part(solid, 14.6, 0.9, 10.4, M.concrete, 0.9, 6.65, -0.4, { rise: 0.45, round: 0.1 });
+  // champagne fin screen on the right side
+  bars(solid, -4.8, 2.0, 0.34, (g, v) => { mesh(g, new THREE.BoxGeometry(0.28, 6.4, 0.07), M.champ, 7.0, 3.45, v); }, 0.5);
+  // brand: blue light line on the roof edge + sign
+  part(solid, 14.6, 0.12, 0.06, M.blue, 0.9, 6.75, 4.83, { rise: 0.6, cast: false });
+  part(solid, 3.4, 0.5, 0.08, M.navy, -1.2, 5.5, 2.5, { rise: 0.6 });
+  part(solid, 2.6, 0.16, 0.04, M.white, -1.2, 5.66, 2.56, { rise: 0.62, cast: false });
+  // entrance: recessed blue portal
+  part(solid, 2.4, 3.2, 0.25, M.blue, -1.2, 0.25, 2.55, { rise: 0.35 });
+  part(solid, 1.9, 2.9, 0.1, M.glass, -1.2, 0.25, 2.66, { rise: 0.36 });
+  // forecourt furniture
+  for (const bx of [3.2, 5.6]) part(solid, 1.8, 0.45, 0.55, M.wood, bx, 0, 3.4, { rise: 0.85, round: 0.05 });
+  for (const x of [-7.8, -5.8, -3.8, 1.4, 7.8]) bollard(solid, x, 3.2, 0.9);
+  car(solid, -5, 4.8, M2.car2, Math.PI / 2 * 0 + 0.02, 1.0); car(solid, 5, 4.8, M2.car1, -0.03, 1.02);
+  return { root, solid, warm: M.warm };
+}
+
+// ---------- FACTORY: modern logistics / production facility ----------
+export function buildFactory() {
+  const root = new THREE.Group(), solid = new THREE.Group(); root.add(solid);
+  plot(root, 24, 18, M.asphalt);
+  for (let x = -10.5; x <= -3; x += 2.4) part(root, 0.08, 0.025, 4.6, M.white, x, 0, 6.2, { cast: false });
+  // main hall: horizontal ribbed cladding, navy base band, clerestory glazing
+  part(solid, 15, 0.25, 10, M.concrete2, 3, 0, -2.5, { rise: 0, round: 0.05 });
+  part(solid, 14.6, 7.2, 9.6, M.cladding, 3, 0.25, -2.5, { rise: 0.1, round: 0.06 });
+  part(solid, 14.7, 1.3, 9.7, M.navy, 3, 0.25, -2.5, { rise: 0.12 });
+  part(solid, 14.7, 0.7, 9.7, M.glassDark, 3, 5.9, -2.5, { rise: 0.15 });
+  part(solid, 14.9, 0.35, 9.9, M.concrete, 3, 7.45, -2.5, { rise: 0.2, round: 0.05 });
+  // rooftop: solar array + HVAC
+  const solar = grp(solid, 0.55);
+  for (let x = -3; x <= 8; x += 1.9) for (let z = -6; z <= 0.5; z += 1.35) mesh(solar, new THREE.BoxGeometry(1.7, 0.05, 1.05), M2.solar, x, 8.15, z, -0.28, 0, 0);
+  for (const hx of [8.8, 9.6]) part(solid, 0.7, 0.8, 1.6, M.alu, hx, 7.8, -5.5, { rise: 0.6, round: 0.06 });
+  // loading docks with black dock shelters
+  for (const dx of [2.2, 5.6, 9.0]) {
+    part(solid, 3.0, 3.6, 0.3, M2.rubber, dx, 0.25, 2.45, { rise: 0.3 });
+    part(solid, 2.4, 3.1, 0.12, M.shutter, dx, 0.25, 2.62, { rise: 0.32 });
+    part(solid, 3.4, 0.14, 1.6, M.navy, dx, 4.0, 3.2, { rise: 0.35 });
+    bollard(solid, dx - 1.7, 3.1); bollard(solid, dx + 1.7, 3.1);
+  }
+  // office block: two-storey glass with white frame and blue brand band
+  part(solid, 6, 0.25, 7.6, M.concrete2, -7.6, 0, -1.4, { rise: 0.05, round: 0.05 });
+  part(solid, 5.4, 6.2, 7, M.glass, -7.6, 0.25, -1.4, { rise: 0.2 });
+  const offIn = grp(solid, 0.2);
+  part(offIn, 5.2, 0.15, 6.8, M.white, -7.6, 3.2, -1.4); part(offIn, 5.2, 0.04, 6.8, M.warm, -7.6, 3.1, -1.4, { cast: false }); part(offIn, 5.2, 0.04, 6.8, M.warm, -7.6, 6.3, -1.4, { cast: false });
+  for (const dx of [-9, -7.6, -6.2]) part(offIn, 1.1, 0.75, 0.6, M.woodIn, dx, 0.25, 0.4);
+  bars(solid, -10.2, -5.0, 0.87, (g, v) => mesh(g, new THREE.BoxGeometry(0.08, 6.2, 0.1), M.frame, v, 3.35, 2.1), 0.25);
+  part(solid, 6, 0.5, 7.6, M.concrete, -7.6, 6.45, -1.4, { rise: 0.3, round: 0.06 });
+  part(solid, 6.02, 0.22, 7.62, M.blue, -7.6, 6.2, -1.4, { rise: 0.31, cast: false });
+  part(solid, 3.4, 0.16, 2, M.concrete, -7.6, 3.1, 3.2, { rise: 0.35 });
+  // silos + pipe rack
+  for (const sz of [-6.5, -3.6]) { cyl(solid, 1.2, 1.2, 8.5, M.alu, 12.1, 0, sz, { rise: 0.45 }); const cg = grp(solid, 0.5); mesh(cg, new THREE.ConeGeometry(1.2, 0.9, 28), M.alu, 12.1, 8.95, sz); }
+  const pipe = grp(solid, 0.55); mesh(pipe, new THREE.CylinderGeometry(0.16, 0.16, 3, 12), M.alu, 11.0, 6.5, -5.05, 0, 0, Math.PI / 2);
+  // articulated truck backing into dock 2
+  const tr = grp(solid, 0.95); tr.position.set(4.6, 0, 6.8); tr.rotation.y = Math.PI / 2;
+  mesh(tr, new RoundedBoxGeometry(2.3, 2.7, 7, 3, 0.08), M.white, 0, 1.9, 0);
+  mesh(tr, new THREE.BoxGeometry(2.32, 0.5, 6.9), M.blue, 0, 1.1, 0);
+  mesh(tr, new RoundedBoxGeometry(2.3, 2.3, 2.1, 3, 0.25), M.navy, 0, 1.75, 4.7);
+  mesh(tr, new THREE.BoxGeometry(2.0, 0.9, 0.05), M.glassDark, 0, 2.2, 5.76);
+  for (const wz of [-2.6, -1.4, 4.8]) for (const wx of [-1.1, 1.1]) mesh(tr, new THREE.CylinderGeometry(0.5, 0.5, 0.35, 20), M2.rubber, wx, 0.5, wz, 0, 0, Math.PI / 2);
+  // staff cars
+  car(solid, -10.5 + 1.2, 6.2, M2.car1, 0, 1.0); car(solid, -8.1 + 1.2, 6.2, M2.car3, 0, 1.03); car(solid, -5.7 + 1.2, 6.2, M2.car2, 0, 1.06);
+  // perimeter fence (back + sides)
+  const fence = grp(solid, 1.05);
+  for (let x = -11.8; x <= 11.8; x += 1.97) mesh(fence, new THREE.CylinderGeometry(0.04, 0.04, 1.6, 6), M.alu, x, 0.8, -8.8);
+  mesh(fence, new THREE.BoxGeometry(23.6, 1.5, 0.02), M2.mesh, 0, 0.8, -8.8);
+  return { root, solid, warm: M.warm };
+}
+
+// ---------- RENOVATION: half original, half renewed ----------
+export function buildReno() {
+  const root = new THREE.Group(), solid = new THREE.Group(); root.add(solid);
+  plot(root, 18, 13);
+  part(root, 3, 0.03, 5.6, M.drive, -7.2, 0, 3.4, { cast: false });
+  // ORIGINAL half (left): warm sand render, arched windows, crenellated parapet
+  part(solid, 7, 6.2, 7, M2.old, -3.1, 0, -1.2, { rise: 0, round: 0.03 });
+  part(solid, 7.3, 0.35, 7.3, M2.oldTrim, -3.1, 3.05, -1.2, { rise: 0.08 });
+  part(solid, 7.2, 0.45, 0.3, M2.oldTrim, -3.1, 6.2, 2.2, { rise: 0.12 }); part(solid, 7.2, 0.45, 0.3, M2.oldTrim, -3.1, 6.2, -4.6, { rise: 0.12 }); part(solid, 0.3, 0.45, 7.1, M2.oldTrim, -6.55, 6.2, -1.2, { rise: 0.12 });
+  for (let x = -6.3; x <= 0.2; x += 0.95) { part(solid, 0.45, 0.4, 0.3, M2.oldTrim, x, 6.65, 2.2, { rise: 0.14 }); part(solid, 0.45, 0.4, 0.3, M2.oldTrim, x, 6.65, -4.6, { rise: 0.14 }); }
+  const ow = grp(solid, 0.15);
+  for (const wx of [-5.2, -3.1, -1.0]) for (const wy of [0.9, 3.9]) {
+    const a = mesh(ow, archGeo(1.0, 1.9), M.glassDark, wx, wy, 2.3); a.castShadow = false;
+    mesh(ow, new THREE.BoxGeometry(1.3, 0.12, 0.3), M2.oldTrim, wx, wy - 0.06, 2.42);
+  }
+  const door = mesh(ow, archGeo(1.3, 2.5, 0.1), M.wood, -3.1, 0, 2.28); door.position.x = -3.1;
+  // RENEWED half (right): white concrete, floor-to-ceiling glass, timber louvres
+  part(solid, 6.2, 6.2, 7, M.concrete, 4.0, 0, -1.2, { rise: 0.3, round: 0.06 });
+  part(solid, 4.8, 2.4, 0.08, M.glass, 4.3, 0.5, 2.33, { rise: 0.35 });
+  part(solid, 4.8, 2.2, 0.08, M.glass, 4.3, 3.5, 2.33, { rise: 0.35 });
+  const rIn = grp(solid, 0.35); part(rIn, 4.6, 2.2, 0.05, M.warm, 4.3, 0.55, 2.0, { cast: false });
+  bars(solid, 1.9, 6.7, 0.3, (g, v) => mesh(g, new THREE.BoxGeometry(0.08, 2.2, 0.2), M.wood, v, 4.6, 2.5), 0.45);
+  part(solid, 6.6, 0.3, 7.4, M.concrete, 4.0, 6.2, -1.2, { rise: 0.4, round: 0.06 });
+  // scaffold with planks over the seam + new side
+  const sc = grp(solid, 0.55);
+  for (let x = -0.2; x <= 7.2; x += 1.25) for (const z of [2.55, 3.55]) mesh(sc, new THREE.CylinderGeometry(0.04, 0.04, 7, 6), M.orange, x, 3.5, z);
+  for (const y of [2.2, 4.4, 6.6]) {
+    for (const z of [2.55, 3.55]) mesh(sc, new THREE.CylinderGeometry(0.035, 0.035, 7.4, 6), M.orange, 3.5, y, z, 0, 0, Math.PI / 2);
+    mesh(sc, new THREE.BoxGeometry(7.4, 0.06, 0.95), M2.plank, 3.5, y + 0.05, 3.05);
+  }
+  for (let x = -0.2; x < 7; x += 2.5) mesh(sc, new THREE.CylinderGeometry(0.03, 0.03, 3.2, 6), M.orange, x + 1.25, 3.3, 3.56, 0, 0, 0.75);
+  // site: skip with debris, brick pallets, cement bags, safety fence
+  part(solid, 3, 1.2, 1.6, M.yellow, 5.4, 0, 5.2, { rise: 0.8, round: 0.05 });
+  const deb = grp(solid, 0.82); for (let i = 0; i < 7; i++) mesh(deb, new THREE.BoxGeometry(0.4 + Math.random() * 0.4, 0.2, 0.3 + Math.random() * 0.3), i % 2 ? M2.old : M.concrete2, 4.3 + Math.random() * 2.2, 1.25, 4.8 + Math.random() * 0.8, Math.random(), Math.random(), 0);
+  for (const px of [1.2, 2.5]) { part(solid, 1.1, 0.12, 1.1, M.wood, px, 0, 5.0, { rise: 0.85 }); part(solid, 1.0, 0.6, 1.0, M2.brick, px, 0.12, 5.0, { rise: 0.86 }); }
+  const fence = grp(solid, 0.9);
+  for (let x = -0.8; x <= 8.2; x += 1.5) { mesh(fence, new THREE.BoxGeometry(0.4, 0.15, 0.3), M.concrete2, x, 0.08, 6.1); mesh(fence, new THREE.CylinderGeometry(0.03, 0.03, 1.4, 6), M.alu, x, 0.8, 6.1); }
+  mesh(fence, new THREE.BoxGeometry(9, 1.3, 0.02), M2.mesh, 3.7, 0.8, 6.1);
+  car(solid, -7.2, 4.0, M2.car1, 0, 1.0);
+  return { root, solid, warm: M.warm };
+}
+
+// ---------- viewer ----------
+const easeOutBack = t => { const c1 = 1.25, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+export function viewer(canvas, { radius = 10, target = [0, 2, 0], height = 0.5, spin = 0.1, fov = 22, shadows = true, yaw0 = -0.62 } = {}) {
+  const r = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  const W = canvas.clientWidth, H = canvas.clientHeight;
+  r.setPixelRatio(Math.min(devicePixelRatio, 2)); r.setSize(W, H, false);
+  r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.0; r.outputColorSpace = THREE.SRGBColorSpace;
+  r.shadowMap.enabled = shadows; r.shadowMap.type = THREE.PCFSoftShadowMap;
+  const scene = new THREE.Scene();
+  const pm = new THREE.PMREMGenerator(r); scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.6;
+  const sun = new THREE.DirectionalLight(0xffedd6, 2.6); sun.position.set(14, 22, 10); sun.castShadow = shadows;
+  sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, { left: -16, right: 16, top: 18, bottom: -16, near: 1, far: 70 }); sun.shadow.bias = -0.0003; sun.shadow.normalBias = 0.02;
+  scene.add(sun); const fill = new THREE.DirectionalLight(0xcfe0ff, 0.5); fill.position.set(-12, 8, -6); scene.add(fill);
+  scene.add(new THREE.HemisphereLight(0xe3ecff, 0xf0e8da, 0.5));
+  const cam = new THREE.PerspectiveCamera(fov, W / H, 0.1, 400);
+  const vh = THREE.MathUtils.degToRad(fov) / 2, hh = Math.atan(Math.tan(vh) * W / H);
+  const s = { r, scene, cam, groups: [], radius, height, target: new THREE.Vector3(...target), onFrame: null };
+  s.dist = () => Math.max(s.radius / Math.tan(vh), s.radius / Math.tan(hh));
+  let yaw = yaw0, drag = null, vel = 0;
+  canvas.addEventListener('pointerdown', e => { drag = e.clientX; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener('pointermove', e => { if (drag !== null) { vel = (e.clientX - drag) * -0.01; yaw += vel; drag = e.clientX; } });
+  canvas.addEventListener('pointerup', () => { drag = null; });
+  s.show = (model) => { if (s.model) scene.remove(s.model.root); s.model = model; scene.add(model.root); s.groups = [model.solid]; s.rise(model.solid); };
+  s.rise = (group, dur = 1.0) => { group.visible = true; group.userData.t0 = performance.now(); group.userData.dur = dur; };
+  function riseTick(group, now) {
+    if (!group || !group.visible || group.userData.t0 == null) return;
+    const el = (now - group.userData.t0) / 1000;
+    for (const o of group.children) {
+      if (o.userData.rise == null) continue;
+      const t = clamp((el - o.userData.rise * 0.9) / group.userData.dur, 0, 1);
+      o.scale.y = Math.max(t === 0 ? 0.0001 : easeOutBack(t), 0.0001); o.visible = t > 0 && !o.userData.hold;
+    }
+  }
+  function loop(now) {
+    if (drag === null) { vel *= 0.94; yaw += vel + spin * 0.01; }
+    const d = s.dist(); cam.position.set(s.target.x + Math.sin(yaw) * d, s.target.y + d * s.height, s.target.z + Math.cos(yaw) * d); cam.lookAt(s.target);
+    for (const g of s.groups) riseTick(g, now);
+    s.onFrame && s.onFrame(now);
+    r.render(scene, cam); requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+  return s;
+}
+
+// ================= page wiring =================
+const warmOf = (model, on) => { const m = M.warm.clone(); m.emissiveIntensity = on; model.solid.traverse(o => { if (o.isMesh && o.material === M.warm) o.material = m; }); return m; };
+const FRAME = {
+  Villa: { radius: 9.2, target: [0, 1.8, 0], height: 0.5 },
+  Shop: { radius: 10.2, target: [0.6, 3.2, 0], height: 0.42 },
+  Tower: { radius: 17.5, target: [0, 13, 0], height: 0.22 },
+  Factory: { radius: 14.2, target: [0.5, 3.0, 0], height: 0.5 },
+  Renovation: { radius: 10.0, target: [0.5, 3.0, 0.5], height: 0.45 },
+};
+const BUILD = { Villa: buildVilla, Shop: buildShop, Tower: buildTower, Factory: buildFactory, Renovation: buildReno };
+const SUB = { Villa: 'Private residence', Shop: 'Retail & F&B', Tower: 'Residential or commercial', Factory: 'Industrial & warehouse', Renovation: 'Upgrade an existing property' };
+const frame = (v, name) => { const f = FRAME[name]; v.radius = f.radius; v.height = f.height; v.target.set(...f.target); };
+
+// screen 4: cycles through all five buildings like a swipe
+const names = Object.keys(BUILD), models4 = names.map(n => { const m = BUILD[n](); warmOf(m, 0.25); return m; });
+const v4 = viewer(document.getElementById('cv-villa'), { radius: 9.2, target: [0, 1.8, 0] });
+const nm = document.getElementById('bname'), sub = document.getElementById('bsub'), dots = [...document.querySelectorAll('#bdots i')];
+let bi = 0;
+function showB(i) {
+  bi = i; frame(v4, names[i]); v4.show(models4[i]);
+  nm.classList.add('out'); setTimeout(() => { nm.textContent = names[i]; sub.textContent = SUB[names[i]]; nm.classList.remove('out'); }, 220);
+  dots.forEach((d, k) => d.classList.toggle('on', k === i));
+}
+showB(0); setInterval(() => showB((bi + 1) % names.length), 4200);
+
+// screen 4b: chosen villa with lights on
+const vB = buildVilla(); warmOf(vB, 0.9);
+const sB = viewer(document.getElementById('cv-chosen'), { radius: 9.6, target: [0, 1.8, 0], spin: 0.25 }); sB.show(vB);
+
+// screen 5: stage morph + picker
+const v5 = villaStages(buildVilla()); const warm5 = warmOf(v5, 0);
+const s5 = viewer(document.getElementById('cv-stage'), { radius: 11.2, target: [0, 3.4, 0], spin: 0.08 });
+s5.scene.add(v5.root); s5.model = v5; s5.groups = [v5.solid, v5.build];
+const row = document.getElementById('pick'), items = [...row.children], desc = document.getElementById('pdesc');
+const DESC = ['Budget, plot and feasibility', 'Drawings and permits', 'Collecting contractor bids', 'Choosing who builds it', 'Work under way on site', 'Finishing and moving in'];
+const SLOT = 118;
+function setStage(n) {
+  items.forEach((el, i) => el.classList.toggle('on', i === n - 1));
+  row.style.transform = `translateX(${row.parentElement.clientWidth / 2 - ((n - 1) * SLOT + SLOT / 2)}px)`;
+  desc.classList.add('out'); setTimeout(() => { desc.textContent = DESC[n - 1]; desc.classList.remove('out'); }, 200);
+  v5.survey.visible = n === 1; v5.wire.visible = n >= 2 && n <= 4; v5.build.visible = n === 5; v5.solid.visible = n >= 5;
+  warm5.emissiveIntensity = n === 6 ? 0.9 : 0;
+  v5.solid.children.forEach(g => { const r = g.userData.rise; g.userData.hold = n === 5 && r != null && r >= 0.4 && r < 1.0; });
+  if (n >= 5) s5.rise(v5.solid, 1.0); if (n === 5) s5.rise(v5.build, 1.0);
+}
+let st = 3; setStage(3);
+items.forEach((b, i) => b.addEventListener('click', () => { st = i + 1; setStage(st); clearInterval(auto); }));
+const auto = setInterval(() => { st = st % 6 + 1; setStage(st); }, 2800);
+
+// gallery + hero
+document.querySelectorAll('[data-model]').forEach(cv => {
+  const name = cv.dataset.model, m = BUILD[name](); warmOf(m, 0.35);
+  const f = FRAME[name]; const s = viewer(cv, { ...f, spin: 0.14, yaw0: -0.62 + Math.random() * 0.5 }); s.show(m);
+});
+const hero = buildVilla(); warmOf(hero, 0.55);
+const sh = viewer(document.getElementById('cv-hero'), { radius: 8.0, target: [0.5, 2.6, 0], height: 0.32, spin: 0.06, fov: 20 }); sh.show(hero);
+</script></body></html>
