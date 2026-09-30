@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Pressable, ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import * as Haptics from 'expo-haptics';
@@ -39,6 +40,7 @@ export default function Home() {
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const orbRef = useRef<View>(null);
   const { width: winW } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const [flying, setFlying] = useState<{ x: number; y: number } | null>(null);
   // Ask bar: an unclipped overlay orb (Screen root) scales 30 to 90 and glides to Pulse's hero-orb spot while the page fades
   // (EASE, 420ms) with a light haptic; then Pulse cross-fades in (see (client)/_layout.tsx). Reset when Home regains focus.
@@ -48,7 +50,7 @@ export default function Home() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     orbRef.current?.measureInWindow?.((x, y, w, h) => {
       const cx = x + w / 2, cy = y + h / 2;
-      origin.value = { dx: winW / 2 - cx, dy: s(30) + s(40) + s(45) - cy };
+      origin.value = { dx: winW / 2 - cx, dy: Math.max(insets.top, s(30)) + s(40) + s(45) - cy };
       setFlying({ x, y });
     });
     leave.value = withTiming(1, { duration: 420, easing: EASE });
