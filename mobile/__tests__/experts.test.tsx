@@ -29,3 +29,23 @@ test('Quotes: best match is Omar at 12% below average; Accept goes to booking', 
   await fireEvent.press(screen.getByText('Accept & book'));
   expect(router.push).toHaveBeenCalledWith('/book?expert=omar&service=bid-visit&quote=q-omar');
 });
+test('Experts: a filter chip narrows the grid', async () => {
+  mockParams = {}; await render(<Experts />);
+  expect(screen.getByText('Omar Haddad')).toBeTruthy();
+  await fireEvent.press(screen.getByText('Architects'));
+  expect(screen.getByText('Karim Nasser')).toBeTruthy(); expect(screen.queryByText('Omar Haddad')).toBeNull();
+});
+test('Quotes: Compare flips the card to a side-by-side of the 3 quotes, close flips back', async () => {
+  mockParams = { request: 'req-bid' }; await render(<Quotes />);
+  expect(screen.queryAllByTestId('quote-col')).toHaveLength(0);
+  await fireEvent.press(screen.getByText('Compare'));
+  expect(screen.getAllByTestId('quote-col')).toHaveLength(3);
+  expect(screen.getByText('AED 2,450')).toBeTruthy();
+  await fireEvent.press(screen.getByLabelText('Close comparison'));
+  expect(screen.queryAllByTestId('quote-col')).toHaveLength(0);
+});
+test('Quotes: Accept & book ignores a double tap', async () => {
+  mockParams = { request: 'req-bid' }; await render(<Quotes />);
+  await fireEvent.press(screen.getByText('Accept & book')); await fireEvent.press(screen.getByText('Accept & book'));
+  expect(router.push).toHaveBeenCalledTimes(1);
+});
