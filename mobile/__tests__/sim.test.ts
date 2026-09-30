@@ -29,11 +29,14 @@ test('after a restart, pending requests and flags resume (Review Focus #4)', () 
   jest.advanceTimersByTime(SIM.teamReplyMs);
   expect(useDemo.getState().quotes.filter((q) => q.requestId === id)).toHaveLength(2);
   expect(useDemo.getState().flags.find((f) => f.ref === ref)?.replied).toBe(true);
+  // seeded request (createdAt === T0) must never auto-quote
+  expect(useDemo.getState().quotes.filter((q) => q.requestId === 'req-soil')).toHaveLength(0);
 });
 
 test('team reply is delivered once', () => {
   const ref = useDemo.getState().flagQuestion('Is it load-bearing?', 'structural');
+  const countBefore = useDemo.getState().messages.filter((m) => m.threadId === 'team').length;
   simulateTeamReply(ref); simulateTeamReply(ref);
   jest.advanceTimersByTime(SIM.teamReplyMs);
-  expect(useDemo.getState().messages.filter((m) => m.threadId === 'team' && m.text?.includes('load-bearing'))).toHaveLength(1);
+  expect(useDemo.getState().messages.filter((m) => m.threadId === 'team')).toHaveLength(countBefore + 1);
 });
