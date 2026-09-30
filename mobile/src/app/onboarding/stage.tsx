@@ -1,10 +1,10 @@
 import { Platform, Pressable, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import Animated, { useAnimatedStyle, withTiming, FadeIn } from 'react-native-reanimated';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Directions, Gesture, GestureDetector } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 import { Screen } from '@/ui/Screen';
 import { Header, Eyebrow } from '@/ui/Header';
@@ -31,7 +31,11 @@ export default function StageScreen() {
   const [st, setSt] = useState<StageN>((Number(stage) || 3) as StageN); const [w, setW] = useState(0);
   const pick = (n: number) => { const v = Math.min(6, Math.max(1, n)) as StageN; if (v !== st) { setSt(v); Haptics.selectionAsync(); } };
   const row = useAnimatedStyle(() => ({ transform: [{ translateX: withTiming(w / 2 - ((st - 1) * s(SLOT) + s(SLOT) / 2), { duration: 800, easing: EASE }) }] }));
-  const swipe = Gesture.Fling().direction(1 | 2).runOnJS(true).onEnd((e: any) => pick(st + (e.velocityX < 0 ? 1 : -1)));
+  // Fling events carry no velocity: one fling per direction (swipe left = next stage, right = previous). Built once; it
+  // reads the current stage through a ref.
+  const stepRef = useRef((d: number) => pick(st + d)); stepRef.current = (d: number) => pick(st + d);
+  const swipe = useMemo(() => Gesture.Race(Gesture.Fling().direction(Directions.LEFT).runOnJS(true).onEnd(() => stepRef.current(1)),
+    Gesture.Fling().direction(Directions.RIGHT).runOnJS(true).onEnd(() => stepRef.current(-1))), []);
   return (
     <Screen bg="aurora" px={16}>
       <Header center={<Eyebrow>2 OF 2</Eyebrow>} />
