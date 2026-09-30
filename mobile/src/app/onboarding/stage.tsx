@@ -5,7 +5,7 @@ import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated'
 import { enterFade } from '@/theme/motion';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Directions, Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 import { Screen } from '@/ui/Screen';
 import { Header, Eyebrow } from '@/ui/Header';
@@ -33,14 +33,17 @@ function StageScreen() {
   const [st, setSt] = useState<StageN>((Number(stage) || 3) as StageN); const [w, setW] = useState(0);
   const pick = (n: number) => { const v = Math.min(6, Math.max(1, n)) as StageN; if (v !== st) { setSt(v); Haptics.selectionAsync(); } };
   const row = useAnimatedStyle(() => ({ transform: [{ translateX: withTiming(w / 2 - ((st - 1) * s(SLOT) + s(SLOT) / 2), { duration: 800, easing: EASE }) }] }));
-  // Fling events carry no velocity: one fling per direction (swipe left = next stage, right = previous). Built once; it
-  // reads the current stage through a ref.
+  // Swipe on the stage names (any speed): left = next stage, right = previous. Fires once the finger has travelled far
+  // enough, or on a quick flick at release; one step per gesture. Built once; it reads the current stage through a ref.
   const stepRef = useRef((d: number) => pick(st + d)); stepRef.current = (d: number) => pick(st + d);
-  const swipe = useMemo(() => Gesture.Race(Gesture.Fling().direction(Directions.LEFT).runOnJS(true).onEnd(() => stepRef.current(1)),
-    Gesture.Fling().direction(Directions.RIGHT).runOnJS(true).onEnd(() => stepRef.current(-1))), []);
+  const fired = useRef(false);
+  const swipe = useMemo(() => Gesture.Pan().runOnJS(true).activeOffsetX([-12, 12]).failOffsetY([-24, 24])
+    .onBegin(() => { fired.current = false; })
+    .onUpdate((e) => { if (!fired.current && Math.abs(e.translationX) > 40) { fired.current = true; stepRef.current(e.translationX < 0 ? 1 : -1); } })
+    .onEnd((e) => { if (!fired.current && Math.abs(e.velocityX) > 450) { fired.current = true; stepRef.current(e.velocityX < 0 ? 1 : -1); } }), []);
   return (
     <Screen bg="aurora" px={16}>
-      <Header center={<Eyebrow>2 OF 2</Eyebrow>} />
+      <Header center={<Eyebrow>{`${st} OF ${STAGES.length}`}</Eyebrow>} />
       <T size={27} w={700} ls={-0.035} lh={1.05} style={{ marginTop: s(14) }}>{`Where is your\n${b.name.toLowerCase()} today?`}</T>
       <View style={{ height: s(262), marginHorizontal: -s(16), marginTop: s(6) }}>
         <ModelView model={b.id} stage={st} radius={11.2} target={[0, 3.4, 0]} spin={0.08} lights={st === 6 ? 0.9 : 0} />
