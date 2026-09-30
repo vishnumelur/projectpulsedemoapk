@@ -1,6 +1,6 @@
-import { Modal, Platform, Pressable, ScrollView, View } from 'react-native';
+import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
@@ -92,19 +92,30 @@ function TabsBar({ tab, onTab }: { tab: Tab; onTab: (t: Tab) => void }) {
     if (animate) { ux.value = withTiming(l.x, { duration: 420, easing: EASE }); uw.value = withTiming(l.w, { duration: 420, easing: EASE }); }
     else { ux.value = l.x; uw.value = l.w; }
   };
-  useEffect(() => { go(idx, ready.current); }, [idx]); // eslint-disable-line react-hooks/exhaustive-deps
+  // The row is wider than the screen (the mockup crops "Decisions" at the margin): it scrolls sideways, and the active tab
+  // is brought fully into view, so every tab is reachable. At rest on Milestones it looks exactly like the approved row.
+  const sv = useRef<ScrollView>(null); const vw = useRef(0); const sx = useRef(0);
+  const reveal = (i: number, animated: boolean) => {
+    const l = lay.current[i]; if (!l || !vw.current) return;
+    const right = l.x + l.w + s(4); const left = Math.max(0, l.x - s(4));
+    const to = right > sx.current + vw.current ? right - vw.current : left < sx.current ? left : null;
+    if (to != null) sv.current?.scrollTo({ x: to, animated });
+  };
+  useEffect(() => { go(idx, ready.current); reveal(idx, ready.current); }, [idx]); // eslint-disable-line react-hooks/exhaustive-deps
   const ust = useAnimatedStyle(() => ({ width: uw.value, transform: [{ translateX: ux.value }] }));
   return (
-    <View style={{ marginTop: s(14.5) }}>
-      <View style={{ flexDirection: 'row', gap: s(16), overflow: 'hidden' }}>
+    <ScrollView ref={sv} horizontal showsHorizontalScrollIndicator={false} scrollEventThrottle={16} style={{ marginTop: s(14.5), marginBottom: -s(9) }}
+      onLayout={(e) => { vw.current = e.nativeEvent.layout.width; reveal(idx, false); }} onScroll={(e) => { sx.current = e.nativeEvent.contentOffset.x; }}>
+      {/* paddingBottom holds the underline (7px below the labels) inside the scroller, which clips */}
+      <View style={{ flexDirection: 'row', gap: s(16), paddingBottom: s(9) }}>
         {TABS.map((t, i) => (
-          <Pressable key={t} onPress={() => onTab(t)} onLayout={(e) => { lay.current[i] = { x: e.nativeEvent.layout.x, w: e.nativeEvent.layout.width }; if (i === idx && !ready.current) { go(i, false); ready.current = true; } }}>
+          <Pressable key={t} onPress={() => onTab(t)} onLayout={(e) => { lay.current[i] = { x: e.nativeEvent.layout.x, w: e.nativeEvent.layout.width }; if (i === idx && !ready.current) { go(i, false); reveal(i, false); ready.current = true; } }}>
             <L size={11.5} w={600} c={t === tab ? C.navy : C.faint2}>{t}</L>
           </Pressable>
         ))}
+        <Animated.View pointerEvents="none" style={[{ position: 'absolute', left: 0, bottom: s(9) - s(7) - 2, height: 2, borderRadius: 2, backgroundColor: C.blue }, ust]} />
       </View>
-      <Animated.View pointerEvents="none" style={[{ position: 'absolute', left: 0, bottom: -s(7), height: 2, borderRadius: 2, backgroundColor: C.blue }, ust]} />
-    </View>
+    </ScrollView>
   );
 }
 
@@ -160,22 +171,29 @@ export default function Project() {
   }, [tab, bx, bo]);
   const bst = useAnimatedStyle(() => ({ opacity: bo.value, transform: [{ translateX: bx.value }] }));
   const step = (d: number) => { const i = TABS.indexOf(tab) + d; if (i >= 0 && i < TABS.length) setTab(TABS[i]); };
-  const swipe = Gesture.Pan().activeOffsetX([-20, 20]).failOffsetY([-14, 14]).onEnd((e) => {
-    'worklet';
-    if (e.translationX < -50) runOnJS(step)(1); else if (e.translationX > 50) runOnJS(step)(-1);
-  });
+  // Horizontal swipe on the content switches tab. It runs simultaneously with the page ScrollView's own native gesture
+  // (on iOS the UIScrollView recogniser otherwise swallowed it); vertical drags fail it (failOffsetY) and just scroll.
+  const stepRef = useRef(step); stepRef.current = step;
+  const swipe = useMemo(() => {
+    const go = (d: number) => stepRef.current(d);
+    return Gesture.Simultaneous(Gesture.Pan().activeOffsetX([-20, 20]).failOffsetY([-14, 14]).onEnd((e) => {
+      'worklet';
+      if (e.translationX < -50) runOnJS(go)(1); else if (e.translationX > 50) runOnJS(go)(-1);
+    }), Gesture.Native());
+  }, []);
 
   const compactHeader = (title: string) => (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: s(11) }}>
       <T size={20} w={700} ls={-0.035} lh={1.1}>{title}</T><L size={9.5} c={C.mute}>{`${name} · Al Reem`}</L>
     </View>
   );
-  const dateRow = (key: string, day: string, month: string, title: string, sub: string, right: React.ReactNode, last: boolean) => (
+  // Titles wrap to a second line when long (client request; "Upgrade to solar-ready roof"), with the pill kept top-right.
+  const dateRow = (key: string, day: string, month: string, title: string, sub: string, right: React.ReactNode, last: boolean, pillTop = false) => (
     <View key={key} style={{ flexDirection: 'row', gap: s(12), alignItems: 'center', paddingVertical: s(11), borderBottomWidth: last ? 0 : 1, borderBottomColor: C.line }}>
       <View style={{ width: s(30), alignItems: 'center' }}><T size={14} w={700} ls={-0.02} style={{ lineHeight: s(22) }}>{day}</T><T size={8.5} w={700} ls={0.06} c={C.mute} style={{ lineHeight: s(17) }}>{month}</T></View>
-      <View style={{ flex: 1, minWidth: 0, marginRight: -s(8), overflow: 'hidden' }}>{/* nowrap + clip mid-glyph as on web; a native 1-line Text cuts at a word boundary instead */}
-        <T size={11.5} w={700} ellipsizeMode="clip" numberOfLines={1} style={[{ lineHeight: s(19.5) }, Platform.OS === 'web' ? null : { width: s(400) }]}>{title}</T><T size={10} c={C.mute} style={{ lineHeight: s(19.5) }}>{sub}</T></View>
-      {right}
+      <View style={{ flex: 1, minWidth: 0, marginRight: pillTop ? 0 : -s(8) }}>
+        <T size={11.5} w={700} numberOfLines={pillTop ? 3 : 2} style={{ lineHeight: s(pillTop ? 15 : 19.5), marginBottom: pillTop ? s(3) : 0 }}>{title}</T><T size={10} c={C.mute} style={{ lineHeight: s(pillTop ? 15 : 19.5) }}>{sub}</T></View>
+      {pillTop ? <View style={{ alignSelf: 'flex-start' }}>{right}</View> : right}
     </View>
   );
   const head = tab === 'Milestones' ? (<>
@@ -227,20 +245,18 @@ export default function Project() {
     </Glass>
   ) : (
     <Glass r={18} style={{ marginTop: s(16), paddingHorizontal: s(14) }}>
-      {DECISIONS.map((d, i) => dateRow(d.title, d.day, d.month, d.title, `Decided by ${d.by}`, tag('Approved', C.greenBg, C.green), i === DECISIONS.length - 1))}
+      {DECISIONS.map((d, i) => dateRow(d.title, d.day, d.month, d.title, `Decided by ${d.by}`, tag('Approved', C.greenBg, C.green), i === DECISIONS.length - 1, true))}
     </Glass>
   );
   const pay = cat ? PAYMENTS[cat] : [];
   return (
     <Screen bg="aurora">
       <GestureDetector gesture={swipe}>
-        <View style={{ flex: 1 }}>
-          <PageScroll tabBar contentContainerStyle={{ paddingBottom: s(90) }}>
-            <View>{head}</View>
-            <TabsBar tab={tab} onTab={setTab} />
-            <Animated.View style={bst}>{body}</Animated.View>
-          </PageScroll>
-        </View>
+        <PageScroll tabBar contentContainerStyle={{ paddingBottom: s(90) }}>
+          <View>{head}</View>
+          <TabsBar tab={tab} onTab={setTab} />
+          <Animated.View style={bst}>{body}</Animated.View>
+        </PageScroll>
       </GestureDetector>
       <PhotoViewer index={photo} onIndex={setPhoto} onClose={() => setPhoto(null)} />
       <Sheet visible={cat !== null} onClose={() => setCat(null)}>
