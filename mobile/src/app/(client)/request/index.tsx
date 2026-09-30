@@ -1,6 +1,9 @@
 import { Pressable, TextInput, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
+import { GradientText } from '@/fx/GradientText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Screen } from '@/ui/Screen';
 import { Header } from '@/ui/Header';
@@ -13,13 +16,60 @@ import { KB } from '@/pulse/kb';
 import { useDemo } from '@/store/demo';
 import { simulateQuotes } from '@/sim/scheduler';
 import { s } from '@/theme/scale';
-import { C, F } from '@/theme/tokens';
+import { C, F, EASE } from '@/theme/tokens';
 
 const WHEN = [['asap', 'ASAP'], ['2w', 'Within 2 weeks'], ['flex', 'Flexible']] as const;
+
+/** Caption: the summary types itself in with a shimmer, then crossfades to the settled text. */
+function TypedSummary({ text, instant }: { text: string; instant: boolean }) {
+  const [n, setN] = useState(instant ? text.length : 0);
+  const done = n >= text.length;
+  const [gone, setGone] = useState(instant);
+  const fade = useSharedValue(instant ? 1 : 0);
+  useEffect(() => {
+    if (instant) return;
+    const id = setInterval(() => setN((v) => { if (v + 1 >= text.length) clearInterval(id); return v + 1; }), 28);
+    return () => clearInterval(id);
+  }, [instant, text]);
+  useEffect(() => { if (!done) return; fade.value = withTiming(1, { duration: 350, easing: EASE }); const id = setTimeout(() => setGone(true), 400); return () => clearTimeout(id); }, [done]);
+  const settled = useAnimatedStyle(() => ({ opacity: fade.value }));
+  const typing = useAnimatedStyle(() => ({ opacity: 1 - fade.value }));
+  return (
+    <View style={{ marginTop: s(8) }}>
+      <Animated.View style={settled}><T size={11.5} lh={1.55}>{text}</T></Animated.View>
+      {!gone ? (
+        <Animated.View pointerEvents="none" style={[{ position: 'absolute', left: 0, right: 0, top: 0 }, typing]}>
+          <GradientText shimmer base={C.navy} size={11.5} lh={1.55}>{text.slice(0, n)}</GradientText>
+        </Animated.View>
+      ) : null}
+    </View>
+  );
+}
+
+/** Caption: the segmented control slides. Local thumb that springs to the selected segment. */
+function SlidingSeg({ value, onChange }: { value: string; onChange: (k: any) => void }) {
+  const [w, setW] = useState(0);
+  const idx = Math.max(0, WHEN.findIndex(([k]) => k === value));
+  const segW = w ? (w - s(6)) / WHEN.length : 0;
+  const x = useSharedValue(idx * segW);
+  useEffect(() => { x.value = withSpring(idx * segW, { damping: 18, stiffness: 220 }); }, [idx, segW]);
+  const thumb = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
+  return (
+    <View onLayout={(ev) => setW(ev.nativeEvent.layout.width)} style={{ flexDirection: 'row', backgroundColor: '#F1F3F9', borderRadius: s(12), padding: s(3) }}>
+      {segW > 0 && <Animated.View style={[{ position: 'absolute', left: s(3), top: s(3), bottom: s(3), width: segW, borderRadius: s(9), backgroundColor: '#fff', elevation: 1,
+        shadowColor: '#16205A', shadowOpacity: 0.08, shadowRadius: s(8), shadowOffset: { width: 0, height: s(2) } }, thumb]} />}
+      {WHEN.map(([k, label]) => (
+        <Pressable key={k} onPress={() => { if (k !== value) Haptics.selectionAsync(); onChange(k); }} style={{ flex: 1, alignItems: 'center', paddingVertical: s(7) }}>
+          <T size={9.6} w={600} ls={-0.02} numberOfLines={1} ellipsizeMode="clip" c={value === k ? C.navy : C.mute}>{label}</T>
+        </Pressable>
+      ))}
+    </View>
+  );
+}
 export default function RequestQuote() {
-  const { kb = 'soil-test' } = useLocalSearchParams<{ kb?: string }>();
+  const { kb = 'soil-test', stay } = useLocalSearchParams<{ kb?: string; stay?: string }>();
   const e = KB.find((x) => x.id === kb) ?? KB[0];
-  const [summary, setSummary] = useState(e.requestSummary); const [edit, setEdit] = useState(false);
+  const [summary, setSummary] = useState(e.requestSummary); const [edit, setEdit] = useState(false); const [played, setPlayed] = useState(false);
   const [when, setWhen] = useState<'asap' | '2w' | 'flex'>('2w'); const [busy, setBusy] = useState(false);
   const send = () => {
     if (busy) return; setBusy(true);
@@ -40,19 +90,13 @@ export default function RequestQuote() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(6) }}><Orb size={12} /><T size={9} w={700} ls={0.08} c={C.blue}>WRITTEN BY PULSE</T></View>
         {edit ? <TextInput value={summary} onChangeText={setSummary} multiline autoFocus allowFontScaling={false}
           style={{ marginTop: s(8), fontFamily: F[400], fontSize: s(11.5), lineHeight: s(11.5 * 1.55), color: C.navy, padding: 0 }} />
-          : <T size={11.5} lh={1.55} style={{ marginTop: s(8) }}>{summary}</T>}
-        <Pressable onPress={() => setEdit(!edit)}><T size={10} w={700} c={C.blue} style={{ marginTop: s(8) }}>{edit ? 'Done' : 'Edit'}</T></Pressable>
+          : <TypedSummary text={summary} instant={!!stay || played} />}
+        <Pressable onPress={() => { setPlayed(true); setEdit(!edit); }}><T size={10} w={700} c={C.blue} style={{ marginTop: s(8) }}>{edit ? 'Done' : 'Edit'}</T></Pressable>
       </LinearGradient>
       <View style={{ marginTop: s(6) }}>
         {kv('Location', <T size={11.5} w={700}>Al Reem Island</T>)}
         <View style={{ paddingTop: s(12), paddingBottom: s(6) }}><T size={11.5} c={C.mute}>When</T></View>
-        <View style={{ flexDirection: 'row', backgroundColor: '#F1F3F9', borderRadius: s(12), padding: s(3) }}>
-          {WHEN.map(([k, label]) => (
-            <Pressable key={k} onPress={() => setWhen(k)} style={{ flex: 1, alignItems: 'center', paddingVertical: s(7), borderRadius: s(9), backgroundColor: when === k ? '#fff' : 'transparent', elevation: when === k ? 1 : 0 }}>
-              <T size={9.6} w={600} ls={-0.02} numberOfLines={1} ellipsizeMode="clip" c={when === k ? C.navy : C.mute}>{label}</T>
-            </Pressable>
-          ))}
-        </View>
+        <SlidingSeg value={when} onChange={setWhen} />
         <View style={{ marginTop: s(4) }}>{kv('Sending to', (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(6) }}>
             <View style={{ flexDirection: 'row' }}>{e.recommend.avatars.slice(0, 3).map((p, i) => <Avatar key={p} photo={p} size={18} ring="white" style={{ marginLeft: i ? -s(8) : 0, shadowOpacity: 0, elevation: 0 }} />)}</View>

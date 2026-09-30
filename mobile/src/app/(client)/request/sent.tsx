@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useEffect } from 'react';
-import Animated, { type SharedValue, useSharedValue, withRepeat, withTiming, Easing, useAnimatedStyle, ZoomIn } from 'react-native-reanimated';
+import Animated, { type SharedValue, useSharedValue, withRepeat, withTiming, Easing, useAnimatedStyle, ZoomIn, withSpring, withDelay } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { Screen } from '@/ui/Screen';
@@ -16,21 +16,31 @@ import { C } from '@/theme/tokens';
 import type { PhotoKey } from '@/theme/photos';
 
 const PEOPLE: PhotoKey[] = ['karim', 'lina', 'rashid', 'maya', 'omar'];
+/** Caption: avatars glide out from the orb onto the orbit (staggered 180ms), tick one by one with a light haptic, then drift around it. */
 function Orbiter({ i, spin }: { i: number; spin: SharedValue<number> }) {
   const R = s(86);
-  const st = useAnimatedStyle(() => { const a = ((i * 72 - 90) * Math.PI) / 180 + spin.value; return { transform: [{ translateX: Math.cos(a) * R }, { translateY: Math.sin(a) * R }] }; });
+  const out = useSharedValue(0);
+  useEffect(() => {
+    out.value = withDelay(180 * i, withSpring(1, { damping: 26, stiffness: 170 }));
+    const t = setTimeout(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light), 180 * i + 600);
+    return () => clearTimeout(t);
+  }, []);
+  const st = useAnimatedStyle(() => {
+    const a = ((i * 72 - 90) * Math.PI) / 180 + spin.value;
+    // translate only (never rotate), so the avatar stays upright while it orbits
+    return { opacity: Math.min(1, out.value * 2), transform: [{ translateX: Math.cos(a) * R * out.value }, { translateY: Math.sin(a) * R * out.value }, { scale: 0.4 + 0.6 * out.value }] };
+  });
   return (
     <Animated.View style={[{ position: 'absolute', left: s(100) - s(19), top: s(100) - s(19) }, st]}>
       <Avatar photo={PEOPLE[i]} size={34} ring="white" />
-      <Animated.View entering={ZoomIn.delay(350 * i + 400).springify()} style={{ position: 'absolute', right: -s(4), bottom: -s(3), width: s(15), height: s(15), borderRadius: s(8),
+      <Animated.View entering={ZoomIn.delay(180 * i + 600).springify()} style={{ position: 'absolute', right: -s(4), bottom: -s(3), width: s(15), height: s(15), borderRadius: s(8),
         backgroundColor: C.blue, borderWidth: 2, borderColor: '#fff', alignItems: 'center', justifyContent: 'center' }}><Icon name="check" color="#fff" size={8} stroke={3} /></Animated.View>
     </Animated.View>
   );
 }
 export default function Sent() {
   const spin = useSharedValue(0);
-  useEffect(() => { spin.value = withRepeat(withTiming(Math.PI * 2, { duration: 24000, easing: Easing.linear }), -1, false);
-    const t = setTimeout(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success), 2200); return () => clearTimeout(t); }, []);
+  useEffect(() => { spin.value = withRepeat(withTiming(Math.PI * 2, { duration: 30000, easing: Easing.linear }), -1, false); }, []);
   const step = (label: string, when: string, on = false) => (
     <View style={{ flex: 1, alignItems: 'center' }}>
       <View style={{ width: s(12), height: s(12), borderRadius: s(6), backgroundColor: on ? C.blue : '#fff', borderWidth: 2, borderColor: on ? C.blue : '#D3D8E8' }}>
