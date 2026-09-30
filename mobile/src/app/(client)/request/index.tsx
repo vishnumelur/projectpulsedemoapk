@@ -1,6 +1,6 @@
 import { Pressable, TextInput, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { GradientText } from '@/fx/GradientText';
@@ -19,6 +19,7 @@ import { s } from '@/theme/scale';
 import { C, F, EASE } from '@/theme/tokens';
 
 const WHEN = [['asap', 'ASAP'], ['2w', 'Within 2 weeks'], ['flex', 'Flexible']] as const;
+type When = (typeof WHEN)[number][0];
 
 /** Caption: the summary types itself in with a shimmer, then crossfades to the settled text. */
 function TypedSummary({ text, instant }: { text: string; instant: boolean }) {
@@ -27,10 +28,11 @@ function TypedSummary({ text, instant }: { text: string; instant: boolean }) {
   const [gone, setGone] = useState(instant);
   const fade = useSharedValue(instant ? 1 : 0);
   useEffect(() => {
-    if (instant) return;
-    const id = setInterval(() => setN((v) => { if (v + 1 >= text.length) clearInterval(id); return v + 1; }), 28);
+    if (instant || done) return;
+    const id = setInterval(() => setN((v) => v + 1), 28);
     return () => clearInterval(id);
-  }, [instant, text]);
+  }, [instant, done, text]);
+  useEffect(() => { if (n >= text.length) setN(text.length); }, [n, text]);
   useEffect(() => { if (!done) return; fade.value = withTiming(1, { duration: 350, easing: EASE }); const id = setTimeout(() => setGone(true), 400); return () => clearTimeout(id); }, [done]);
   const settled = useAnimatedStyle(() => ({ opacity: fade.value }));
   const typing = useAnimatedStyle(() => ({ opacity: 1 - fade.value }));
@@ -47,12 +49,17 @@ function TypedSummary({ text, instant }: { text: string; instant: boolean }) {
 }
 
 /** Caption: the segmented control slides. Local thumb that springs to the selected segment. */
-function SlidingSeg({ value, onChange }: { value: string; onChange: (k: any) => void }) {
+function SlidingSeg({ value, onChange }: { value: When; onChange: (k: When) => void }) {
   const [w, setW] = useState(0);
   const idx = Math.max(0, WHEN.findIndex(([k]) => k === value));
   const segW = w ? (w - s(6)) / WHEN.length : 0;
-  const x = useSharedValue(idx * segW);
-  useEffect(() => { x.value = withSpring(idx * segW, { damping: 18, stiffness: 220 }); }, [idx, segW]);
+  const x = useSharedValue(0);
+  const placed = useRef(false);
+  useEffect(() => {
+    if (!segW) return;
+    if (!placed.current) { placed.current = true; x.value = idx * segW; } // first measurement: snap, no spring
+    else x.value = withSpring(idx * segW, { damping: 18, stiffness: 220 });
+  }, [idx, segW]);
   const thumb = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
   return (
     <View onLayout={(ev) => setW(ev.nativeEvent.layout.width)} style={{ flexDirection: 'row', backgroundColor: '#F1F3F9', borderRadius: s(12), padding: s(3) }}>
@@ -70,9 +77,10 @@ export default function RequestQuote() {
   const { kb = 'soil-test', stay } = useLocalSearchParams<{ kb?: string; stay?: string }>();
   const e = KB.find((x) => x.id === kb) ?? KB[0];
   const [summary, setSummary] = useState(e.requestSummary); const [edit, setEdit] = useState(false); const [played, setPlayed] = useState(false);
-  const [when, setWhen] = useState<'asap' | '2w' | 'flex'>('2w'); const [busy, setBusy] = useState(false);
+  const [when, setWhen] = useState<When>('2w'); const [busy, setBusy] = useState(false);
+  const sending = useRef(false);
   const send = () => {
-    if (busy) return; setBusy(true);
+    if (sending.current) return; sending.current = true; setBusy(true);
     const id = useDemo.getState().sendRequest({ kbId: e.id, title: e.requestTitle, summary, expertType: e.recommend.expertType, when });
     simulateQuotes(id); router.replace('/request/sent');
   };
