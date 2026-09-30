@@ -10,6 +10,13 @@ describe('safety gate (enforced in code)', () => {
     ['can we knock down the wall between rooms', 'structural'], ['There is a crack in the column', 'structural'],
     ['Can I add another floor?', 'structural'], ['My contractor wants to terminate the contract', 'legal'],
     ['Should I sue the builder?', 'legal'], ['I smell gas on site', 'safety'], ['exposed wires near the pool!!', 'safety'],
+    ['Can we tear down this wall?', 'structural'], ['Can I take out the wall?', 'structural'], ['We want to knock through the wall', 'structural'],
+    ['Can I drill into the column?', 'structural'], ['Can we demolish the partition?', 'structural'], ['The wall has a crack', 'structural'],
+    ['My slab is cracking', 'structural'], ['There are foundation cracks', 'structural'], ['The beam is sagging', 'structural'],
+    ['Can I remove part of the ceiling?', 'structural'], ['Can I cut the balcony slab?', 'structural'],
+    ['Is the balcony safe?', 'safety'], ['Is the building stable?', 'safety'], ['Is there a risk of falling?', 'safety'],
+    ['I have a legal dispute with my contractor', 'legal'], ['Should I get a lawyer?', 'legal'], ['Who has liability for the delay?', 'legal'],
+    ['Can I claim compensation?', 'legal'], ['Is this contract legal?', 'legal'], ['Is the contract enforceable?', 'legal'],
   ])('%s → %s', (q, cat) => expect(classifySafety(q)).toBe(cat));
   test.each(['Can I paint the kitchen wall?', 'What wall tiles should I choose?', 'Do I need a soil test?',
     'What does a bid review cost?', '', '   ', '🙂', 'هل أحتاج اختبار التربة؟'])('not flagged: %p', (q) => expect(classifySafety(q)).toBeNull());
@@ -38,6 +45,13 @@ describe('askPulse', () => {
   test('stage breaks ties: "bids" at Tender → bid review', () => {
     const r = askPulse('Can someone check my bids?', { stage: 3, projectType: 'villa' });
     expect(r.kind === 'answer' && r.entry.id).toBe('bid-review');
+  });
+  test('stage bonus: same query resolves differently by stage', () => {
+    const at = (q: string, stage: 1 | 2 | 3 | 4 | 5 | 6) => { const r = askPulse(q, { stage, projectType: 'villa' }); return r.kind === 'answer' ? r.entry.id : r.kind; };
+    expect(at('site visit inspection', 5)).toBe('site-visit');
+    expect(at('What about the foundation?', 5)).toBe('concrete');
+    expect(at('interior design', 2)).toBe('design-review');
+    expect(at('interior design', 6)).toBe('interior');
   });
   test('KB has 20 entries, each with a recommendation and a source', () => {
     expect(KB).toHaveLength(20);
