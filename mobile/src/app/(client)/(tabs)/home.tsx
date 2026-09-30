@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Platform, useWindowDimensions } from 'react-native';
+import { useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Pressable, ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
@@ -9,6 +9,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Screen } from '@/ui/Screen';
 import { T } from '@/ui/T';
 import { Glass } from '@/ui/Glass';
+import { useTabClearance } from '@/ui/TabBar';
 import { Avatar } from '@/ui/Avatar';
 import { Icon } from '@/ui/Icon';
 import { Orb } from '@/fx/Orb';
@@ -61,6 +62,7 @@ export default function Home() {
     busy.current = false; leave.value = 0; setFlying(null);
     return () => { if (timer.current) clearTimeout(timer.current); };
   }, []));
+  const clear = useTabClearance(); // the last Needs-you row scrolls fully clear of the floating tab bar
   const b = BUILDINGS.find((x) => x.id === projectType)!;
   return (
     <Screen bg="aurora3" px={0} overlay={flying ? (
@@ -69,7 +71,7 @@ export default function Home() {
       <Animated.View style={[{ flex: 1 }, page]}>
       {/* full-width scroller with the 16px margin inside it: an Android ScrollView clips its children, which cut the Ask bar's
           glow and the rounded ends of its gradient stroke flat at the margin */}
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: s(90), paddingHorizontal: s(16) }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: clear, paddingHorizontal: s(16) }}>
         <Rise index={0} blur={false}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: s(8) }}>
             <View><T size={9.5} c={C.mute}>Good evening</T><GradientText shimmer size={22} w={700} ls={-0.035} style={{ marginTop: s(-1) }}>Sara</GradientText></View>
@@ -90,10 +92,11 @@ export default function Home() {
                   style={{ marginTop: s(12), borderRadius: s(14), paddingVertical: s(7), paddingLeft: s(7), paddingRight: s(12), flexDirection: 'row', alignItems: 'center', gap: s(9) }}>
                   <View style={{ width: s(28), height: s(28), borderRadius: s(14), backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center',
                     ...shadow(C.blue, 0.12, s(5)) }}><Icon name="arrowR" size={12} color={C.blue} stroke={2.4} /></View>
-                  <View style={{ flex: 1, minWidth: 0, alignItems: 'flex-start' }}>
+                  {/* the title may use the 9px gap before "Start" (the approved one-liner runs right up to it) and wraps to a
+                      second line when longer ("Book a snagging inspection"), never running under Start */}
+                  <View style={{ flex: 1, minWidth: 0, alignItems: 'flex-start', marginRight: -s(6) }}>
                     <T size={8.5} w={700} ls={0.12} c={C.mute}>NEXT STEP</T>
-                    {/* one line that may run under "Start", as in the mockup (web: nowrap; native text can't overflow its box, so give it room) */}
-                    <GradientText shimmer size={11.5} w={700} style={{ marginTop: 1, flexShrink: 0, ...(Platform.OS === 'web' ? { whiteSpace: 'nowrap' } : { width: s(170) }) } as any}>{NEXT_STEP[stage - 1]}</GradientText>
+                    <GradientText shimmer size={11.5} w={700} numberOfLines={2} style={{ marginTop: 1 }}>{NEXT_STEP[stage - 1]}</GradientText>
                   </View>
                   <T size={10} w={700} c={C.blue}>Start</T>
                 </LinearGradient>

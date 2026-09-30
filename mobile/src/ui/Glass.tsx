@@ -10,7 +10,13 @@ export function Glass({ r = 18, style, children, ...rest }: ViewProps & { r?: nu
     <View {...rest} style={[{ borderRadius: s(r), overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.95)',
       backgroundColor: android ? 'rgba(250,251,255,0.94)' : 'rgba(255,255,255,0.66)',
       ...shadow('#16205A', 0.07, s(12), s(6)) }, style]}>
-      {Platform.OS !== 'android' && <BlurView intensity={30} tint="light" style={StyleSheet.absoluteFill} />}
+      {/* the blur is clipped to the radius by its own wrapper: a caller may set overflow:'visible' (Home's card lets the 3D
+          model break out), and an unclipped iOS BlurView then drew a square white slab with hard top corners */}
+      {Platform.OS !== 'android' && (
+        <View pointerEvents="none" style={[StyleSheet.absoluteFill, { borderRadius: s(r), overflow: 'hidden' }]}>
+          <BlurView intensity={30} tint="light" style={StyleSheet.absoluteFill} />
+        </View>
+      )}
       {children}
     </View>
   );
