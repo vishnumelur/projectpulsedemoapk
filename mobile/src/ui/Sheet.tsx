@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { cancelAnimation, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -7,12 +7,15 @@ import { shadow } from '@/theme/shadow';
 import { DUR, ease, easeInOut } from '@/theme/motion';
 
 /** Bottom sheet. Physical but calm: the panel glides up on EASE_OUT (DUR.slow) and stops, no overshoot; the backdrop fades.
- *  Closing reverses on the in-out curve, and the Modal unmounts only once the panel has left. */
+ *  Closing reverses on the in-out curve, and the Modal unmounts only once the panel has left. While it leaves, the sheet keeps
+ *  showing the content it had while open and keeps its measured height, so it glides out whole instead of collapsing. */
 export function Sheet({ visible, onClose, children }: { visible: boolean; onClose: () => void; children: React.ReactNode }) {
   const insets = useSafeAreaInsets();
   const [mounted, setMounted] = useState(visible);
   const [h, setH] = useState(0);
   const p = useSharedValue(0);
+  const last = useRef<React.ReactNode>(children);
+  if (visible) last.current = children; // frozen during the exit: callers often derive `visible` and the content from the same state
   useEffect(() => {
     if (visible) { setMounted(true); p.value = withTiming(1, ease(DUR.slow)); }
     else p.value = withTiming(0, easeInOut(DUR.base), (fin) => { 'worklet'; if (fin) runOnJS(setMounted)(false); });
@@ -24,13 +27,13 @@ export function Sheet({ visible, onClose, children }: { visible: boolean; onClos
   return (
     <Modal visible={mounted} transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
       <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(22,32,90,0.25)' }, scrim]}>
-        <Pressable style={{ flex: 1 }} onPress={onClose} />
+        <Pressable accessibilityRole="button" accessibilityLabel="Close" style={{ flex: 1 }} onPress={onClose} />
       </Animated.View>
       <View style={{ flex: 1 }} pointerEvents="box-none" />
-      <Animated.View onLayout={(e) => setH(e.nativeEvent.layout.height)} style={[{ backgroundColor: '#fff', borderTopLeftRadius: s(26), borderTopRightRadius: s(26), paddingTop: s(10),
+      <Animated.View onLayout={(e) => { if (visible) setH(e.nativeEvent.layout.height); }} style={[{ backgroundColor: '#fff', borderTopLeftRadius: s(26), borderTopRightRadius: s(26), paddingTop: s(10),
         paddingHorizontal: s(16), paddingBottom: s(18) + insets.bottom, ...shadow('#16205A', 0.18, s(20)) }, panel]}>
         <View style={{ width: s(36), height: s(4), borderRadius: s(4), backgroundColor: '#D3D7E6', alignSelf: 'center', marginBottom: s(12) }} />
-        {children}
+        {visible ? children : last.current}
       </Animated.View>
     </Modal>
   );

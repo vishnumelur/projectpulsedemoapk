@@ -11,13 +11,14 @@ export const DUR = { fast: 180, base: 280, slow: 420, reveal: 600,
   /** Ambient loops (full cycle): Ken Burns push-in, a floating card, a light sweep on a button, a light sweep on a progress segment. */
   kenBurns: 14000, float: 6000, sweep: 4000, trackSweep: 2600 } as const;
 
-/** Critically-damped springs (ζ ≥ 1): settle without overshoot. Use for press feedback, sheets, thumbs, knobs. */
-export const SPRING = { damping: 30, stiffness: 260, mass: 1, overshootClamping: true } as const;
+/** Springs with ζ = damping / (2·√(stiffness·mass)) ≥ 1, so they settle without overshoot (overshootClamping as a backstop):
+ *  SPRING ζ ≈ 1.02 (critically damped, brisk), SPRING_SOFT ζ ≈ 1.23 (overdamped, gentle). Press feedback, sheets, thumbs, knobs. */
+export const SPRING = { damping: 33, stiffness: 260, mass: 1, overshootClamping: true } as const;
 export const SPRING_SOFT = { damping: 32, stiffness: 170, mass: 1, overshootClamping: true } as const;
 
 /** withTiming configs: `ease(DUR.slow)` for arrivals, `easeInOut(DUR.base)` for moves within the screen and departures. */
-export const ease = (duration: number = DUR.slow) => ({ duration, easing: EASE_OUT });
-export const easeInOut = (duration: number = DUR.base) => ({ duration, easing: EASE_IN_OUT });
+export const ease = (duration: number = DUR.slow) => { 'worklet'; return { duration, easing: EASE_OUT }; };
+export const easeInOut = (duration: number = DUR.base) => { 'worklet'; return { duration, easing: EASE_IN_OUT }; };
 
 /** Entrance rise: content fades in while rising at most this far (px). Chat bubbles use CHAT_RISE. */
 export const RISE = 10;
