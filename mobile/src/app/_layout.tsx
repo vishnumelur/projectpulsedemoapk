@@ -23,8 +23,16 @@ export default function RootLayout() {
   // Web: CanvasKit is loaded in index.web.js before the router entry. Never require Skia's web loader here —
   // Metro resolves it on native in dev and canvaskit.js imports Node's 'fs'.
   useEffect(() => useDemo.persist.onFinishHydration(() => setHydrated(true)), []);
-  useEffect(() => { if (hydrated) resumeSimulations(); }, [hydrated]);
-  const ready = fonts && hydrated;
+  // A demo: every cold start begins fresh at "Hi, I'm Pulse" (nothing from a previous run is kept). Only the dev
+  // gallery session used by the capture tools survives a reload, and that exists in development builds only.
+  const [fresh, setFresh] = useState(false);
+  useEffect(() => {
+    if (!hydrated || fresh) return;
+    const st = useDemo.getState();
+    if (__DEV__ && st.devGallery) resumeSimulations(); else st.resetDemo();
+    setFresh(true);
+  }, [hydrated, fresh]);
+  const ready = fonts && hydrated && fresh;
   useEffect(() => { if (ready) SplashScreen.hideAsync(); }, [ready]);
   if (!ready) return null;
   return (

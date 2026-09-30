@@ -58,8 +58,9 @@ export const useDemo = create<DemoState>()(persist((set, get) => ({
     set({ session: { role: acct.role, email: acct.email }, role: acct.role, devGallery: false, banner: null });
     return { ok: true, role: acct.role };
   },
-  // Keeps the demo data (Sara's project, Omar's quotes) and the last role, so Sign in pre-selects the same account.
-  signOut: () => set({ session: null, devGallery: false, banner: null }),
+  // Keeps the demo data (quotes, jobs, chats) and the last role, so Sign in pre-selects the same account. The first-run
+  // setup is reset, so every sign-in shows the demo from the top: client → "What are you building?", engineer → E1–E3.
+  signOut: () => set({ session: null, devGallery: false, banner: null, clientOnboarded: false, expertVerified: false }),
   completeClientOnboarding: (projectType, stage) => set({ projectType, stage, clientOnboarded: true }),
 
   sendRequest: (r) => {

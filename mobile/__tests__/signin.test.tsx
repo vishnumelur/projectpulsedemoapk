@@ -44,12 +44,12 @@ describe('store sessions', () => {
     expect(useDemo.getState().signIn('someone@mail.ae', 'pulse2026').ok).toBe(false);
     expect(useDemo.getState().session).toBeNull();
   });
-  test('signOut clears the session but keeps the demo data and the last role', () => {
+  test('signOut clears the session, keeps the demo data and the last role, and restarts the first-run setup', () => {
     useDemo.getState().signIn(SARA, 'pulse2026'); useDemo.getState().completeClientOnboarding('villa', 3);
     useDemo.setState({ devGallery: true });
     useDemo.getState().signOut();
     expect(useDemo.getState().session).toBeNull(); expect(useDemo.getState().devGallery).toBe(false);
-    expect(useDemo.getState().clientOnboarded).toBe(true); expect(useDemo.getState().role).toBe('client');
+    expect(useDemo.getState().clientOnboarded).toBe(false); expect(useDemo.getState().expertVerified).toBe(false); expect(useDemo.getState().role).toBe('client');
   });
 });
 
@@ -176,7 +176,7 @@ describe('Log out', () => {
     await tick(500);
     expect(router.dismissAll).toHaveBeenCalled(); expect(router.replace).toHaveBeenCalledTimes(1);
     expect(router.replace).toHaveBeenCalledWith('/onboarding/signup');
-    expect(useDemo.getState().session).toBeNull(); expect(useDemo.getState().clientOnboarded).toBe(true);
+    expect(useDemo.getState().session).toBeNull(); expect(useDemo.getState().clientOnboarded).toBe(false);
   });
   test('engineer Dashboard: the avatar opens the account sheet; Log out → confirm → Sign in', async () => {
     useDemo.getState().signIn(OMAR, 'pulse2026');
