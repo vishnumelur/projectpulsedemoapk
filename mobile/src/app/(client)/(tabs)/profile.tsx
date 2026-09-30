@@ -1,6 +1,9 @@
 import { Alert, Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
+import { Rise } from '@/motion/Rise';
 import { Screen } from '@/ui/Screen';
 import { T } from '@/ui/T';
 import { Glass } from '@/ui/Glass';
@@ -11,7 +14,7 @@ import { CLIENT } from '@/data/seed';
 import { GRAD } from '@/theme/tokens';
 import { nextRoute } from '@/nav/next';
 import { s } from '@/theme/scale';
-import { C } from '@/theme/tokens';
+import { C, EASE } from '@/theme/tokens';
 
 const Row = ({ label, value, last }: { label: string; value?: string; last?: boolean }) => (
   <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: s(12), borderBottomWidth: last ? 0 : 1, borderBottomColor: C.line }}>
@@ -21,21 +24,30 @@ const Row = ({ label, value, last }: { label: string; value?: string; last?: boo
 );
 
 export default function Profile() {
-  const toExpert = () => { const st = useDemo.getState(); st.setRole('expert'); router.replace(nextRoute({ ...st, role: 'expert' }) as any); };
+  const out = useSharedValue(0);
+  const fade = useAnimatedStyle(() => ({ opacity: 1 - out.value }));
+  // Switching cross-fades into Expert mode: the page fades out (EASE) while the expert route replaces it.
+  const toExpert = () => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); out.value = withTiming(1, { duration: 350, easing: EASE }); const st = useDemo.getState(); st.setRole('expert'); router.replace(nextRoute({ ...st, role: 'expert' }) as any); };
   const reset = () => Alert.alert('Reset demo?', 'Restores the original demo data.', [{ text: 'Cancel' }, { text: 'Reset', style: 'destructive',
     onPress: () => { useDemo.getState().resetDemo(); router.replace('/'); } }]);
   return (
     <Screen bg="aurora3">
-      <View style={{ alignItems: 'center', marginTop: s(14) }}>
+      <Animated.View style={[{ flex: 1 }, fade]}>
+      <Rise index={0} blur={false} style={{ alignItems: 'center', marginTop: s(14) }}>
+      <View style={{ alignItems: 'center' }}>
         <Avatar photo="sara" size={70} ring="white4" />
         <T size={20} w={700} ls={-0.035} style={{ marginTop: s(6) }}>{CLIENT.name}</T>
         <T size={11} c={C.mute} style={{ marginTop: s(2) }}>{CLIENT.email}</T>
       </View>
-      <Glass r={18} style={{ marginTop: s(18), paddingHorizontal: s(14) }}>
+      </Rise>
+      <Rise index={1} r={18} style={{ marginTop: s(18) }}>
+      <Glass r={18} style={{ paddingHorizontal: s(14) }}>
         <Row label="My projects" value="1" /><Row label="Payments" /><Row label="Notifications" /><Row label="Language" value="English" last />
       </Glass>
+      </Rise>
+      <Rise index={2} r={18} style={{ marginTop: s(14) }}>
       <Pressable onPress={toExpert}>
-        <Glass r={18} style={{ marginTop: s(14), padding: s(14), flexDirection: 'row', alignItems: 'center', gap: s(12) }}>
+        <Glass r={18} style={{ padding: s(14), flexDirection: 'row', alignItems: 'center', gap: s(12) }}>
           <LinearGradient colors={GRAD} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ width: s(32), height: s(32), borderRadius: s(10), alignItems: 'center', justifyContent: 'center' }}>
             <Icon name="swap" size={15} color="#fff" stroke={2.2} />
           </LinearGradient>
@@ -43,7 +55,9 @@ export default function Profile() {
           <T size={14} w={700} c={C.blue}>›</T>
         </Glass>
       </Pressable>
+      </Rise>
       <Pressable onLongPress={reset} style={{ marginTop: 'auto', marginBottom: s(84), alignSelf: 'center', opacity: 0 }}><T size={9} c={C.faint3}>Project Pulse demo · v1.0</T></Pressable>
+      </Animated.View>
     </Screen>
   );
 }

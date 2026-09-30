@@ -24,3 +24,9 @@ test('Profile switch goes to the expert side', async () => {
   expect(useDemo.getState().role).toBe('expert');
   expect(router.replace).toHaveBeenCalledWith('/expert-role');
 });
+
+test('Tapping the Ask bar expands the blob and opens Pulse', async () => {
+  await render(<Home />);
+  await fireEvent.press(screen.getByText('Ask Pulse anything…'));
+  expect(router.push).toHaveBeenCalledWith('/pulse');
+});
