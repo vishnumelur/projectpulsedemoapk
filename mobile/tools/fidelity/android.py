@@ -82,7 +82,9 @@ def side_by_side(i):
 def main():
     import argparse
     ap = argparse.ArgumentParser(); ap.add_argument('ids', nargs='?'); ap.add_argument('--wait', type=int, default=14)
-    ap.add_argument('--no-capture', action='store_true'); o = ap.parse_args()
+    ap.add_argument('--no-capture', action='store_true')
+    ap.add_argument('--reseed', action='store_true', help='reset the demo data before every screen (simulations from one screen change later ones)')
+    o = ap.parse_args()
     wait, capture, only = o.wait, not o.no_capture, (o.ids.split(',') if o.ids else None)
     items = [g for g in gallery() if not only or g['id'] in only]
     os.makedirs(SHOTS, exist_ok=True)
@@ -90,6 +92,7 @@ def main():
         open_href('/dev/gallery'); time.sleep(14); dismiss_dev_menu()      # seeds the demo state
     for g in items:
         if capture:
+            if o.reseed: open_href('/dev/gallery'); time.sleep(8); wait_loaded(); time.sleep(3)
             open_href(g['href']); time.sleep(wait_for(g['id'], wait)); dismiss_dev_menu()
             wait_device(); png = wait_loaded()
             if not png: print('no screenshot for', g['id'], flush=True); continue
