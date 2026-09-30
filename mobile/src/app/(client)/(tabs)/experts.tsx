@@ -1,5 +1,5 @@
 import { Pressable, ScrollView, View } from 'react-native';
-import Animated, { SharedValue, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withDelay, withSequence, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { SharedValue, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withDelay, withSequence, withTiming } from 'react-native-reanimated';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import { Image } from 'expo-image';
@@ -19,17 +19,18 @@ import { useDemo } from '@/store/demo';
 import { IS_TEST, setTileRect } from '@/screens/experts/fx';
 import { s } from '@/theme/scale';
 import { C } from '@/theme/tokens';
+import { DUR, ease, easeInOut } from '@/theme/motion';
 
 const PAR = s(5); // parallax travel; the photo scales up only while scrolled (scale 1, translate 0 at rest = approved crop)
 const BOX = s(124);
 type E = (typeof EXPERTS)[number];
 function Tile({ e, i, top, scrollY }: { e: E; i: number; top: boolean; scrollY: SharedValue<number> }) {
   const ref = useRef<View>(null); const lift = useSharedValue(0);
-  const wrap = useAnimatedStyle(() => ({ transform: [{ scale: 1 + 0.03 * lift.value }], zIndex: lift.value > 0.01 ? 5 : 0,
+  const wrap = useAnimatedStyle(() => ({ transform: [{ scale: 1 + 0.02 * lift.value }], zIndex: lift.value > 0.01 ? 5 : 0,
     shadowColor: '#16205A', shadowOpacity: 0.2 * lift.value, shadowRadius: 18, shadowOffset: { width: 0, height: 12 } }));
   const par = useAnimatedStyle(() => { const ty = Math.max(-PAR, Math.min(PAR, -scrollY.value * 0.06)); return { transform: [{ translateY: ty }, { scale: 1 + (2 * Math.abs(ty)) / BOX }] }; });
   const open = () => {
-    lift.value = withSequence(withSpring(1, { damping: 14, stiffness: 220 }), withDelay(600, withTiming(0, { duration: 300 })));
+    lift.value = withSequence(withTiming(1, ease(DUR.base)), withDelay(600, withTiming(0, easeInOut(DUR.base))));
     let pushed = false; const go = () => { if (pushed) return; pushed = true; router.push(`/expert/${e.id}`); };
     const node = ref.current as any;
     if (IS_TEST || !node?.measureInWindow) return go();

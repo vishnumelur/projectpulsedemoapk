@@ -1,7 +1,8 @@
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import Animated, { FadeInUp, useSharedValue, withRepeat, withSequence, withTiming, useAnimatedStyle, withDelay, withSpring } from 'react-native-reanimated';
+import Animated, { cancelAnimation, useSharedValue, withRepeat, withSequence, withTiming, useAnimatedStyle, useReducedMotion, withDelay } from 'react-native-reanimated';
+import { CHAT_RISE, DUR, SCALE_FROM, ease, easeInOut, enterUp } from '@/theme/motion';
 import { Image } from 'expo-image';
 import { Screen } from '@/ui/Screen';
 import { BackButton } from '@/ui/Header';
@@ -20,8 +21,10 @@ import { C, F } from '@/theme/tokens';
 
 function PhotoViewer({ photo, onClose }: { photo: PhotoKey | null; onClose: () => void }) {
   const p = useSharedValue(0);
-  useEffect(() => { p.value = photo ? withSpring(1, { damping: 16, stiffness: 160 }) : 0; }, [photo]);
-  const st = useAnimatedStyle(() => ({ opacity: p.value, transform: [{ scale: 0.82 + 0.18 * p.value }] }));
+  useEffect(() => { p.value = photo ? withTiming(1, ease(DUR.slow)) : 0; return () => cancelAnimation(p); }, [photo]);
+  // the scrim fades; only the photo settles from SCALE_FROM to 1
+  const st = useAnimatedStyle(() => ({ opacity: p.value }));
+  const img = useAnimatedStyle(() => ({ transform: [{ scale: SCALE_FROM + (1 - SCALE_FROM) * p.value }] }));
   if (!photo) return null;
   return (
     <Modal visible transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
@@ -29,15 +32,21 @@ function PhotoViewer({ photo, onClose }: { photo: PhotoKey | null; onClose: () =
         <Pressable accessibilityLabel="Close" onPress={onClose} style={{ position: 'absolute', top: s(50), right: s(20), width: s(34), height: s(34), borderRadius: s(17), backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
           <T size={16} w={600} c="#fff">✕</T>
         </Pressable>
-        <Image source={PHOTOS[photo]} contentFit="contain" style={{ width: '94%', aspectRatio: 1.5 }} />
+        <Animated.View style={[{ width: '94%', aspectRatio: 1.5 }, img]}><Image source={PHOTOS[photo]} contentFit="contain" style={{ flex: 1 }} /></Animated.View>
       </Animated.View>
     </Modal>
   );
 }
+/** Typing dot: a soft wave, each dot brightens and drifts up 2px on an in-out curve, then rests. No hop. */
 function Dot({ d }: { d: number }) {
-  const y = useSharedValue(0);
-  useEffect(() => { y.value = withDelay(d, withRepeat(withSequence(withTiming(-3, { duration: 360 }), withTiming(0, { duration: 360 }), withTiming(0, { duration: 480 })), -1)); }, []);
-  const st = useAnimatedStyle(() => ({ transform: [{ translateY: y.value }], opacity: y.value < -1 ? 1 : 0.5 }));
+  const w = useSharedValue(0);
+  const reduce = useReducedMotion();
+  useEffect(() => {
+    if (reduce) return;
+    w.value = withDelay(d, withRepeat(withSequence(withTiming(1, easeInOut(450)), withTiming(0, easeInOut(450)), withTiming(0, { duration: 300 })), -1));
+    return () => cancelAnimation(w);
+  }, [reduce]);
+  const st = useAnimatedStyle(() => ({ transform: [{ translateY: -2 * w.value }], opacity: 0.4 + 0.6 * w.value }));
   return <Animated.View style={[{ width: s(5), height: s(5), borderRadius: s(3), backgroundColor: C.faint2 }, st]} />;
 }
 export default function Chat() {
@@ -58,7 +67,7 @@ export default function Chat() {
   const bubble = (m: (typeof msgs)[number]) => m.photo
     ? <Pressable key={m.id} accessibilityLabel="Open photo" onPress={() => setViewer(m.photo!)} style={{ alignSelf: 'flex-start', marginTop: s(8) }}><Image source={PHOTOS[m.photo]} contentFit="cover" style={{ width: s(150), height: s(96), borderRadius: s(14) }} /></Pressable>
     : (
-      <Animated.View key={m.id} entering={FadeInUp.springify().damping(16)} style={[{ maxWidth: '76%', paddingVertical: s(9), paddingHorizontal: s(12), borderRadius: s(16), marginTop: s(8) },
+      <Animated.View key={m.id} entering={enterUp(0, 0, CHAT_RISE)} style={[{ maxWidth: '76%', paddingVertical: s(9), paddingHorizontal: s(12), borderRadius: s(16), marginTop: s(8) },
         m.from === 'me' ? { alignSelf: 'flex-end', backgroundColor: C.blue, borderBottomRightRadius: s(5) } : { alignSelf: 'flex-start', backgroundColor: '#fff', borderBottomLeftRadius: s(5), ...shadow('#16205A', 0.06, s(5)) }]}>
         <T size={11} lh={1.45} c={m.from === 'me' ? '#fff' : C.navy}>{m.text}</T>
       </Animated.View>

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
-import Animated, { FadeIn, FadeOut, useAnimatedStyle, useSharedValue, SharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, SharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 import { Screen } from '@/ui/Screen';
 import { Header, Eyebrow } from '@/ui/Header';
 import { T } from '@/ui/T';
@@ -17,6 +17,7 @@ import { useDemo } from '@/store/demo';
 import { s } from '@/theme/scale';
 import { shadow } from '@/theme/shadow';
 import { C, EASE } from '@/theme/tokens';
+import { enterFade, exitFade } from '@/theme/motion';
 
 const SPRING = { damping: 14, stiffness: 220, mass: 0.8 };
 
@@ -94,7 +95,7 @@ export default function Book() {
           {DAYS.map((d) => <DayCell key={d.n} d={d} on={d.n === day} onPress={() => { setDay(d.n); Haptics.selectionAsync(); }} />)}
         </View>
         <T size={9.5} w={600} c={C.mute} style={{ marginTop: s(14) }}>{`${e.first}'s free times on Thursday`}</T>
-        <Animated.View key={`slots-${day}`} entering={FadeIn.duration(260)} exiting={FadeOut.duration(120)} style={{ gap: s(6), marginTop: s(10) }}>
+        <Animated.View key={`slots-${day}`} entering={enterFade(0, 260)} exiting={exitFade} style={{ gap: s(6), marginTop: s(10) }}>
           {[CLIENT_SLOTS.slice(0, 3), CLIENT_SLOTS.slice(3)].map((row, ri) => <View key={ri} style={{ flexDirection: 'row', gap: s(6) }}>{row.map((x) => {
             const on = x.id === slot;
             const label = <T size={11} w={600} c={on ? '#fff' : C.navy} align="center" style={!x.free ? { textDecorationLine: 'line-through' } : undefined}>{x.time}</T>;

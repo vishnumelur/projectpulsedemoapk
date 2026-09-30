@@ -1,7 +1,9 @@
 import { View, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { useEffect } from 'react';
-import Animated, { type SharedValue, useSharedValue, withRepeat, withTiming, Easing, useAnimatedStyle, ZoomIn, withSpring, withDelay } from 'react-native-reanimated';
+import Animated, { type SharedValue, cancelAnimation, useSharedValue, withRepeat, withTiming, Easing, useAnimatedStyle, useReducedMotion, withDelay } from 'react-native-reanimated';
+import { DUR, SUCCESS_FROM, ease } from '@/theme/motion';
+import { ScaleIn } from '@/motion/ScaleIn';
 import Svg, { Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { Screen } from '@/ui/Screen';
@@ -21,9 +23,9 @@ function Orbiter({ i, spin }: { i: number; spin: SharedValue<number> }) {
   const R = s(86);
   const out = useSharedValue(0);
   useEffect(() => {
-    out.value = withDelay(180 * i, withSpring(1, { damping: 26, stiffness: 170 }));
+    out.value = withDelay(180 * i, withTiming(1, ease(DUR.reveal)));
     const t = setTimeout(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light), 180 * i + 600);
-    return () => clearTimeout(t);
+    return () => { clearTimeout(t); cancelAnimation(out); };
   }, []);
   const st = useAnimatedStyle(() => {
     const a = ((i * 72 - 90) * Math.PI) / 180 + spin.value;
@@ -33,14 +35,19 @@ function Orbiter({ i, spin }: { i: number; spin: SharedValue<number> }) {
   return (
     <Animated.View style={[{ position: 'absolute', left: s(100) - s(19), top: s(100) - s(19) }, st]}>
       <Avatar photo={PEOPLE[i]} size={34} ring="white" />
-      <Animated.View entering={ZoomIn.delay(180 * i + 600).springify()} style={{ position: 'absolute', right: -s(4), bottom: -s(3), width: s(15), height: s(15), borderRadius: s(8),
-        backgroundColor: C.blue, borderWidth: 2, borderColor: '#fff', alignItems: 'center', justifyContent: 'center' }}><Icon name="check" color="#fff" size={8} stroke={3} /></Animated.View>
+      <ScaleIn delay={180 * i + 600} from={SUCCESS_FROM} style={{ position: 'absolute', right: -s(4), bottom: -s(3), width: s(15), height: s(15), borderRadius: s(8),
+        backgroundColor: C.blue, borderWidth: 2, borderColor: '#fff', alignItems: 'center', justifyContent: 'center' }}><Icon name="check" color="#fff" size={8} stroke={3} /></ScaleIn>
     </Animated.View>
   );
 }
 export default function Sent() {
   const spin = useSharedValue(0);
-  useEffect(() => { spin.value = withRepeat(withTiming(Math.PI * 2, { duration: 30000, easing: Easing.linear }), -1, false); }, []);
+  const reduce = useReducedMotion();
+  useEffect(() => {
+    if (reduce) return;
+    spin.value = withRepeat(withTiming(Math.PI * 2, { duration: 30000, easing: Easing.linear }), -1, false);
+    return () => cancelAnimation(spin);
+  }, [reduce]);
   const step = (label: string, when: string, on = false) => (
     <View style={{ flex: 1, alignItems: 'center' }}>
       <View style={{ width: s(12), height: s(12), borderRadius: s(6), backgroundColor: on ? C.blue : '#fff', borderWidth: 2, borderColor: on ? C.blue : '#D3D8E8',

@@ -1,7 +1,9 @@
 import { KeyboardAvoidingView, Platform, Pressable, TextInput, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
+import { DUR, enterFade, enterUp } from '@/theme/motion';
+import { PressScale } from '@/motion/PressScale';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { Screen } from '@/ui/Screen';
@@ -59,9 +61,9 @@ export default function PulseScreen() {
         </View>
         <View style={{ marginTop: s(22), gap: s(8), alignSelf: 'stretch' }}>
           {SUGGESTIONS[f.askStage].map((sug) => (
-            <Pressable key={sug} onPress={() => { Haptics.selectionAsync(); setPicked(sug); setTimeout(() => f.submit(SUGGESTION_QUERY[sug] ?? sug), 260); }}>
+            <PressScale key={sug} onPress={() => { Haptics.selectionAsync(); setPicked(sug); setTimeout(() => f.submit(SUGGESTION_QUERY[sug] ?? sug), 260); }}>
               <Glass r={16} style={[{ paddingVertical: s(12), paddingHorizontal: s(14) }, picked === sug && { borderColor: C.blue, borderWidth: 1.5 }]}><T size={12} w={600}>{sug}</T></Glass>
-            </Pressable>
+            </PressScale>
           ))}
         </View>
         <Pressable onPress={() => f.setState('ask')} style={{ marginTop: 'auto', marginBottom: s(22) }}><T size={9.5} c={C.mute}>or just ask. Type, or hold the mic to speak</T></Pressable>
@@ -107,7 +109,7 @@ export default function PulseScreen() {
         <View style={{ paddingTop: s(8) }}><BackButton flat /></View>
         <View style={{ alignItems: 'center' }}>
           <View style={{ marginTop: s(62) }}><Orb size={132} soft /></View>
-          <Animated.View entering={FadeIn.duration(400)} style={{ marginTop: s(34), flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <Animated.View entering={enterFade(0, DUR.slow)} style={{ marginTop: s(34), flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}>
             {idx >= 0 ? (<>
               <T size={14} w={500} ls={-0.01} c={C.faint}>{f.q.slice(0, idx)}</T>
               <GradientText shimmer size={14} w={600} ls={-0.01}>{f.q.slice(idx, idx + key.length)}</GradientText>
@@ -163,10 +165,10 @@ export default function PulseScreen() {
       </View>
       {e ? (<>
         <View style={{ marginTop: s(14) }}><Streamed lead={e.lead} text={renderBody(e, f.projectType)} /></View>
-        <Animated.View entering={FadeIn.delay(600)} style={{ flexDirection: 'row', marginTop: s(8) }}>
+        <Animated.View entering={enterFade(600)} style={{ flexDirection: 'row', marginTop: s(8) }}>
           <View style={{ backgroundColor: 'rgba(0,0,254,0.06)', paddingVertical: s(3.5), paddingHorizontal: s(9), borderRadius: s(10) }}><T size={9} w={700} c={C.blue}>{`◆ ${e.source}`}</T></View>
         </Animated.View>
-        <Animated.View entering={FadeInDown.delay(900).springify().damping(16)} style={{ marginTop: s(14) }}>
+        <Animated.View entering={enterUp(1, 900)} style={{ marginTop: s(14) }}>
           <View style={{ borderRadius: s(22), backgroundColor: '#fff', padding: s(14), overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(0,0,254,0.06)',
             ...shadow(C.blue, 0.12, s(20), s(18)) }}>
             <LinearGradient colors={['rgba(49,209,255,0.32)', 'rgba(185,168,255,0.32)', 'rgba(0,0,254,0.16)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0.4 }}
