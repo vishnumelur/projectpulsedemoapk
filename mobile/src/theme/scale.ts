@@ -3,10 +3,10 @@ import { Dimensions, PixelRatio } from 'react-native';
 /** Width in CSS px of the phone screen area in the approved mockups. */
 export const MOCK_W = 254;
 
-let k = Dimensions.get('window').width / MOCK_W;
+// Fixed at launch (portrait-only app). s() is a worklet, so k is captured by value — it must not change later.
+const k = Dimensions.get('window').width / MOCK_W;
 const R = PixelRatio.get();
 
-export function setScaleWidth(width: number) { k = width / MOCK_W; }
 export function scaleFactor() { return k; }
 /** Convert a mockup px value to device dp. */
 // A worklet so animated styles / derived values may call it on the UI thread (k and R are captured).
