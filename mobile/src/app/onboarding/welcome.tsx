@@ -67,15 +67,16 @@ function Blob({ id, cx, cy, rx, ry, color, opacity, stops, drift, t }: { id: str
 
 /** A3 backdrop: `.scr` #FBFCFF with a faint cyan blob top right (`.a-c`, opacity .25, drift2 12s) and a lilac one behind the
  *  orb (`.a-v` at top 120px, opacity .16, drift 16s). */
-function Backdrop({ still }: { still: boolean }) {
+function Backdrop({ active }: { active: boolean }) {
   const c = useSharedValue(0);
   const v = useSharedValue(0);
+  // paused (held where they are) while the screen is covered or motion is reduced; resumed from that point on focus
   useEffect(() => {
-    if (still) return;
-    c.value = withRepeat(withTiming(1, { duration: 6000, easing: EASE_IN_OUT }), -1, true);
-    v.value = withRepeat(withTiming(1, { duration: 8000, easing: EASE_IN_OUT }), -1, true);
+    if (!active) return;
+    c.value = withRepeat(withTiming(c.value > 0.5 ? 0 : 1, { duration: DUR.auroraA, easing: EASE_IN_OUT }), -1, true);
+    v.value = withRepeat(withTiming(v.value > 0.5 ? 0 : 1, { duration: DUR.auroraB, easing: EASE_IN_OUT }), -1, true);
     return () => { cancelAnimation(c); cancelAnimation(v); };
-  }, [still]);
+  }, [active]);
   return (
     <>
       {/* 230x200 box at right -90 / top -60, blur 45: the disc edge sits at 56% of the blurred radius */}
@@ -116,18 +117,26 @@ function LightPoint() {
 /** ✦ The orb blooms in from the splash logo (scale .85 -> 1 with a fade, DUR.reveal, EASE_OUT), then breathes slowly while
  *  its colours rotate inside the crisp circle (RoundOrb: conic mix turning every 5s, glow breathing 3.2s, halo rings).
  *  Two orbit rings turn slowly (16s, and 26s the other way) with a light point travelling on the ring. */
-function Stage({ settled, reduce }: { settled: boolean; reduce: boolean }) {
+function Stage({ settled, active }: { settled: boolean; active: boolean }) {
   const bloom = useSharedValue(settled ? 1 : 0);
   const breath = useSharedValue(0);
   const clock = useSharedValue(0);
-  const frame = useFrameCallback((f) => { clock.value = f.timeSinceFirstFrame; }, false);
+  const offset = useSharedValue(0);
+  const frame = useFrameCallback((f) => { clock.value = offset.value + f.timeSinceFirstFrame; }, false);
+  useEffect(() => { if (!settled) bloom.value = withTiming(1, { duration: DUR.reveal, easing: EASE_OUT }); }, []);
+  // the rings' clock and the breathe run only while this screen is focused (sign up on top pauses them: no UI-thread work
+  // behind it); the clock resumes where it stopped, so the rings don't jump
+  const first = useRef(true);
   useEffect(() => {
-    if (!settled) bloom.value = withTiming(1, { duration: DUR.reveal, easing: EASE_OUT });
-    if (reduce) return;
-    breath.value = withDelay(DUR.reveal, withRepeat(withTiming(1, { duration: DUR.float / 2, easing: EASE_IN_OUT }), -1, true));
+    if (!active) return;
+    const base = clock.value;
+    const delay = first.current && !settled ? DUR.reveal : 0;
+    first.current = false;
+    breath.value = withDelay(delay, withRepeat(withTiming(breath.value > 0.5 ? 0 : 1, { duration: DUR.float / 2, easing: EASE_IN_OUT }), -1, true));
+    offset.value = base;
     frame.setActive(true);
     return () => { cancelAnimation(breath); frame.setActive(false); };
-  }, []);
+  }, [active]);
   const orb = useAnimatedStyle(() => ({ opacity: bloom.value, transform: [{ scale: (0.85 + 0.15 * bloom.value) * (1 + 0.02 * breath.value) }] }));
   const rings = useAnimatedStyle(() => ({ opacity: bloom.value }));
   return (
@@ -207,6 +216,8 @@ export default function Welcome() {
   const chosen = useSharedValue(-1);
   const glide = [useSharedValue(0), useSharedValue(0)]; // one per reply (REPLIES)
   const busy = useRef(false);
+  const [focused, setFocused] = useState(true);
+  const active = focused && !reduce;
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const clear = () => { timers.current.forEach(clearTimeout); timers.current = []; };
   useEffect(() => clear, []);
@@ -214,7 +225,14 @@ export default function Welcome() {
   useFocusEffect(useCallback(() => {
     clear(); busy.current = false; chosen.value = -1;
     glide.forEach((g) => { cancelAnimation(g); g.value = 0; });
+    setFocused(true);
+    return () => setFocused(false); // covered (sign up on top): pause the ambient loops
   }, []));
+  const signIn = () => {
+    if (busy.current) return; // shares the reply guard: a double tap, or a tap during a glide, can't push twice
+    busy.current = true;
+    router.push('/onboarding/signup?mode=signin');
+  };
   const choose = (i: number) => {
     if (busy.current) return; // one tap only
     busy.current = true;
@@ -228,7 +246,7 @@ export default function Welcome() {
   return (
     <View style={{ flex: 1, backgroundColor: '#FBFCFF', overflow: 'hidden' }}>
       <StatusBar style="dark" />
-      <Backdrop still={reduce} />
+      <Backdrop active={active} />
       <View style={{ flex: 1, paddingTop: Math.max(insets.top, s(30)), paddingHorizontal: s(18) }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: s(8) }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(7) }}>
@@ -238,11 +256,11 @@ export default function Welcome() {
               <GradientText size={13.5} w={700} style={{ letterSpacing: LS(13.5) }} colors={PULSE_GRAD}>Pulse</GradientText>
             </View>
           </View>
-          <Pressable onPress={() => router.push('/onboarding/signup?mode=signin')} hitSlop={10} accessibilityRole="button">
+          <Pressable onPress={signIn} hitSlop={10} accessibilityRole="button">
             <T size={11} w={700} c={C.blue}>Sign in</T>
           </Pressable>
         </View>
-        <Stage settled={settled} reduce={reduce} />
+        <Stage settled={settled} active={active} />
         {/* `.bub`: Pulse speaks first, tail at the bottom left */}
         <Animated.View entering={settled ? undefined : enterUp(1, CARD_AT)} style={{ backgroundColor: '#fff', paddingVertical: s(11), paddingHorizontal: s(13),
           borderTopLeftRadius: s(18), borderTopRightRadius: s(18), borderBottomRightRadius: s(18), borderBottomLeftRadius: s(6), ...shadow(C.navy, 0.07, s(12), s(8)) }}>

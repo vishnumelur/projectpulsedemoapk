@@ -1,12 +1,13 @@
 import { render, screen, fireEvent, act } from '@testing-library/react-native';
-import { router, Redirect } from 'expo-router';
+import { router, Redirect, useFocusEffect } from 'expo-router';
 import Welcome from '@/app/onboarding/welcome';
 import Role from '@/app/onboarding/role';
 import Building from '@/app/onboarding/building';
 import Stage from '@/app/onboarding/stage';
 import { useDemo } from '@/store/demo';
 
-jest.mock('expo-router', () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() }, useLocalSearchParams: () => ({}), useFocusEffect: jest.fn(),
+jest.mock('expo-router', () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() }, useLocalSearchParams: () => ({}), // runs like a mount-time focus; its cleanup runs on unmount (blur)
+  useFocusEffect: jest.fn((cb: () => void | (() => void)) => require('react').useEffect(cb, [cb])),
   Redirect: jest.fn(() => null) }));
 beforeEach(() => { useDemo.getState().resetDemo(); jest.clearAllMocks(); });
 
@@ -22,6 +23,36 @@ test('Welcome (A3): Sign in goes to sign in', async () => {
   await render(<Welcome />);
   await fireEvent.press(screen.getByText('Sign in'));
   expect(router.push).toHaveBeenCalledWith('/onboarding/signup?mode=signin');
+});
+
+test('Welcome (A3): Sign in shares the tap guard: a double tap pushes once and a reply after it is ignored', async () => {
+  jest.useFakeTimers();
+  await render(<Welcome />);
+  await fireEvent.press(screen.getByText('Sign in'));
+  await fireEvent.press(screen.getByText('Sign in'));
+  await fireEvent.press(screen.getByText("I'm an engineer"));
+  await act(async () => { jest.advanceTimersByTime(1000); });
+  expect(router.push).toHaveBeenCalledTimes(1);
+  expect(router.push).toHaveBeenCalledWith('/onboarding/signup?mode=signin');
+  expect(useDemo.getState().role).toBeNull();
+  jest.useRealTimers();
+});
+
+test('Welcome (A3): Sign in is ignored while a reply glides', async () => {
+  jest.useFakeTimers();
+  await render(<Welcome />);
+  await fireEvent.press(screen.getByText("I'm planning a project"));
+  await fireEvent.press(screen.getByText('Sign in'));
+  await act(async () => { jest.advanceTimersByTime(1000); });
+  jest.useRealTimers();
+  expect(router.push).toHaveBeenCalledTimes(1);
+  expect(router.push).toHaveBeenCalledWith('/onboarding/signup');
+});
+
+test('Welcome (A3): focus is tracked, and losing it (unmount/blur) runs the pause cleanup cleanly', async () => {
+  const r = await render(<Welcome />);
+  expect(useFocusEffect).toHaveBeenCalled();
+  await r.unmount();
 });
 
 test.each([["I'm planning a project", 'client'], ["I'm an engineer", 'expert']] as const)('Welcome (A3): the reply "%s" sets the %s role, glides up, then goes to sign up', async (reply, role) => {
