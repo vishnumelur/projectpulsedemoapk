@@ -30,7 +30,7 @@ export default function SendQuote() {
   const sent = useRef(false); // synchronous double-tap guard: two taps can land before a re-render
   const send = () => {
     if (sent.current) return; sent.current = true;
-    useDemo.getState().sendQuote(r.id, price, days);
+    useDemo.getState().sendQuote(r.id, Math.max(100, price), days); // typed prices may not have blurred through the floor yet
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     router.replace('/pro');
   };
@@ -54,7 +54,7 @@ export default function SendQuote() {
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: s(10) }}>
         {stepBtn('−', -100, 'Decrease price')}
         {/* tap the number to type a price */}
-        <Pressable accessibilityLabel="Type price" onPress={() => input.current?.focus()} style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Pressable accessibilityRole="button" accessibilityLabel={`Price AED ${price.toLocaleString('en-US')}, tap to type`} onPress={() => input.current?.focus()} style={{ flexDirection: 'row', alignItems: 'center' }}>
           <T size={30} w={700} ls={-0.04}>AED </T>
           <RollingPrice value={price} size={30} amber={out} gradient={GRAD} />
           <TextInput ref={input} value={String(price)} keyboardType="number-pad" maxLength={5} caretHidden
