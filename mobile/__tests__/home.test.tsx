@@ -5,6 +5,7 @@ import Profile from '@/app/(client)/(tabs)/profile';
 import { useDemo } from '@/store/demo';
 
 jest.mock('expo-router', () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() }, useLocalSearchParams: () => ({}), useFocusEffect: jest.fn() }));
+jest.mock('@/fx/RoundOrb', () => { const { View: mockView } = require('react-native'); const mockOrb = () => require('react').createElement(mockView, { testID: 'RoundOrb' }); return { __esModule: true, RoundOrb: mockOrb, default: mockOrb }; });
 beforeEach(() => { useDemo.getState().resetDemo(); jest.clearAllMocks(); });
 
 test('Home shows the approved content and wires the actions', async () => {

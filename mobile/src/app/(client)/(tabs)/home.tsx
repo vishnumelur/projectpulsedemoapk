@@ -63,21 +63,21 @@ export default function Home() {
   }, []));
   const b = BUILDINGS.find((x) => x.id === projectType)!;
   return (
-    <Screen bg="aurora3" overlay={flying ? (
+    <Screen bg="aurora3" px={16} overlay={flying ? (
       <Animated.View pointerEvents="none" style={[{ position: 'absolute', left: flying.x, top: flying.y, width: s(30), height: s(30) }, fly]}><Orb size={30} /></Animated.View>
     ) : undefined}>
       <Animated.View style={[{ flex: 1 }, page]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: s(90) }}>
         <Rise index={0} blur={false}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: s(9) }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: s(8) }}>
             <View><T size={9.5} c={C.mute}>Good evening</T><GradientText shimmer size={22} w={700} ls={-0.035} style={{ marginTop: s(-1) }}>Sara</GradientText></View>
             <Pressable onPress={() => router.push('/profile')}><Avatar photo="sara" size={34} ring="white" /></Pressable>
           </View>
         </Rise>
 
-        <Rise index={1} r={22} style={{ marginTop: s(54.5) }}>
-          <Glass r={22} style={{ paddingTop: s(54), paddingHorizontal: s(12), paddingBottom: s(10), overflow: 'visible' }}>
-            <View style={{ position: 'absolute', left: '50%', marginLeft: -s(95), top: -s(74), width: s(190), height: s(140) }}>
+        <Rise index={1} r={22} style={{ marginTop: s(58.5) }}>
+          <Glass r={22} style={{ paddingTop: s(58), paddingHorizontal: s(14), paddingBottom: s(12), overflow: 'visible' }}>
+            <View style={{ position: 'absolute', left: '50%', marginLeft: -s(95), top: -s(78), width: s(190), height: s(140) }}>
               <ModelView model={b.id} lights={0.5} radius={9.4} target={[0, 2.2, 0]} height={0.42} spin={0.15} shadows={false} />
             </View>
             <T size={13} w={700} ls={-0.01} align="center">{b.name} · Al Reem Island</T>
@@ -85,7 +85,7 @@ export default function Home() {
             <Rise index={3} spring blur={false}>
               <Pressable onPress={() => router.push('/quotes?request=req-bid')}>
                 <LinearGradient colors={['rgba(0,0,254,0.06)', 'rgba(49,209,255,0.08)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0.3 }}
-                  style={{ marginTop: s(8), borderRadius: s(14), paddingVertical: s(7), paddingLeft: s(7), paddingRight: s(18), marginRight: -s(6), flexDirection: 'row', alignItems: 'center', gap: s(9) }}>
+                  style={{ marginTop: s(12), borderRadius: s(14), paddingVertical: s(7), paddingLeft: s(7), paddingRight: s(12), flexDirection: 'row', alignItems: 'center', gap: s(9) }}>
                   <View style={{ width: s(28), height: s(28), borderRadius: s(14), backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center',
                     ...shadow(C.blue, 0.12, s(5)) }}><Icon name="arrowR" size={12} color={C.blue} stroke={2.4} /></View>
                   <View style={{ flex: 1, minWidth: 0, alignItems: 'flex-start' }}>
