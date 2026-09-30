@@ -14,6 +14,7 @@ import { GradientText } from '@/fx/GradientText';
 import { useDemo } from '@/store/demo';
 import { EARNINGS, aed } from '@/data/seed';
 import { useCountUp, IS_TEST } from '@/screens/expert/motion';
+import { PRESS_SCALE } from '@/theme/motion';
 import { GRAD } from '@/theme/tokens';
 import { s } from '@/theme/scale';
 import { C, EASE } from '@/theme/tokens';
@@ -65,7 +66,7 @@ export default function Earnings() {
       </View>
       <Glass r={16} style={{ marginTop: s(14), paddingVertical: s(12), paddingHorizontal: s(14), flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <View><T size={9.5} c={C.mute}>Ready to withdraw</T><T size={15} w={700} ls={-0.02}>{aed(withdrawable)}</T></View>
-        <Pressable disabled={!withdrawable} onPress={openSheet} style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.96 : 1 }] })}>
+        <Pressable disabled={!withdrawable} onPress={openSheet} style={({ pressed }) => ({ transform: [{ scale: pressed ? PRESS_SCALE : 1 }] })}>
           <LinearGradient colors={GRAD} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ paddingVertical: s(9), paddingHorizontal: s(14), borderRadius: s(12), opacity: withdrawable ? 1 : 0.4 }}><T size={10.5} w={700} c="#fff">Withdraw</T></LinearGradient>
         </Pressable>
       </Glass>

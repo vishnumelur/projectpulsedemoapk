@@ -12,6 +12,7 @@ import { useDemo } from '@/store/demo';
 import { DAYS } from '@/data/seed';
 import type { Slot } from '@/data/types';
 import { GRAD, EASE } from '@/theme/tokens';
+import { SPRING } from '@/theme/motion';
 import { s } from '@/theme/scale';
 import { shadow } from '@/theme/shadow';
 import { C } from '@/theme/tokens';
@@ -55,9 +56,9 @@ function ToggleSlot({ x, onToggle }: { x: Slot; onToggle: (id: string) => void }
 export default function Availability() {
   const slots = useDemo((st) => st.slots); const toggle = useDemo((st) => st.toggleSlot);
   const [on, setOn] = useState(true);
-  // master switch: knob springs across, the gradient fades to grey, and all slots dim
+  // master switch: knob glides across (critically damped), the gradient fades to grey, and all slots dim
   const k = useSharedValue(1);
-  useEffect(() => { k.value = withSpring(on ? 1 : 0, { damping: 16, stiffness: 220 }); }, [on]);
+  useEffect(() => { k.value = withSpring(on ? 1 : 0, SPRING); }, [on]);
   const knobX = s(16);
   const knob = useAnimatedStyle(() => ({ transform: [{ translateX: (k.value - 1) * knobX }] }));
   const grad = useAnimatedStyle(() => ({ opacity: Math.max(0, Math.min(1, k.value)) }));

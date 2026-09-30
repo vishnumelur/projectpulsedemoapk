@@ -3,7 +3,7 @@ import { ScrollView, View } from 'react-native';
 import { useEffect, useMemo, useRef } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path } from 'react-native-svg';
-import Animated, { LinearTransition, useAnimatedProps, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
+import Animated, { useAnimatedProps, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Screen } from '@/ui/Screen';
 import { PageScroll } from '@/ui/PageScroll';
@@ -16,6 +16,7 @@ import { Rise, useCountUp, IS_TEST } from '@/screens/expert/motion';
 import { s } from '@/theme/scale';
 import { shadow } from '@/theme/shadow';
 import { C, EASE } from '@/theme/tokens';
+import { layout } from '@/theme/motion';
 
 const AP = Animated.createAnimatedComponent(Path);
 const SPARK_LEN = 130; // polyline length in viewBox units (≈128.4), rounded up so the dash fully hides it
@@ -69,8 +70,8 @@ export default function ExpertHome() {
         <T size={9} w={700} ls={0.14} c={C.mute} style={{ marginTop: s(16), marginBottom: s(8) }}>{`NEW REQUESTS · ${reqs.length}`}</T>
         <View style={{ gap: s(8) }}>
           {reqs.map((r, i) => (
-            <Animated.View key={r.id} layout={LinearTransition.springify().damping(18)}>
-              <Rise dx={28} dy={0} delay={180 + 110 * i}><RequestCard r={r} compact={i > 0} /></Rise>
+            <Animated.View key={r.id} layout={layout}>
+              <Rise dx={28} dy={0} delay={180 + 70 * i}><RequestCard r={r} compact={i > 0} /></Rise>
             </Animated.View>
           ))}
         </View>

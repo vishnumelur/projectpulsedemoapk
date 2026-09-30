@@ -5,7 +5,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useEffect } from 'react';
 import Svg, { Circle } from 'react-native-svg';
-import Animated, { ZoomIn, useSharedValue, useAnimatedProps, withTiming } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedProps, withTiming } from 'react-native-reanimated';
+import { ScaleIn } from '@/motion/ScaleIn';
+import { SUCCESS_FROM } from '@/theme/motion';
 import { Screen } from '@/ui/Screen';
 import { Header } from '@/ui/Header';
 import { T } from '@/ui/T';
@@ -75,7 +77,7 @@ export default function ExpertSetup() {
           const done = checklist[it.k];
           return (
             <View key={it.k} style={{ flexDirection: 'row', alignItems: 'center', gap: s(11), paddingVertical: s(12), borderBottomWidth: i === 4 ? 0 : 1, borderBottomColor: C.line }}>
-              {done ? <Animated.View entering={ZoomIn.springify().damping(9)}><LinearGradient colors={GRAD} locations={[0, 0.6, 1]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ width: s(24), height: s(24), borderRadius: s(12), alignItems: 'center', justifyContent: 'center' }}><Icon name="check" size={12} color="#fff" stroke={3} /></LinearGradient></Animated.View>
+              {done ? <ScaleIn from={SUCCESS_FROM}><LinearGradient colors={GRAD} locations={[0, 0.6, 1]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ width: s(24), height: s(24), borderRadius: s(12), alignItems: 'center', justifyContent: 'center' }}><Icon name="check" size={12} color="#fff" stroke={3} /></LinearGradient></ScaleIn>
                 : <View style={{ width: s(24), height: s(24), borderRadius: s(12), borderWidth: 1.5, borderColor: '#D3D8E8' }} />}
               <View style={{ flex: 1 }}><T size={12} w={700} lh={17 / 12}>{it.t}</T><T size={10} c={C.mute} lh={1.7} style={{ paddingTop: s(3) }}>{done ? it.done : it.hint}</T></View>
               {!done && <Pressable onPress={() => setOpen(it.k)}><T size={10.5} w={700} c={C.blue}>Add</T></Pressable>}
