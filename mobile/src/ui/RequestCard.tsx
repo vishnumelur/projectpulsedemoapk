@@ -1,5 +1,6 @@
 // src/ui/RequestCard.tsx — a client request as the expert sees it (E4 dashboard, Requests tab)
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
+import { PressScale } from '@/motion/PressScale';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Glass } from './Glass';
@@ -13,7 +14,7 @@ import type { Request } from '@/data/types';
 export function RequestCard({ r, compact }: { r: Request; compact?: boolean }) {
   const photo = r.clientName === 'Sara' ? 'sara' : 'karim';
   return (
-    <Pressable onPress={() => router.push(`/pro/request/${r.id}` as any)} style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.98 : 1 }] })}>
+    <PressScale onPress={() => router.push(`/pro/request/${r.id}` as any)}>
       <Glass r={18} style={{ paddingVertical: s(12), paddingHorizontal: s(14), opacity: compact ? 0.9 : 1 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(10) }}>
           <Avatar photo={photo} size={34} />
@@ -27,6 +28,6 @@ export function RequestCard({ r, compact }: { r: Request; compact?: boolean }) {
           </View>
         )}
       </Glass>
-    </Pressable>
+    </PressScale>
   );
 }

@@ -1,9 +1,11 @@
-import { Platform, Pressable, TextInput, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Svg, { Defs, LinearGradient as SvgGrad, Stop, Path } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { ZoomIn } from 'react-native-reanimated';
+import Animated, { cancelAnimation, useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
+import { DUR, SELECT_PEAK, ease } from '@/theme/motion';
+import { ScaleIn } from '@/motion/ScaleIn';
 import * as Haptics from 'expo-haptics';
 import { Screen } from '@/ui/Screen';
 import { BackButton } from '@/ui/Header';
@@ -21,18 +23,38 @@ import { C, F } from '@/theme/tokens';
 
 const LABEL = ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent'];
 const TAGS = ['On time', 'Clear report', 'Professional', 'Great value'];
+const glyph = (paint: string) => (
+  <Svg width={s(36)} height={s(36)} viewBox="0 0 24 24">
+    <Defs><SvgGrad id="sg" x1="0" y1="0" x2="1" y2="1"><Stop offset="0" stopColor="#31D1FF" /><Stop offset="0.55" stopColor="#0000FE" /><Stop offset="1" stopColor="#7A5CFF" /></SvgGrad></Defs>
+    <Path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.3l-5.6 2.9 1.1-6.3L2.9 9.5l6.3-.9z" fill={paint} />
+  </Svg>
+);
+const GLOW = Platform.OS === 'web' ? ({ filter: 'drop-shadow(0 6px 10px rgba(0,0,254,0.28))' } as any)
+  // Android: the same glyph-shaped drop shadow via RN's filter (a box shadow would draw the star's square box)
+  : Platform.OS === 'android' ? ({ filter: [{ dropShadow: { offsetX: 0, offsetY: s(6), standardDeviation: s(5), color: 'rgba(0,0,254,0.28)' } }] } as any)
+  : { ...shadow(C.blue, 0.28, s(5), s(6)) };
+/** Stars arrive with a calm staggered scale-in. Lighting one crossfades the gradient fill in while it grows to at most
+ *  SELECT_PEAK and settles back (EASE_OUT). No pop, no bounce. */
 function Star({ on, i, onPress }: { on: boolean; i: number; onPress: () => void }) {
+  const fill = useSharedValue(on ? 1 : 0);
+  const k = useSharedValue(1);
+  const first = useRef(true);
+  useEffect(() => {
+    fill.value = withTiming(on ? 1 : 0, ease(DUR.base));
+    if (on && !first.current) k.value = withSequence(withTiming(SELECT_PEAK, ease(DUR.fast)), withTiming(1, ease(DUR.base)));
+    first.current = false;
+  }, [on]);
+  useEffect(() => () => { cancelAnimation(fill); cancelAnimation(k); }, []);
+  const grow = useAnimatedStyle(() => ({ transform: [{ scale: k.value }] }));
+  const lit = useAnimatedStyle(() => ({ opacity: fill.value }));
   return (
     <Pressable accessibilityLabel={`${i} stars`} onPress={onPress}>
-      <Animated.View entering={ZoomIn.delay(100 * i).springify().damping(10)} style={on ? (Platform.OS === 'web' ? ({ filter: 'drop-shadow(0 6px 10px rgba(0,0,254,0.28))' } as any)
-        // Android: the same glyph-shaped drop shadow via RN's filter (a box shadow would draw the star's square box)
-        : Platform.OS === 'android' ? ({ filter: [{ dropShadow: { offsetX: 0, offsetY: s(6), standardDeviation: s(5), color: 'rgba(0,0,254,0.28)' } }] } as any)
-        : { ...shadow(C.blue, 0.28, s(5), s(6)) }) : undefined}>
-        <Svg width={s(36)} height={s(36)} viewBox="0 0 24 24">
-          <Defs><SvgGrad id="sg" x1="0" y1="0" x2="1" y2="1"><Stop offset="0" stopColor="#31D1FF" /><Stop offset="0.55" stopColor="#0000FE" /><Stop offset="1" stopColor="#7A5CFF" /></SvgGrad></Defs>
-          <Path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.3l-5.6 2.9 1.1-6.3L2.9 9.5l6.3-.9z" fill={on ? 'url(#sg)' : '#E3E6F0'} />
-        </Svg>
-      </Animated.View>
+      <ScaleIn delay={60 * (i - 1)}>
+        <Animated.View style={grow}>
+          {glyph('#E3E6F0')}
+          <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, GLOW, lit]}>{glyph('url(#sg)')}</Animated.View>
+        </Animated.View>
+      </ScaleIn>
     </Pressable>
   );
 }
@@ -42,7 +64,13 @@ export default function Review() {
   const [note, setNote] = useState<string | null>(null); const [done, setDone] = useState(false);
   const toggle = (t: string) => { Haptics.selectionAsync(); setTags((x) => (x.includes(t) ? x.filter((y) => y !== t) : [...x, t])); };
   const sent = useRef(false);
-  const submit = () => { if (sent.current) return; sent.current = true; useDemo.getState().submitReview(id, stars, tags); setDone(true); setTimeout(() => router.replace('/home'), 1200); };
+  const leave = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (leave.current) clearTimeout(leave.current); }, []);
+  const submit = () => {
+    if (sent.current) return; sent.current = true; useDemo.getState().submitReview(id, stars, tags); setDone(true);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    leave.current = setTimeout(() => router.replace('/home'), 1200);
+  };
   return (
     <Screen bg="review">
       <View style={{ paddingTop: s(6) }}><BackButton flat label="✕" onPress={() => router.replace('/home')} /></View>

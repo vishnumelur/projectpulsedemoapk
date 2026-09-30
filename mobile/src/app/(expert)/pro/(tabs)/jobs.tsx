@@ -13,6 +13,7 @@ import { DayStrip, DEFAULT_DAY, StripDay, stripDay } from '@/ui/DayStrip';
 import { enterFade, exitFade } from '@/theme/motion';
 import type { Slot } from '@/data/types';
 import { GRAD, EASE } from '@/theme/tokens';
+import { SPRING } from '@/theme/motion';
 import { s } from '@/theme/scale';
 import { shadow } from '@/theme/shadow';
 import { C } from '@/theme/tokens';
@@ -80,9 +81,9 @@ export default function Availability() {
   const changed = useRef(false);
   const pick = useCallback((k: string) => { changed.current = true; setDay(k); }, []);
   const [on, setOn] = useState(true);
-  // master switch: knob springs across, the gradient fades to grey, and all slots dim
+  // master switch: knob glides across (critically damped), the gradient fades to grey, and all slots dim
   const k = useSharedValue(1);
-  useEffect(() => { k.value = withSpring(on ? 1 : 0, { damping: 16, stiffness: 220 }); }, [on]);
+  useEffect(() => { k.value = withSpring(on ? 1 : 0, SPRING); }, [on]);
   const knobX = s(16);
   const knob = useAnimatedStyle(() => ({ transform: [{ translateX: (k.value - 1) * knobX }] }));
   const grad = useAnimatedStyle(() => ({ opacity: Math.max(0, Math.min(1, k.value)) }));

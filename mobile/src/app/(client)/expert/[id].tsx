@@ -1,6 +1,6 @@
 import { Platform, Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import Animated, { FadeIn, FadeInDown, interpolate, interpolateColor, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { interpolate, interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Image } from 'expo-image';
@@ -16,18 +16,18 @@ import { EXPERTS, aed } from '@/data/seed';
 import { PHOTOS } from '@/theme/photos';
 import { RollingText, takeTileRect } from '@/screens/experts/fx';
 import { s } from '@/theme/scale';
-import { C, EASE } from '@/theme/tokens';
+import { C } from '@/theme/tokens';
+import { DUR, SELECT_PEAK, ease, enterFade, enterUp } from '@/theme/motion';
 
 type Svc = (typeof EXPERTS)[number]['services'][number];
 const HERO_H = s(250);
 const HERO_RAD = s(18);
 const DOT_ON = s(5);
-const SPRING = { damping: 11, stiffness: 190, mass: 0.8 };
 const ANDROID = Platform.OS === 'android'; const S4 = s(4), S10 = s(10), S14 = s(14), S24 = s(24);
-/** Service card: the blue ring/border springs across on select (pop + colour); cards glide in staggered. */
+/** Service card: the blue ring/border glides across on select (colour + a calm ring settle); cards glide in staggered. */
 function ServiceCard({ x, on, i, onPress }: { x: Svc; on: boolean; i: number; onPress: () => void }) {
   const sel = useSharedValue(on ? 1 : 0);
-  useEffect(() => { sel.value = withSpring(on ? 1 : 0, SPRING); }, [on, sel]);
+  useEffect(() => { sel.value = withTiming(on ? 1 : 0, ease(DUR.base)); }, [on, sel]);
   const card = useAnimatedStyle(() => {
     const color = interpolateColor(sel.value, [0, 1], ['#16205A', C.blue]); const op = interpolate(sel.value, [0, 1], [0.05, 0.12]);
     if (ANDROID) { // boxShadow (see theme/shadow) with the mockup's .opt -> .opt.on values: 0 4px 14px navy .05 -> 0 10px 24px blue .12
@@ -38,9 +38,9 @@ function ServiceCard({ x, on, i, onPress }: { x: Svc; on: boolean; i: number; on
   });
   const ring = useAnimatedStyle(() => ({ opacity: Math.min(1, sel.value), transform: [{ scale: interpolate(sel.value, [0, 1], [1.05, 1]) }] }));
   const dot = useAnimatedStyle(() => ({ borderWidth: interpolate(sel.value, [0, 1], [2, DOT_ON]), borderColor: interpolateColor(sel.value, [0, 1], ['#CFD4E6', C.blue]),
-    transform: [{ scale: interpolate(sel.value, [0, 0.5, 1], [1, 1.22, 1]) }] }));
+    transform: [{ scale: interpolate(sel.value, [0, 0.5, 1], [1, SELECT_PEAK, 1]) }] }));
   return (
-    <Animated.View entering={FadeInDown.delay(120 + i * 90).springify().damping(16)} style={{ marginTop: s(10) }}>
+    <Animated.View entering={enterUp().delay(120 + i * 60)} style={{ marginTop: s(10) }}>
       <Pressable onPress={onPress}>
         <Animated.View style={[{ flexDirection: 'row', alignItems: 'center', gap: s(12), paddingVertical: s(14), paddingHorizontal: s(16), borderRadius: s(18), backgroundColor: '#fff',
           shadowRadius: s(10) }, card]}>
@@ -61,7 +61,7 @@ export default function ExpertProfile() {
   const [svc, setSvc] = useState(e.services[0].id); const price = e.services.find((x) => x.id === svc)!.price;
   const insets = useSafeAreaInsets(); const { width: W } = useWindowDimensions();
   const [from] = useState(() => takeTileRect(e.id)); const zoom = useSharedValue(from ? 0 : 1); const booked = useRef(false);
-  useEffect(() => { if (from) zoom.value = withTiming(1, { duration: 460, easing: EASE }); }, [from, zoom]);
+  useEffect(() => { if (from) zoom.value = withTiming(1, ease(460)); }, [from, zoom]);
   // portrait grows out of the tapped tile (uniform scale + corner radius), then sits full-bleed
   const heroStyle = useAnimatedStyle(() => {
     if (!from) return {};
@@ -81,7 +81,7 @@ export default function ExpertProfile() {
             <Pressable onPress={() => router.push(`/chat/${e.id}`)}><Glass r={16} style={{ width: s(32), height: s(32), alignItems: 'center', justifyContent: 'center' }}><View style={{ zIndex: 2 }}><Icon name="mail" size={13} stroke={2} /></View></Glass></Pressable>
           </View>
         </Animated.View>
-        <Animated.View entering={FadeIn.delay(200).duration(360)} style={{ marginTop: -s(46), paddingHorizontal: s(20) }}>
+        <Animated.View entering={enterFade(200, 360)} style={{ marginTop: -s(46), paddingHorizontal: s(20) }}>
           <T size={25} w={700} ls={-0.035} lh={1.05}>{e.name}</T>
           <T size={11} c={C.mute} style={{ marginTop: s(4) }}>{e.role === 'Structural' ? 'Structural engineer' : e.role} · <T size={11} c={C.star}>★</T> {e.rating.toFixed(1)} · {e.jobs} jobs</T>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(5), marginTop: s(8) }}>

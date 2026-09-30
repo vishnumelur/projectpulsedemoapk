@@ -1,5 +1,5 @@
 import { Pressable, View } from 'react-native';
-import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Screen } from '@/ui/Screen';
@@ -14,7 +14,8 @@ import { EXPERTS, MARKET_AVG, aed } from '@/data/seed';
 import { s } from '@/theme/scale';
 import { shadow } from '@/theme/shadow';
 import { CountUp } from '@/screens/experts/fx';
-import { C, EASE } from '@/theme/tokens';
+import { C } from '@/theme/tokens';
+import { DUR, easeInOut, enterUp } from '@/theme/motion';
 
 const hide = { accessibilityElementsHidden: true, importantForAccessibility: 'no-hide-descendants' } as const;
 const FACE = { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backfaceVisibility: 'hidden' } as const;
@@ -26,7 +27,7 @@ export default function Quotes() {
   const req = useDemo((st) => st.requests.find((r) => r.id === request));
   const best = useDemo((st) => bestQuote(st, request));
   const [back, setBack] = useState(false); const flip = useSharedValue(0); const accepted = useRef(false);
-  const toggle = () => { const nb = !back; setBack(nb); flip.value = withTiming(nb ? 1 : 0, { duration: 650, easing: EASE }); };
+  const toggle = () => { const nb = !back; setBack(nb); flip.value = withTiming(nb ? 1 : 0, easeInOut(DUR.reveal)); };
   const frontSt = useAnimatedStyle(() => ({ transform: [{ perspective: 1000 }, { rotateY: `${flip.value * 180}deg` }] }));
   const frontOp = useAnimatedStyle(() => ({ opacity: flip.value < 0.5 ? 1 : 0 }));
   const backOp = useAnimatedStyle(() => ({ opacity: flip.value < 0.5 ? 0 : 1 }));
@@ -40,7 +41,7 @@ export default function Quotes() {
       <Header />
       <T size={25} w={700} ls={-0.035} lh={1.05} style={{ marginTop: s(14) }}>Your best match</T>
       <T size={11} c={C.mute} style={{ marginTop: s(4) }}>{`From ${all.length} quotes for your ${(req?.title ?? 'bid review').toLowerCase()}`}</T>
-      <Animated.View entering={FadeInDown.delay(100).springify().damping(16)} style={{ marginTop: s(18) }}>
+      <Animated.View entering={enterUp().delay(100)} style={{ marginTop: s(18) }}>
         <Animated.View {...(back ? hide : {})} pointerEvents={back ? 'none' : 'auto'} style={[{ padding: s(18), borderRadius: s(24), backgroundColor: '#fff', alignItems: 'center', ...shadow('#16205A', 0.06, s(10)), backfaceVisibility: 'hidden' }, frontSt, frontOp]}>
         <Avatar photo={ex.photo} size={64} />
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(4), marginTop: s(10) }}>

@@ -2,7 +2,7 @@
 import { Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import Animated, { FadeInDown, LinearTransition, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
+import Animated, { cancelAnimation, useAnimatedStyle, useReducedMotion, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Screen } from './Screen';
 import { PageScroll } from './PageScroll';
@@ -15,7 +15,8 @@ import { LogoMark } from './LogoMark';
 import { useDemo } from '@/store/demo';
 import { EXPERTS, CLIENT } from '@/data/seed';
 import { s } from '@/theme/scale';
-import { C, EASE } from '@/theme/tokens';
+import { C } from '@/theme/tokens';
+import { DUR, ease, easeInOut, enterUp, layout } from '@/theme/motion';
 import type { Notice, Thread } from '@/data/types';
 
 const ago = (at: number, now: number) => { const m = Math.round((now - at) / 60000); return m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : 'Mon'; };
@@ -42,13 +43,18 @@ function threadAvatar(t: Thread) {
 }
 function TypingText({ children }: { children: string }) {
   const o = useSharedValue(1);
-  useEffect(() => { o.value = withRepeat(withSequence(withTiming(0.45, { duration: 900, easing: EASE }), withTiming(1, { duration: 900, easing: EASE })), -1); }, []);
+  const reduce = useReducedMotion();
+  useEffect(() => {
+    if (reduce) return;
+    o.value = withRepeat(withSequence(withTiming(0.45, easeInOut(900)), withTiming(1, easeInOut(900))), -1);
+    return () => cancelAnimation(o);
+  }, [reduce]);
   const st = useAnimatedStyle(() => ({ opacity: o.value }));
   return <Animated.View style={[{ marginTop: 2 }, st]}><T size={10.5} w={600} c={C.blue} numberOfLines={1}>{children}</T></Animated.View>;
 }
 function UnreadDot({ on }: { on: boolean }) {
   const o = useSharedValue(on ? 1 : 0);
-  useEffect(() => { o.value = withTiming(on ? 1 : 0, { duration: 400 }); }, [on]);
+  useEffect(() => { o.value = withTiming(on ? 1 : 0, ease(DUR.slow)); }, [on]);
   const st = useAnimatedStyle(() => ({ opacity: o.value }));
   return <Animated.View pointerEvents="none" style={[{ position: 'absolute', right: 0, top: s(13), width: s(7), height: s(7), borderRadius: s(4), backgroundColor: C.blue }, st]} />;
 }
@@ -92,7 +98,7 @@ export function InboxView({ role, initialTab = 0, chatBase }: { role: 'client' |
         {tab === 0 ? (
           <Glass r={18} style={{ marginTop: s(14), paddingHorizontal: s(14) }}>
             {threads.map((t, i) => (
-              <Animated.View key={t.id} layout={LinearTransition.springify().damping(18)} entering={initialIds.current.has(t.id) ? undefined : FadeInDown.springify().damping(16)}
+              <Animated.View key={t.id} layout={layout} entering={initialIds.current.has(t.id) ? undefined : enterUp()}
                 style={{ borderBottomWidth: i === threads.length - 1 ? 0 : 1, borderBottomColor: C.line }}>
                 <Pressable onPress={() => router.push(`${chatBase}/${t.id}` as any)} style={{ flexDirection: 'row', alignItems: 'center', gap: s(11), paddingVertical: s(11) }}>
                   {threadAvatar(t)}

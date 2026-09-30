@@ -78,7 +78,7 @@ export default function Book() {
         <Header center={<Eyebrow>BOOK</Eyebrow>} />
         <T size={27} w={700} ls={-0.035} lh={1.05} style={{ marginTop: s(12) }}>{'When suits\nyou?'}</T>
         <DayStrip variant="blue" px={16} mt={12} selected={day} isDisabled={notBookable} onSelect={pickDay} />
-        <Animated.View key={`slots-${day}`} entering={enterFade()} exiting={exitFade}>
+        <Animated.View key={`slots-${day}`} entering={enterFade(0, 260)} exiting={exitFade}>
           <T size={9.5} w={600} c={C.mute} style={{ marginTop: s(14) }}>{`${e.first}'s free times on ${heading(d)}`}</T>
           <View style={{ gap: s(6), marginTop: s(10) }}>
             {[slots.slice(0, 3), slots.slice(3)].map((row, ri) => <View key={ri} style={{ flexDirection: 'row', gap: s(6) }}>{row.map((x) => {

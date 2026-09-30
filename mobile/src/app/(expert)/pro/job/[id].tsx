@@ -75,7 +75,7 @@ export default function Deliver() {
       {/* ✦ photos drop into the row */}
       <View style={{ flexDirection: 'row', gap: s(6), marginTop: s(8) }}>
         {photos.map((ph, i) => (
-          <Rise key={ph} dy={-22} scale={0.9} delay={i < initial.current ? 420 + 130 * i : 0} style={{ flex: 1 }}>
+          <Rise key={ph} dy={-22} scale={0.9} delay={i < initial.current ? 420 + 70 * i : 0} style={{ flex: 1 }}>
             <Image source={PHOTOS[ph]} contentFit="cover" style={{ width: '100%', height: s(56), borderRadius: s(12) }} />
           </Rise>
         ))}

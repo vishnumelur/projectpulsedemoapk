@@ -2,7 +2,7 @@ import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 import { Image } from 'expo-image';
 import { Screen } from '@/ui/Screen';
@@ -17,6 +17,7 @@ import { STAGES, BUILDINGS } from '@/data/types';
 import { PHOTOS } from '@/theme/photos';
 import { s } from '@/theme/scale';
 import { C, EASE } from '@/theme/tokens';
+import { DUR, SCALE_FROM, ease } from '@/theme/motion';
 
 const LH = 1.26; // Chrome 'normal' line height of the mockup font
 const L = (props: React.ComponentProps<typeof T>) => <T lh={LH} {...props} />;
@@ -28,7 +29,7 @@ function BudgetRing({ size, thickness, children }: { size: number; thickness: nu
   const arc = (a: number, b: number) => `M ${pt(a)} A ${r} ${r} 0 ${b - a > 0.5 ? 1 : 0} 1 ${pt(b)}`;
   const v = useSharedValue(0);
   useEffect(() => { v.value = withTiming(1, { duration: 1200, easing: EASE }); }, [v]);
-  const st = useAnimatedStyle(() => ({ opacity: v.value, transform: [{ rotate: `${(v.value - 1) * 90}deg` }, { scale: 0.8 + 0.2 * v.value }] }));
+  const st = useAnimatedStyle(() => ({ opacity: v.value, transform: [{ rotate: `${(v.value - 1) * 20}deg` }, { scale: SCALE_FROM + (1 - SCALE_FROM) * v.value }] }));
   return (
     <View style={{ width: D, height: D, alignItems: 'center', justifyContent: 'center' }}>
       <Animated.View style={[{ position: 'absolute', width: D, height: D }, st]}>
@@ -122,7 +123,7 @@ function TabsBar({ tab, onTab }: { tab: Tab; onTab: (t: Tab) => void }) {
 /** Full-screen photo viewer: zooms in from the tapped photo, swipe between dates, close with the cross. */
 function PhotoViewer({ index, onIndex, onClose }: { index: number | null; onIndex: (i: number) => void; onClose: () => void }) {
   const v = useSharedValue(0); const open = index !== null;
-  useEffect(() => { v.value = 0; if (open) v.value = withSpring(1, { damping: 16, stiffness: 160 }); }, [open, index, v]);
+  useEffect(() => { v.value = 0; if (open) v.value = withTiming(1, ease(DUR.slow)); }, [open, index, v]);
   const st = useAnimatedStyle(() => ({ opacity: v.value, transform: [{ scale: 0.55 + 0.45 * v.value }] }));
   const pan = Gesture.Pan().activeOffsetX([-16, 16]).failOffsetY([-24, 24]).onEnd((e) => {
     'worklet';

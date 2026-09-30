@@ -1,7 +1,8 @@
 // Motion helpers for the expert work screens (E4–E8). Every effect settles on the approved static frame.
 import { useEffect, useRef, useState } from 'react';
 import { View, StyleProp, ViewStyle } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { cancelAnimation, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
+import { DUR, RISE, SUCCESS_FROM, ease } from '@/theme/motion';
 import { GradientText } from '@/fx/GradientText';
 import { IS_TEST } from '@/screens/experts/fx';
 import { s } from '@/theme/scale';
@@ -24,14 +25,17 @@ export function useCountUp(to: number, duration = 1100, delay = 0) {
   return v;
 }
 
-/** Entrance: rises (or drops, dy < 0; slides with dx) into place with a spring and fades in; rests at translate 0 / opacity 1. */
+/** Entrance: rises (or drops, dy < 0; slides with dx) into place on EASE_OUT and fades in; rests at translate 0 / opacity 1.
+ *  Calm by construction: travel is capped at RISE px and the start scale at SUCCESS_FROM, so nothing flies or pops. */
 export function Rise({ delay = 0, dy = 14, dx = 0, scale = 1, style, children }: { delay?: number; dy?: number; dx?: number; scale?: number; style?: StyleProp<ViewStyle>; children: React.ReactNode }) {
   const k = useSharedValue(IS_TEST ? 1 : 0);
-  useEffect(() => { if (!IS_TEST) k.value = withDelay(delay, withSpring(1, { damping: 15, stiffness: 140, mass: 0.9 })); }, []);
-  const d = s(dy); const e = s(dx); // plain helpers stay outside the worklet (Android: no sync remote calls)
+  useEffect(() => { if (!IS_TEST) k.value = withDelay(delay, withTiming(1, ease(DUR.reveal))); return () => cancelAnimation(k); }, []);
+  // plain helpers stay outside the worklet (Android: no sync remote calls)
+  const cap = (v: number) => Math.sign(v) * Math.min(Math.abs(s(v)), RISE);
+  const d = cap(dy); const e = cap(dx); const sc = Math.max(scale, SUCCESS_FROM);
   const st = useAnimatedStyle(() => ({
     opacity: Math.min(1, k.value * 1.6),
-    transform: [{ translateX: e * (1 - k.value) }, { translateY: d * (1 - k.value) }, { scale: scale + (1 - scale) * k.value }],
+    transform: [{ translateX: e * (1 - k.value) }, { translateY: d * (1 - k.value) }, { scale: sc + (1 - sc) * k.value }],
   }));
   return <Animated.View style={[style, st]}>{children}</Animated.View>;
 }
@@ -47,7 +51,7 @@ function colorAt(colors: readonly string[], f: number) {
 
 function RollChar({ from, to, dir, h, size, colors }: { from: string; to: string; dir: 1 | -1; h: number; size: number; colors: readonly string[] }) {
   const p = useSharedValue(0);
-  useEffect(() => { p.value = withTiming(1, { duration: 420, easing: EASE }); }, []);
+  useEffect(() => { p.value = withTiming(1, ease(DUR.slow)); return () => cancelAnimation(p); }, []);
   const inSt = useAnimatedStyle(() => ({ transform: [{ translateY: dir * h * (1 - p.value) }] }));
   const outSt = useAnimatedStyle(() => ({ transform: [{ translateY: -dir * h * p.value }], opacity: 1 - p.value * 0.6 }));
   const g = (ch: string) => <GradientText size={size} w={700} ls={-0.04} colors={colors}>{ch}</GradientText>;
@@ -74,7 +78,7 @@ export function RollingPrice({ value, size, amber, gradient }: { value: number; 
     return () => clearTimeout(t);
   }, [text]);
   const tint = useSharedValue(amber ? 1 : 0);
-  useEffect(() => { tint.value = withTiming(amber ? 1 : 0, { duration: 320, easing: EASE }); }, [amber]);
+  useEffect(() => { tint.value = withTiming(amber ? 1 : 0, ease(320)); }, [amber]);
   const gSt = useAnimatedStyle(() => ({ opacity: 1 - tint.value }));
   const aSt = useAnimatedStyle(() => ({ opacity: tint.value }));
   const colors = amber ? AMBER_GRAD : gradient;

@@ -2,6 +2,7 @@ import { Pressable, TextInput, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
+import { SPRING, ease } from '@/theme/motion';
 import * as Haptics from 'expo-haptics';
 import { GradientText } from '@/fx/GradientText';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -17,7 +18,7 @@ import { useDemo } from '@/store/demo';
 import { simulateQuotes } from '@/sim/scheduler';
 import { s } from '@/theme/scale';
 import { shadow } from '@/theme/shadow';
-import { C, F, EASE } from '@/theme/tokens';
+import { C, F } from '@/theme/tokens';
 
 const WHEN = [['asap', 'ASAP'], ['2w', 'Within 2 weeks'], ['flex', 'Flexible']] as const;
 type When = (typeof WHEN)[number][0];
@@ -34,7 +35,7 @@ function TypedSummary({ text, instant }: { text: string; instant: boolean }) {
     return () => clearInterval(id);
   }, [instant, done, text]);
   useEffect(() => { if (n >= text.length) setN(text.length); }, [n, text]);
-  useEffect(() => { if (!done) return; fade.value = withTiming(1, { duration: 350, easing: EASE }); const id = setTimeout(() => setGone(true), 400); return () => clearTimeout(id); }, [done]);
+  useEffect(() => { if (!done) return; fade.value = withTiming(1, ease(350)); const id = setTimeout(() => setGone(true), 400); return () => clearTimeout(id); }, [done]);
   const settled = useAnimatedStyle(() => ({ opacity: fade.value }));
   const typing = useAnimatedStyle(() => ({ opacity: 1 - fade.value }));
   return (
@@ -59,7 +60,7 @@ function SlidingSeg({ value, onChange }: { value: When; onChange: (k: When) => v
   useEffect(() => {
     if (!segW) return;
     if (!placed.current) { placed.current = true; x.value = idx * segW; } // first measurement: snap, no spring
-    else x.value = withSpring(idx * segW, { damping: 18, stiffness: 220 });
+    else x.value = withSpring(idx * segW, SPRING);
   }, [idx, segW]);
   const thumb = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
   return (

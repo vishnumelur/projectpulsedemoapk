@@ -2,7 +2,9 @@ import { Pressable, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import * as Haptics from 'expo-haptics';
-import Animated, { FadeInDown, FadeOut, ZoomIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
+import { SUCCESS_FROM, enterUp, exitFade } from '@/theme/motion';
+import { ScaleIn } from '@/motion/ScaleIn';
 import { Screen } from '@/ui/Screen';
 import { T } from '@/ui/T';
 import { Glass } from '@/ui/Glass';
@@ -24,7 +26,7 @@ export default function Booked() {
   const [toast, setToast] = useState(false);
   const toastT = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    // the ring draws itself 0 -> full (EASE, 900ms), then the tick pops and the success haptic plays
+    // the ring draws itself 0 -> full (EASE, 900ms), then the tick fades in and settles (0.9 -> 1, EASE_OUT) with the success haptic
     const t0 = Date.now(); let raf = 0;
     const step = () => { const k = Math.min(1, (Date.now() - t0) / 900); setProg(EASE.factory()(k)); if (k < 1) raf = requestAnimationFrame(step); };
     raf = requestAnimationFrame(step);
@@ -44,12 +46,12 @@ export default function Booked() {
           <View style={{ position: 'absolute', width: s(92), height: s(92), borderRadius: s(46), backgroundColor: 'rgba(0,0,254,0.16)', ...shadow(C.blue, 0.3, s(25)) }} />
           <View style={{ position: 'absolute', width: s(80), height: s(80), borderRadius: s(40), backgroundColor: 'rgba(255,255,255,0.92)' }} />
           <ProgressRing size={92} thickness={6} progress={prog} colors={['#31D1FF', '#0000FE', '#0000FE', '#31D1FF']} track="transparent">
-            {tick ? <Animated.View entering={ZoomIn.springify().damping(9)}><Icon name="check" color={C.blue} size={34} stroke={2.6} /></Animated.View> : <View style={{ width: s(34), height: s(34) }} />}
+            {tick ? <ScaleIn from={SUCCESS_FROM}><Icon name="check" color={C.blue} size={34} stroke={2.6} /></ScaleIn> : <View style={{ width: s(34), height: s(34) }} />}
           </ProgressRing>
         </View>
         <T size={27} w={700} ls={-0.035} lh={1.05} style={{ marginTop: s(26) }}>You're booked</T>
         <T size={11} c={C.mute} lh={1.5} align="center" style={{ marginTop: s(6) }}>{`${e.first} will review your 3 bids and\nvisit the site on Thursday.`}</T>
-        <Animated.View entering={FadeInDown.delay(450).duration(500)} style={{ alignSelf: 'stretch', marginTop: s(20) }}>
+        <Animated.View entering={enterUp().delay(450)} style={{ alignSelf: 'stretch', marginTop: s(20) }}>
           <Glass r={18} style={{ padding: s(12), flexDirection: 'row', alignItems: 'center', gap: s(10) }}>
             <Avatar photo={e.photo} size={38} />
             <View style={{ flex: 1, paddingRight: s(8) }}><T size={12} w={700}>{`${job.dayLabel} · ${job.timeLabel}`}</T><T size={9.5} c={C.mute}>{`Al Reem Island · ${aed(job.total, 2)} paid`}</T></View>
@@ -61,7 +63,7 @@ export default function Booked() {
         </View>
       </View>
       {toast && (
-        <Animated.View entering={FadeInDown.duration(220)} exiting={FadeOut.duration(200)} pointerEvents="none" style={{ position: 'absolute', left: s(16), right: s(16), bottom: s(92) }}>
+        <Animated.View entering={enterUp()} exiting={exitFade} pointerEvents="none" style={{ position: 'absolute', left: s(16), right: s(16), bottom: s(92) }}>
           <Glass r={16} style={{ paddingVertical: s(10), paddingHorizontal: s(14), flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: s(8) }}>
             <Icon name="check" color={C.blue} size={14} stroke={2.6} /><T size={11} w={600}>Added to calendar</T>
           </Glass>

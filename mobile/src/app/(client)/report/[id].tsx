@@ -2,7 +2,8 @@ import { useRef, useState } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
+import { enterUp } from '@/theme/motion';
 import { Screen } from '@/ui/Screen';
 import { Header } from '@/ui/Header';
 import { T } from '@/ui/T';
@@ -40,7 +41,7 @@ export default function Report() {
         ...(Platform.OS === 'android' ? { boxShadow: `0px ${s(10)}px ${s(28)}px rgba(0,0,254,0.08), 0px 0px 0px ${s(1)}px rgba(0,0,254,0.06)` } : shadow(C.blue, 0.08, s(14))) }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(7) }}><Orb size={14} /><T size={9} w={700} ls={0.08} c={C.blue}>PULSE SUMMARY</T></View>
         {BULLETS.map(([b, t], i) => (
-          <Animated.View key={i} entering={FadeInDown.delay(150 * i)} style={{ flexDirection: 'row', marginTop: s(6), marginLeft: s(4), gap: s(6) }}>
+          <Animated.View key={i} entering={enterUp(i, 70)} style={{ flexDirection: 'row', marginTop: s(6), marginLeft: s(4), gap: s(6) }}>
             <View style={{ width: s(4), height: s(4), borderRadius: s(2), backgroundColor: C.navy, marginTop: s(8) }} /><T size={11} lh={1.5} style={{ flex: 1 }}>{b ? <T size={11} w={700}>{b}</T> : null}{t}</T>
           </Animated.View>
         ))}

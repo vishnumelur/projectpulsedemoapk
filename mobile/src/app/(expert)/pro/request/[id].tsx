@@ -13,6 +13,7 @@ import { Dock } from '@/ui/Dock';
 import { Orb } from '@/fx/Orb';
 import { useDemo } from '@/store/demo';
 import { RollingPrice } from '@/screens/expert/motion';
+import { PRESS_SCALE } from '@/theme/motion';
 import { GRAD } from '@/theme/tokens';
 import { s } from '@/theme/scale';
 import { shadow } from '@/theme/shadow';
@@ -37,7 +38,7 @@ export default function SendQuote() {
   };
   const stepBtn = (label: string, d: number, a11y: string) => (
     <Pressable accessibilityLabel={a11y} onPress={() => { setPrice((p) => Math.max(100, p + d)); Haptics.selectionAsync(); }}
-      style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.92 : 1 }] })}>
+      style={({ pressed }) => ({ transform: [{ scale: pressed ? PRESS_SCALE : 1 }] })}>
       <Glass r={20} style={{ width: s(40), height: s(40), alignItems: 'center', justifyContent: 'center' }}><T size={18}>{label}</T></Glass>
     </Pressable>
   );

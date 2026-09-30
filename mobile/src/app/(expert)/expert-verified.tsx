@@ -2,7 +2,8 @@ import { View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { resetTo } from '@/nav/back';
 import { useEffect, useState } from 'react';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import Animated, { cancelAnimation, useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import { DUR, SCALE_FROM, ease } from '@/theme/motion';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { Screen } from '@/ui/Screen';
@@ -19,11 +20,11 @@ import { s } from '@/theme/scale';
 import { shadow } from '@/theme/shadow';
 import { C } from '@/theme/tokens';
 
-// ✦ the badge spins in with a spring (ends at the mockup's rotate(-8deg))
+// ✦ the badge turns gently into place: fades in while rotating -20° -> the mockup's -8° (EASE_OUT, DUR.reveal). No spin, no spring.
 function Badge({ children }: { children: React.ReactNode }) {
   const k = useSharedValue(0);
-  useEffect(() => { k.value = withSpring(1, { damping: 9, stiffness: 110 }); }, []);
-  const st = useAnimatedStyle(() => ({ transform: [{ scale: k.value }, { rotate: `${-8 - 180 * (1 - k.value)}deg` }] }));
+  useEffect(() => { k.value = withTiming(1, ease(DUR.reveal)); return () => cancelAnimation(k); }, []);
+  const st = useAnimatedStyle(() => ({ opacity: k.value, transform: [{ scale: SCALE_FROM + (1 - SCALE_FROM) * k.value }, { rotate: `${-8 - 12 * (1 - k.value)}deg` }] }));
   return <Animated.View style={[st, { marginTop: s(84), borderRadius: s(30), ...shadow(C.blue, 0.3, s(22), s(20)) }]}>{children}</Animated.View>;
 }
 export default function ExpertVerified() {
