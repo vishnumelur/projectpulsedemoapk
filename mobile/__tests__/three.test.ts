@@ -21,3 +21,11 @@ test('villa stage variants exist (survey, wireframe, construction)', () => {
   expect(v.survey.children.length).toBeGreaterThan(0);
   expect(v.build.children.length).toBeGreaterThan(0);
 });
+
+import { shouldUpdateShadows, SHADOW_WINDOW_MS } from '@/three/shadow';
+test('shadow map updates only inside the rise window', () => {
+  expect(shouldUpdateShadows(1000, null)).toBe(false);
+  expect(shouldUpdateShadows(1000, 1000)).toBe(true);
+  expect(shouldUpdateShadows(1000 + SHADOW_WINDOW_MS - 1, 1000)).toBe(true);
+  expect(shouldUpdateShadows(1000 + SHADOW_WINDOW_MS, 1000)).toBe(false);
+});

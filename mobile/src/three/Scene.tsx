@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { useEffect, useMemo, useRef } from 'react';
+import { shouldUpdateShadows } from './shadow';
 import { buildVilla, buildShop, buildTower, buildFactory, buildReno, villaStages, M } from './models';
 
 export type ModelId = 'villa' | 'shop' | 'tower' | 'factory' | 'reno';
@@ -21,7 +22,8 @@ export function Scene({ model, stage = 'solid', lights = 0.25, radius, target, h
   useEffect(() => { // environment + lights once
     const pm = new THREE.PMREMGenerator(gl); scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; (scene as any).environmentIntensity = 0.6;
     gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1.0; gl.shadowMap.enabled = shadows; gl.shadowMap.type = THREE.PCFSoftShadowMap;
-    return () => pm.dispose();
+    gl.shadowMap.autoUpdate = false; gl.shadowMap.needsUpdate = true; // model is static in world space; see useFrame
+    return () => { pm.dispose(); scene.environment?.dispose(); scene.environment = null; };
   }, [gl, scene, shadows]);
   useEffect(() => { warm.emissiveIntensity = lights; }, [lights, warm]);
   useEffect(() => { // stage variants (villa only) — same rules as the approved page
@@ -47,6 +49,7 @@ export function Scene({ model, stage = 'solid', lights = 0.25, radius, target, h
         const t = Math.min(1, Math.max(0, (el - o.userData.rise * 0.9) / 1.0));
         o.scale.y = Math.max(t === 0 ? 0.0001 : easeOutBack(t), 0.0001); o.visible = t > 0 && !o.userData.hold; }
     };
+    if (shouldUpdateShadows(now, riseT0.current) || shouldUpdateShadows(now, buildT0.current)) gl.shadowMap.needsUpdate = true;
     tick(m.solid, riseT0.current); tick((m as any).build, buildT0.current);
   });
 

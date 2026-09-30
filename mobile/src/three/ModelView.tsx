@@ -1,4 +1,4 @@
-import { Component, useRef } from 'react';
+import { Component, useMemo, useRef } from 'react';
 import { View, StyleProp, ViewStyle, ImageStyle } from 'react-native';
 import { Image } from 'expo-image';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -23,8 +23,8 @@ type Props = { model: ModelId; stage?: StageView; lights?: number; radius?: numb
 
 export function ModelView({ model, interactive = true, shadows = true, style, ...rest }: Props) {
   const f = FRAME[model]; const yawVel = useRef(0);
-  const push = (dx: number) => { yawVel.current = dx * -0.01; };
-  const pan = Gesture.Pan().enabled(interactive).runOnJS(true).onChange((e) => push(e.changeX));
+  const pan = useMemo(() => Gesture.Pan().enabled(interactive).runOnJS(true).activeOffsetX([-10, 10]).failOffsetY([-10, 10])
+    .onChange((e) => { yawVel.current = e.changeX * -0.01; }), [interactive]);
   return (
     <GLBoundary fallback={<Image source={FALLBACK[model]} contentFit="contain" style={[{ flex: 1 }, style as StyleProp<ImageStyle>]} />}>
       <GestureDetector gesture={pan}>
