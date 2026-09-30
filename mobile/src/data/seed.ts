@@ -96,7 +96,7 @@ export const SEED_MESSAGES: Message[] = [
   { id: 'm2', threadId: 'omar', from: 'them', photo: 'site2', at: T0 + 1 },
   { id: 'm3', threadId: 'omar', from: 'me', text: 'Great, thanks! Is the access road OK for trucks?', at: T0 + 2 },
   { id: 'm4', threadId: 'omar', from: 'them', text: "Yes, it's wide enough. I'll note it in the report.", at: T0 + 3 },
-  { id: 'm5', threadId: 'team', from: 'them', text: "Hi Sara, Rashid here. Please don't remove that wall yet — it may be load-bearing. I've booked a structural check for you; reply here with a good time.", at: T0 },
+  { id: 'm5', threadId: 'team', from: 'them', text: "Hi Sara, Rashid here. I've booked a structural check for you; reply here with a good time.", at: T0 },
   { id: 'm6', threadId: 'lina', from: 'them', text: 'I can review the structure within 5 days. Quote sent: AED 2,450.', at: T0 },
 ];
 export const SEED_FLAGS: Flag[] = [
