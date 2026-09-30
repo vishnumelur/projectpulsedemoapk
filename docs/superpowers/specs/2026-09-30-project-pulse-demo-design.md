@@ -375,3 +375,9 @@ Each unit has one purpose. Screens compose `ui/` components and read from `store
   - Splash in white with the mark.
 - **EAS Build** with a `preview` profile (`android.buildType: "apk"`) → a shareable `.apk` download link. This needs the user's Expo account login (`eas login`).
 - **Development:** use **Expo Go** on the phone for fast iteration. Expo Go bundles Reanimated, Gesture Handler, Skia, expo-gl, expo-blur and expo-haptics, and every library chosen here must be Expo-Go-compatible. This is verified against the installed SDK at the start of implementation. If any library turns out to need native code outside Expo Go, switch to an EAS development build for that step only.
+
+## Batch 5 — First impression refinements (approved 2026-09-30, after device review)
+Source: `design/mockups/batch5-first-impression.html` (+ `.png`).
+- **Welcome = A1 "Living 3D hero"** (replaces the approved 02 Welcome + 03 role screen): live 3D villa on a soft platform, "Project Pulse" lockup + Abu Dhabi tag, two floating glass cards (permit approved; round Pulse orb "3 engineers matched"), headline "Build smarter in Abu Dhabi.", sub-line, trust row (engineer faces, 1,200+ verified, ★4.9), one Pulse Blue "Get started", quiet "Already have an account? Sign in". Get started opens a one-tap bottom sheet "How will you use Pulse?" with two rows (I'm planning a project / I'm an engineer). ✦ captions as on the mockup.
+- **Home stage track = B1 "Segmented bar + stage pill"** (replaces the dot stepper in the 08 villa card): "Tender" pill with a small round orb, "Stage 4 of 6" opposite, six even segments (done = Pulse Blue, current part-filled cyan with a periodic light sweep, future grey), labels Brief · Next: Build · Handover. ✦ caption as on the mockup.
+- **Orb shape:** client requires the animated orb to be a perfect circle everywhere (supersedes the irregular blob silhouette); colours and slow motion unchanged.
