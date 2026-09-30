@@ -13,7 +13,8 @@ import { Header } from '@/ui/Header';
 import { T } from '@/ui/T';
 import { Glass } from '@/ui/Glass';
 import { Btn } from '@/ui/Btn';
-import { Dock } from '@/ui/Dock';
+import { Dock, DOCK_SPACE } from '@/ui/Dock';
+import { PageScroll } from '@/ui/PageScroll';
 import { Sheet } from '@/ui/Sheet';
 import { Chip } from '@/ui/Chip';
 import { Icon } from '@/ui/Icon';
@@ -65,6 +66,8 @@ export default function ExpertSetup() {
   return (
     <Screen bg="aurora">
       <Header center={<T size={9.5} w={700} ls={0.14} c={C.mute}>2 OF 2</T>} />
+      {/* scrolls so every row (Portfolio included) clears the pinned Submit dock */}
+      <PageScroll contentContainerStyle={{ paddingBottom: s(DOCK_SPACE + 12) }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(14), marginTop: s(16) }}>
         <View style={{ width: s(84), height: s(84), alignItems: 'center', justifyContent: 'center' }}>
           <GradRing size={84} thickness={7} progress={n / 5} />
@@ -76,15 +79,17 @@ export default function ExpertSetup() {
         {ITEMS.map((it, i) => {
           const done = checklist[it.k];
           return (
-            <View key={it.k} style={{ flexDirection: 'row', alignItems: 'center', gap: s(11), paddingVertical: s(12), borderBottomWidth: i === 4 ? 0 : 1, borderBottomColor: C.line }}>
+            <Pressable key={it.k} accessibilityRole="button" accessibilityLabel={`${it.t}: ${done ? it.done : it.hint}`} onPress={() => setOpen(it.k)}
+              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, flexDirection: 'row', alignItems: 'center', gap: s(11), paddingVertical: s(12), borderBottomWidth: i === 4 ? 0 : 1, borderBottomColor: C.line })}>
               {done ? <ScaleIn from={SUCCESS_FROM}><LinearGradient colors={GRAD} locations={[0, 0.6, 1]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ width: s(24), height: s(24), borderRadius: s(12), alignItems: 'center', justifyContent: 'center' }}><Icon name="check" size={12} color="#fff" stroke={3} /></LinearGradient></ScaleIn>
                 : <View style={{ width: s(24), height: s(24), borderRadius: s(12), borderWidth: 1.5, borderColor: '#D3D8E8' }} />}
               <View style={{ flex: 1 }}><T size={12} w={700} lh={17 / 12}>{it.t}</T><T size={10} c={C.mute} lh={1.7} style={{ paddingTop: s(3) }}>{done ? it.done : it.hint}</T></View>
-              {!done && <Pressable onPress={() => setOpen(it.k)}><T size={10.5} w={700} c={C.blue}>Add</T></Pressable>}
-            </View>
+              {!done && <T size={10.5} w={700} c={C.blue}>Add</T>}
+            </Pressable>
           );
         })}
       </Glass>
+      </PageScroll>
       <Dock><Btn title={n === 5 ? 'Submit for review' : 'Continue'} onPress={() => (n === 5 ? router.push('/expert-verified') : setOpen(ITEMS.find((i) => !checklist[i.k])!.k))} /></Dock>
       <Sheet visible={!!open} onClose={() => setOpen(null)}>
         {item && (<>
