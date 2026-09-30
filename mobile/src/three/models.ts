@@ -1,9 +1,17 @@
 // @ts-nocheck — procedural port of the approved design/3d/models.js
 import * as THREE from 'three';
+import { Platform } from 'react-native';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { noiseTex, stripeTex, contactTex } from './textures';
 
 const nz = noiseTex(), nzFine = noiseTex(128, 190, 70, 10);
+
+// expo-gl has no renderbufferStorageMultisample, which three's transmission pass needs. On native, glass and water
+// use plain transparency with a matching look instead of physical transmission.
+const NATIVE = Platform.OS !== 'web';
+const phys = (o, nativeOpacity) => new THREE.MeshPhysicalMaterial(NATIVE
+  ? { ...o, transmission: 0, thickness: 0, transparent: true, opacity: nativeOpacity, depthWrite: false }
+  : o);
 
 const std = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.8, ...o });
 export const M = {
@@ -18,11 +26,11 @@ export const M = {
   frame: std(0x2b303b, { roughness: 0.32, metalness: 0.75 }),
   alu: std(0xc9cdd3, { roughness: 0.35, metalness: 0.8 }),
   champ: std(0xcdb898, { roughness: 0.38, metalness: 0.7 }),
-  glass: new THREE.MeshPhysicalMaterial({ color: 0xdff4ff, roughness: 0.02, metalness: 0, transmission: 0.88, thickness: 0.25, ior: 1.5, envMapIntensity: 1.6, specularIntensity: 1 }),
-  glassDark: new THREE.MeshPhysicalMaterial({ color: 0x7fa6c9, roughness: 0.05, metalness: 0.2, transmission: 0.35, thickness: 0.3, envMapIntensity: 1.8 }),
+  glass: phys({ color: 0xdff4ff, roughness: 0.02, metalness: 0, transmission: 0.88, thickness: 0.25, ior: 1.5, envMapIntensity: 1.6, specularIntensity: 1 }, 0.42),
+  glassDark: phys({ color: 0x7fa6c9, roughness: 0.05, metalness: 0.2, transmission: 0.35, thickness: 0.3, envMapIntensity: 1.8 }, 0.8),
   wood: std(0xa8744f, { roughness: 0.55, bumpMap: nzFine, bumpScale: 0.5 }),
   woodIn: std(0xc79a6d, { roughness: 0.6 }),
-  water: new THREE.MeshPhysicalMaterial({ color: 0x46cbea, roughness: 0.03, transmission: 0.25, thickness: 0.4, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 2.2 }),
+  water: phys({ color: 0x46cbea, roughness: 0.03, transmission: 0.25, thickness: 0.4, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 2.2 }, 0.85),
   tile: std(0xbfeaf6, { roughness: 0.4 }),
   frond: new THREE.MeshStandardMaterial({ color: 0x5f8248, roughness: 0.85, side: THREE.DoubleSide }),
   trunk: std(0x8b6b4a, { roughness: 1, bumpMap: nzFine, bumpScale: 3 }),
