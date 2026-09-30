@@ -32,18 +32,18 @@ test('tapping a chat photo opens the viewer and Close dismisses it', async () =>
   await fireEvent.press(screen.getByLabelText('Close'));
   expect(screen.queryByLabelText('Close')).toBeNull();
 });
-test('viewing Updates marks notices read and the count drops', async () => {
+test('Updates: count stays while viewing, notices are read after leaving the tab', async () => {
   mockParams = {}; await render(<Inbox />);
-  const spy = jest.spyOn(useDemo.getState(), 'markNoticesRead');
-  await fireEvent.press(screen.getByText('Updates · 3'));
-  await act(async () => { jest.advanceTimersByTime(1300); });
-  expect(useDemo.getState().notifications.filter((n) => n.forRole === 'client' && !n.read)).toHaveLength(0);
-  expect(screen.getByText('Updates · 0')).toBeTruthy();
-  spy.mockRestore();
-});
-test('stay=1 does not auto-mark read', async () => {
-  mockParams = { stay: '1' }; await render(<Inbox />);
   await fireEvent.press(screen.getByText('Updates · 3'));
   await act(async () => { jest.advanceTimersByTime(3000); });
   expect(screen.getByText('Updates · 3')).toBeTruthy();
+  expect(useDemo.getState().notifications.filter((n) => n.forRole === 'client' && !n.read)).toHaveLength(3);
+  await fireEvent.press(screen.getByText('Messages'));
+  expect(useDemo.getState().notifications.filter((n) => n.forRole === 'client' && !n.read)).toHaveLength(0);
+  expect(screen.getByText('Updates · 0')).toBeTruthy();
+});
+test('unmounting while on Updates marks notices read', async () => {
+  mockParams = { tab: 'updates' }; const r = await render(<Inbox />);
+  await r.unmount();
+  expect(useDemo.getState().notifications.filter((n) => n.forRole === 'client' && !n.read)).toHaveLength(0);
 });

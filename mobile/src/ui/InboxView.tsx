@@ -1,6 +1,6 @@
 // src/ui/InboxView.tsx
 import { Pressable, ScrollView, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Animated, { FadeInDown, LinearTransition, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
@@ -52,7 +52,6 @@ function UnreadDot({ on }: { on: boolean }) {
   return <Animated.View pointerEvents="none" style={[{ position: 'absolute', right: 0, top: s(13), width: s(7), height: s(7), borderRadius: s(4), backgroundColor: C.blue }, st]} />;
 }
 export function InboxView({ role, initialTab = 0, chatBase }: { role: 'client' | 'expert'; initialTab?: number; chatBase: string }) {
-  const { stay } = useLocalSearchParams<{ stay?: string }>();
   const [tab, setTab] = useState(initialTab);
   const allThreads = useDemo((st) => st.threads); const allNotes = useDemo((st) => st.notifications);
   const threads = useMemo(() => allThreads.filter((t) => t.forRole === role), [allThreads, role]);
@@ -63,11 +62,13 @@ export function InboxView({ role, initialTab = 0, chatBase }: { role: 'client' |
   useEffect(() => {
     if (threads[0]?.id !== topId.current) { topId.current = threads[0]?.id; Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }
   }, [threads]);
+  const [faded, setFaded] = useState(false);
   useEffect(() => {
-    if (tab !== 1 || stay || unread === 0) return;
-    const h = setTimeout(() => useDemo.getState().markNoticesRead(role), 1200);
-    return () => clearTimeout(h);
-  }, [tab, stay, unread, role]);
+    if (tab !== 1) return;
+    setFaded(false);
+    const h = setTimeout(() => setFaded(true), 1200); // dots fade out locally while viewing
+    return () => { clearTimeout(h); useDemo.getState().markNoticesRead(role); }; // read on leaving the tab / unmount
+  }, [tab, role]);
   const now = notes.length ? Math.max(...notes.map((n) => n.at)) + 10 * 60e3 : Date.now();
   const today = notes.filter((n) => now - n.at < 20 * 3600e3); const earlier = notes.filter((n) => now - n.at >= 20 * 3600e3);
   const group = (label: string, list: typeof notes) => list.length ? (<>
@@ -77,7 +78,7 @@ export function InboxView({ role, initialTab = 0, chatBase }: { role: 'client' |
         <Pressable key={n.id} onPress={() => router.push(n.href as any)} style={{ flexDirection: 'row', gap: s(11), paddingVertical: s(9.5), borderBottomWidth: i === list.length - 1 ? 0 : 1, borderBottomColor: C.line }}>
           {noticeIcon(n)}
           <View style={{ flex: 1, marginRight: -s(6) }}><T size={12} w={700} lh={1.75}>{n.title}</T><T size={10.5} c={C.mute} lh={1.93}>{n.text}</T><T size={9} c={C.faint2} style={{ marginTop: s(3) }}>{ago(n.at, now)}</T></View>
-          <UnreadDot on={!n.read} />
+          <UnreadDot on={!n.read && !faded} />
         </Pressable>
       ))}
     </Glass>
