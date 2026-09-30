@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Screen } from '@/ui/Screen';
+import { PageScroll } from '@/ui/PageScroll';
 import { T } from '@/ui/T';
 import { Glass } from '@/ui/Glass';
 import { Btn } from '@/ui/Btn';
@@ -19,15 +20,19 @@ import { s } from '@/theme/scale';
 import { C, EASE } from '@/theme/tokens';
 
 const CHART_H = 110;
+const LABEL_H = 10.5; // W1..W4 label line (8px text) 
+const BAR_AREA = s(CHART_H) - s(LABEL_H) - s(5); // chart height minus label and the 5px gap
 /** ✦ the bars grow in sequence (mockup: 1s cubic-bezier(.22,1,.36,1), staggered). Height is h × chart, capped by the column like the CSS flex shrink. */
 function Bar({ h, i, last }: { h: number; i: number; last: boolean }) {
   const g = useSharedValue(IS_TEST ? 1 : 0);
   useEffect(() => { if (!IS_TEST) g.value = withDelay(120 * i, withTiming(1, { duration: 1000, easing: EASE })); }, []);
-  const full = s(CHART_H * h);
+  // explicit height, capped to the column's bar area (chart minus the label row): a percentage maxHeight resolved
+  // differently per platform and lifted the full-height W4 bar off the shared baseline on iOS
+  const full = Math.min(s(CHART_H * h), BAR_AREA);
   const st = useAnimatedStyle(() => ({ height: full * g.value }));
   return (
-    <View style={{ flex: 1, width: '100%', justifyContent: 'flex-end' }}>
-      <Animated.View style={[{ width: '100%', maxHeight: '100%', borderTopLeftRadius: s(8), borderTopRightRadius: s(8), borderBottomLeftRadius: s(4), borderBottomRightRadius: s(4),
+    <View style={{ height: BAR_AREA, width: '100%', justifyContent: 'flex-end' }}>
+      <Animated.View style={[{ width: '100%', borderTopLeftRadius: s(8), borderTopRightRadius: s(8), borderBottomLeftRadius: s(4), borderBottomRightRadius: s(4),
         overflow: 'hidden', backgroundColor: last ? undefined : 'rgba(22,32,90,0.08)' }, st]}>
         {last && <LinearGradient colors={GRAD} locations={[0, 0.6, 1]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={{ flex: 1 }} />}
       </Animated.View>
@@ -49,6 +54,7 @@ export default function Earnings() {
   const openSheet = () => { paying.current = false; Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setSheet(true); };
   return (
     <Screen bg="aurora">
+      <PageScroll tabBar>
       <T size={22} w={700} ls={-0.035} lh={1.1} style={{ marginTop: s(10) }}>Earnings</T>
       <Segmented options={['Week', 'Month', 'Year']} value={seg} onChange={setSeg} style={{ marginTop: s(12) }} />
       <View style={{ alignItems: 'center', marginTop: s(14) }}>
@@ -59,7 +65,7 @@ export default function Earnings() {
         {EARNINGS.weeks.map((h, i) => (
           <View key={i} style={{ flex: 1, alignItems: 'center', gap: s(5), height: '100%', justifyContent: 'flex-end' }}>
             <Bar h={h} i={i} last={i === EARNINGS.weeks.length - 1} />
-            <T size={8} w={700} c={C.faint}>{`W${i + 1}`}</T>
+            <T size={8} w={700} c={C.faint} style={{ lineHeight: s(LABEL_H) }}>{`W${i + 1}`}</T>
           </View>
         ))}
       </View>
@@ -77,6 +83,7 @@ export default function Earnings() {
           </View>
         ))}
       </Glass>
+      </PageScroll>
       {/* ✦ Withdraw opens a short confirmation sheet */}
       <Sheet visible={sheet} onClose={() => setSheet(false)}>
         <T size={17} w={700}>Withdraw to bank</T><T size={11} c={C.mute} style={{ marginTop: s(4) }}>Emirates NBD •••• 2210 · arrives in 1–2 working days</T>

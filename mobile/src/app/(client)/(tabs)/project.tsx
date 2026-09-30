@@ -235,7 +235,7 @@ export default function Project() {
     <Screen bg="aurora">
       <GestureDetector gesture={swipe}>
         <View style={{ flex: 1 }}>
-          <PageScroll contentContainerStyle={{ paddingBottom: s(90) }}>
+          <PageScroll tabBar contentContainerStyle={{ paddingBottom: s(90) }}>
             <View>{head}</View>
             <TabsBar tab={tab} onTab={setTab} />
             <Animated.View style={bst}>{body}</Animated.View>

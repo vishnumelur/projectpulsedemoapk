@@ -88,7 +88,7 @@ export function InboxView({ role, initialTab = 0, chatBase }: { role: 'client' |
     <Screen bg="aurora">
       <T size={22} w={700} ls={-0.035} style={{ marginTop: s(7) }}>Inbox</T>
       <Segmented options={['Messages', `Updates · ${unread}`]} value={tab} onChange={setTab} style={{ marginTop: s(12) }} />
-      <PageScroll contentContainerStyle={{ paddingBottom: s(90) }}>
+      <PageScroll tabBar contentContainerStyle={{ paddingBottom: s(90) }}>
         {tab === 0 ? (
           <Glass r={18} style={{ marginTop: s(14), paddingHorizontal: s(14) }}>
             {threads.map((t, i) => (

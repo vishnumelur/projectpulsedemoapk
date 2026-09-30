@@ -53,7 +53,7 @@ export default function ExpertHome() {
   }, [reqs]);
   return (
     <Screen bg="aurora3">
-      <PageScroll contentContainerStyle={{ paddingBottom: s(90) }}>
+      <PageScroll tabBar contentContainerStyle={{ paddingBottom: s(90) }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: s(8) }}>
           <View><T size={9.5} c={C.mute}>Good morning</T><T size={22} w={700} ls={-0.035} lh={1.1} style={{ marginTop: s(2) }}>Omar</T></View>
           <Avatar photo="omar" size={34} ring="white" />

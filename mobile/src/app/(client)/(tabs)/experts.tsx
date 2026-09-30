@@ -18,6 +18,7 @@ import { PHOTOS } from '@/theme/photos';
 import { useDemo } from '@/store/demo';
 import { IS_TEST, setTileRect } from '@/screens/experts/fx';
 import { s } from '@/theme/scale';
+import { useTabClearance } from '@/ui/TabBar';
 import { C } from '@/theme/tokens';
 
 const PAR = s(5); // parallax travel; the photo scales up only while scrolled (scale 1, translate 0 at rest = approved crop)
@@ -66,6 +67,7 @@ export default function Experts() {
   const stage = useDemo((st) => st.stage); const [f, setF] = useState<(typeof FILTERS)[number]>('For you');
   // drop any stale tile rect whenever this tab regains focus (guarded: the jest router mock has no useFocusEffect)
   if (typeof useFocusEffect === 'function') useFocusEffect(useCallback(() => { setTileRect(null); }, []));
+  const clear = useTabClearance();
   const scrollY = useSharedValue(0); const onScroll = useAnimatedScrollHandler((ev) => { scrollY.value = ev.contentOffset.y; });
   const list = [...EXPERTS].filter((e) => f === 'For you' || e.category === f).sort((a, b) => b.match - a.match);
   return (
@@ -83,7 +85,7 @@ export default function Experts() {
       </ScrollView>
       {/* full-width scroller, margin inside: an Android ScrollView clips its children, which cut the top match's glow */}
       <Animated.ScrollView onScroll={onScroll} scrollEventThrottle={16} showsVerticalScrollIndicator={false} style={{ marginHorizontal: -s(20) }}
-        contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: s(12), marginTop: s(12), paddingBottom: s(110), paddingHorizontal: s(20) }}>
+        contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: s(12), marginTop: s(12), paddingBottom: Math.max(s(110), clear + s(20)), paddingHorizontal: s(20) }}>
         {list.map((e, i) => <Tile key={e.id} e={e} i={i} top={i === 0 && f === 'For you'} scrollY={scrollY} />)}
       </Animated.ScrollView>
       <LinearGradient pointerEvents="none" colors={['rgba(247,248,252,0)', 'rgba(247,248,252,1)', 'rgba(247,248,252,1)']} locations={[0, 0.55, 1]}
