@@ -1,7 +1,7 @@
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import Animated, { FadeInUp, useSharedValue, withRepeat, withSequence, withTiming, useAnimatedStyle, withDelay } from 'react-native-reanimated';
+import Animated, { FadeInUp, useSharedValue, withRepeat, withSequence, withTiming, useAnimatedStyle, withDelay, withSpring } from 'react-native-reanimated';
 import { Image } from 'expo-image';
 import { Screen } from '@/ui/Screen';
 import { BackButton } from '@/ui/Header';
@@ -13,10 +13,26 @@ import { LogoMark } from '@/ui/LogoMark';
 import { LiveDot } from '@/ui/LiveDot';
 import { useDemo } from '@/store/demo';
 import { EXPERTS } from '@/data/seed';
-import { PHOTOS } from '@/theme/photos';
+import { PHOTOS, PhotoKey } from '@/theme/photos';
 import { s } from '@/theme/scale';
 import { C, F } from '@/theme/tokens';
 
+function PhotoViewer({ photo, onClose }: { photo: PhotoKey | null; onClose: () => void }) {
+  const p = useSharedValue(0);
+  useEffect(() => { p.value = photo ? withSpring(1, { damping: 16, stiffness: 160 }) : 0; }, [photo]);
+  const st = useAnimatedStyle(() => ({ opacity: p.value, transform: [{ scale: 0.82 + 0.18 * p.value }] }));
+  if (!photo) return null;
+  return (
+    <Modal visible transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
+      <Animated.View style={[{ flex: 1, backgroundColor: 'rgba(8,12,40,0.92)', alignItems: 'center', justifyContent: 'center' }, st]}>
+        <Pressable accessibilityLabel="Close" onPress={onClose} style={{ position: 'absolute', top: s(50), right: s(20), width: s(34), height: s(34), borderRadius: s(17), backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
+          <T size={16} w={600} c="#fff">✕</T>
+        </Pressable>
+        <Image source={PHOTOS[photo]} contentFit="contain" style={{ width: '94%', aspectRatio: 1.5 }} />
+      </Animated.View>
+    </Modal>
+  );
+}
 function Dot({ d }: { d: number }) {
   const y = useSharedValue(0);
   useEffect(() => { y.value = withDelay(d, withRepeat(withSequence(withTiming(-3, { duration: 360 }), withTiming(0, { duration: 360 }), withTiming(0, { duration: 480 })), -1)); }, []);
@@ -29,13 +45,17 @@ export default function Chat() {
   const allMsgs = useDemo((st) => st.messages); const msgs = useMemo(() => allMsgs.filter((m) => m.threadId === id), [allMsgs, id]);
   const ex = EXPERTS.find((e) => e.id === (thread?.expertId ?? id));
   const [text, setText] = useState(''); const [typing, setTyping] = useState(!!thread?.typing);
+  const [viewer, setViewer] = useState<PhotoKey | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(timer.current), []);
   const scroll = useRef<ScrollView>(null);
   const send = () => {
     const t = text.trim(); if (!t) return; useDemo.getState().sendMessage(id, t); setText(''); setTyping(true);
-    setTimeout(() => { useDemo.setState((st) => ({ messages: [...st.messages, { id: `r-${Date.now()}`, threadId: id, from: 'them', text: "Noted. I'll include it in the report.", at: Date.now() }] })); setTyping(false); }, 2000);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => { useDemo.setState((st) => ({ messages: [...st.messages, { id: `r-${Date.now()}`, threadId: id, from: 'them', text: "Noted. I'll include it in the report.", at: Date.now() }] })); setTyping(false); }, 2000);
   };
   const bubble = (m: (typeof msgs)[number]) => m.photo
-    ? <Image key={m.id} source={PHOTOS[m.photo]} contentFit="cover" style={{ width: s(150), height: s(96), borderRadius: s(14), marginTop: s(8) }} />
+    ? <Pressable key={m.id} accessibilityLabel="Open photo" onPress={() => setViewer(m.photo!)} style={{ alignSelf: 'flex-start', marginTop: s(8) }}><Image source={PHOTOS[m.photo]} contentFit="cover" style={{ width: s(150), height: s(96), borderRadius: s(14) }} /></Pressable>
     : (
       <Animated.View key={m.id} entering={FadeInUp.springify().damping(16)} style={[{ maxWidth: '76%', paddingVertical: s(9), paddingHorizontal: s(12), borderRadius: s(16), marginTop: s(8) },
         m.from === 'me' ? { alignSelf: 'flex-end', backgroundColor: C.blue, borderBottomRightRadius: s(5) } : { alignSelf: 'flex-start', backgroundColor: '#fff', borderBottomLeftRadius: s(5), shadowColor: '#16205A', shadowOpacity: 0.06, shadowRadius: s(5), elevation: 1 }]}>
@@ -70,6 +90,7 @@ export default function Chat() {
           </Pressable>
         </Glass>
       </KeyboardAvoidingView>
+      <PhotoViewer photo={viewer} onClose={() => setViewer(null)} />
     </Screen>
   );
 }
