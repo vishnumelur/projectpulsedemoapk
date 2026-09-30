@@ -1,8 +1,8 @@
 import { Alert, Pressable, View } from 'react-native';
 import { useState } from 'react';
-import Animated from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Rise } from '@/motion/Rise';
+import { PageScroll } from '@/ui/PageScroll';
 import { Screen } from '@/ui/Screen';
 import { T } from '@/ui/T';
 import { Glass } from '@/ui/Glass';
@@ -28,7 +28,7 @@ export default function Profile() {
     onPress: () => { useDemo.getState().resetDemo(); resetTo('/'); } }]);
   return (
     <Screen bg="aurora3">
-      <Animated.View style={{ flex: 1 }}>
+      <PageScroll tabBar contentContainerStyle={{ flexGrow: 1 }}>
       <Rise index={0} blur={false} style={{ alignItems: 'center', marginTop: s(14) }}>
       <View style={{ alignItems: 'center' }}>
         <Avatar photo="sara" size={70} ring="white4" />
@@ -44,8 +44,8 @@ export default function Profile() {
       <Rise index={2} r={18} style={{ marginTop: s(14) }}>
       <Glass r={18} style={{ paddingHorizontal: s(14) }}><LogoutRow onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setOut(true); }} /></Glass>
       </Rise>
-      <Pressable onLongPress={reset} style={{ marginTop: 'auto', marginBottom: s(84), alignSelf: 'center', width: s(56), height: s(20), opacity: 0 }} accessibilityLabel="Project Pulse demo v1.0 (long-press to reset)" />
-      </Animated.View>
+      <Pressable onLongPress={reset} style={{ marginTop: 'auto', marginBottom: s(8), alignSelf: 'center', width: s(56), height: s(20), opacity: 0 }} accessibilityLabel="Project Pulse demo v1.0 (long-press to reset)" />
+      </PageScroll>
       <LogoutSheet visible={out} onClose={() => setOut(false)} />
     </Screen>
   );
