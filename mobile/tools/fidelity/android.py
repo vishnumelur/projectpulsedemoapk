@@ -52,6 +52,22 @@ def wait_for(i, default):
     if i in ('08-home', '11-experts', '12-expert-profile') or i.startswith('17') or i.startswith('04') or i.startswith('05'): return default + 6
     return default
 
+def loading(png):
+    # Expo Go's cold-start splash (its blue logo in the centre) or a blank white loading screen
+    import io
+    im = Image.open(io.BytesIO(png)).convert('RGB'); w, h = im.size
+    isblue = lambda p: p[2] > 200 and p[0] < 90 and p[1] < 190
+    logo = all(isblue(im.getpixel((int(w * f), int(h * 0.47)))) for f in (0.36, 0.5, 0.64))
+    blank = all(all(v > 250 for v in im.getpixel((x, y))) for x in (w // 10, w // 2, w - w // 10) for y in (int(h * 0.3), int(h * 0.8)))
+    return logo or blank
+
+def wait_loaded(extra=45):
+    png = adb('exec-out', 'screencap', '-p', out=True)
+    for _ in range(extra // 3):
+        if png and not loading(png): break
+        time.sleep(3); png = adb('exec-out', 'screencap', '-p', out=True)
+    return png
+
 def side_by_side(i):
     ref = Image.open(f'{REF}/{i}.png').convert('RGB')
     ref = ref.crop((16, 16, ref.width - 16, ref.height - 16))           # strip the 8px (x2) bezel -> 508x1108
@@ -75,7 +91,7 @@ def main():
     for g in items:
         if capture:
             open_href(g['href']); time.sleep(wait_for(g['id'], wait)); dismiss_dev_menu()
-            wait_device(); png = adb('exec-out', 'screencap', '-p', out=True)
+            wait_device(); png = wait_loaded()
             if not png: print('no screenshot for', g['id'], flush=True); continue
             open(f"{SHOTS}/{g['id']}.png", 'wb').write(png)
         side_by_side(g['id']); print('captured', g['id'], flush=True)
