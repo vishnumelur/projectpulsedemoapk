@@ -13,8 +13,9 @@ import { ModelView } from '@/three/ModelView';
 import { BUILDINGS } from '@/data/types';
 import { s } from '@/theme/scale';
 import { C } from '@/theme/tokens';
+import { withPortal } from '@/nav/PortalGuard';
 
-export default function Building() {
+function Building() {
   // First screen after Sign in: history was reset, so there is nothing to go back to (never back into the login).
   const [hasBack] = useState(() => router.canGoBack?.() ?? true);
   const [i, setI] = useState(0); const b = BUILDINGS[i];
@@ -42,3 +43,6 @@ export default function Building() {
     </Screen>
   );
 }
+
+// Client onboarding runs only inside the client session (sealed like the (client) group).
+export default withPortal('client', Building);

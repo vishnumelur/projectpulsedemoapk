@@ -42,8 +42,10 @@ export function LogoutSheet({ visible, onClose, account }: { visible: boolean; o
     if (leaving.current) return; leaving.current = true;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onClose();
-    setTimeout(logOut, DUR.base); // let the sheet settle down first
+    pending.current = setTimeout(logOut, DUR.base); // let the sheet settle down first
   };
+  const pending = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (pending.current) clearTimeout(pending.current); }, []);
   const a = account ? accountFor(account) : null;
   return (
     <Sheet visible={visible} onClose={onClose}>

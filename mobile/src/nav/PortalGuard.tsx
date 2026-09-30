@@ -17,3 +17,10 @@ export function PortalGuard({ role, children }: { role: PortalRole; children: Re
   if (admitted.current) return <>{children}</>;
   return <Redirect href={(session ? nextRoute(useDemo.getState()) : SIGN_IN) as any} />;
 }
+
+/** Wraps a screen that lives outside a portal's route group (the client onboarding under /onboarding) in the same seal. */
+export function withPortal<P extends object>(role: PortalRole, Screen: React.ComponentType<P>) {
+  const Sealed = (props: P) => <PortalGuard role={role}><Screen {...props} /></PortalGuard>;
+  Sealed.displayName = `Sealed(${Screen.displayName ?? Screen.name ?? 'Screen'})`;
+  return Sealed;
+}

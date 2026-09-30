@@ -1,5 +1,5 @@
 import { FlatList, Pressable } from 'react-native';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useEffect } from 'react';
 import { Screen } from '@/ui/Screen';
 import { Glass } from '@/ui/Glass';
@@ -13,8 +13,13 @@ export default function Gallery() {
   // Seeds the demo and opens the portals for dev: `devGallery` lets either portal's guard through (dev builds only), so
   // tools/fidelity/capture.mjs, which loads this page once and then every screen by URL, needs no sign in. Any real
   // sign in / sign out clears it. A tap also sets the session of the screen's own portal (E* = engineer).
-  useEffect(() => { const st = useDemo.getState(); st.resetDemo(); useDemo.setState({ role: 'client', clientOnboarded: true, expertVerified: true,
-    session: { role: 'client', email: accountFor('client').email }, devGallery: true }); }, []);
+  // Release builds: the gallery does not exist (no seed, no session) and forwards to the splash.
+  useEffect(() => {
+    if (!__DEV__) return;
+    const st = useDemo.getState(); st.resetDemo();
+    useDemo.setState({ role: 'client', clientOnboarded: true, expertVerified: true, session: { role: 'client', email: accountFor('client').email }, devGallery: true });
+  }, []);
+  if (!__DEV__) return <Redirect href="/" />;
   const open = (id: string, href: string) => {
     const role = id.startsWith('E') ? 'expert' : 'client';
     useDemo.setState({ role, session: { role, email: accountFor(role).email }, devGallery: true });

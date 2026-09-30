@@ -117,7 +117,9 @@ export const useDemo = create<DemoState>()(persist((set, get) => ({
 
   pushNotice: (n) => {
     const notice: Notice = { ...n, id: uid('n'), at: Date.now(), read: false };
-    set((s) => ({ notifications: [notice, ...s.notifications], banner: s.role === n.forRole ? notice : s.banner }));
+    // Banners only for the signed-in portal: a quote that lands after log out waits in the inbox, never over Sign in.
+    // (Pending sims keep running on purpose, so the demo story is intact at the next sign in.)
+    set((s) => ({ notifications: [notice, ...s.notifications], banner: s.session?.role === n.forRole ? notice : s.banner }));
   },
   dismissBanner: () => set({ banner: null }),
   markNoticesRead: (role) => set((s) => ({ notifications: s.notifications.map((n) => (n.forRole === role ? { ...n, read: true } : n)) })),

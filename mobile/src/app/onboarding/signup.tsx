@@ -1,6 +1,6 @@
 // Sign in (client Task 2, replaces 03 "Create your account"): the sealed demo's only door. The credentials decide the portal.
 import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
-import { Redirect, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
@@ -70,19 +70,21 @@ export default function SignIn() {
   const [state, setState] = useState<'idle' | 'busy' | 'done'>('idle');
   const [fill, setFill] = useState(0);
   const busy = useRef(false); // sync guard: a double tap signs in once
-  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
-  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  // The "checking" beat is dropped if Sign in unmounts; the hand-off after a successful sign in is not (see submit).
+  const verifying = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (verifying.current) clearTimeout(verifying.current); }, []);
   const reduce = useReducedMotion();
   // Already signed in (e.g. the browser's back button on web): Sign in is behind you, go to your portal. Checked once at
   // mount, so a sign in made here is left to its own history reset. The dev gallery may still show this screen.
   const [signedIn] = useState(() => { const st = useDemo.getState(); return !!st.session && !(__DEV__ && st.devGallery); });
+  useEffect(() => { if (signedIn) resetTo(nextRoute(useDemo.getState())); }, [signedIn]);
 
   const shakeX = useSharedValue(0);
   const shakeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shakeX.value }] }));
   const shake = () => {
     if (reduce) return;
-    const t = (to: number, d = 70) => withTiming(to, { duration: d, easing: EASE_IN_OUT });
-    shakeX.value = withSequence(t(-s(7)), t(s(6)), t(-s(4)), t(s(2)), t(0, 90)); // a short decaying sway, no spring
+    const t = (to: number, d: number = DUR.shakeStep) => withTiming(to, { duration: d, easing: EASE_IN_OUT });
+    shakeX.value = withSequence(t(-s(7)), t(s(6)), t(-s(4)), t(s(2)), t(0, DUR.shakeSettle)); // a short decaying sway, no spring
   };
 
   const selected = DEMO_ACCOUNTS.find((a) => a.email === email.trim().toLowerCase())?.role ?? null;
@@ -96,7 +98,8 @@ export default function SignIn() {
   const submit = () => {
     if (busy.current) return; busy.current = true;
     Keyboard.dismiss(); setError(null); setState('busy');
-    timers.current.push(setTimeout(() => {
+    verifying.current = setTimeout(() => {
+      verifying.current = null;
       const r = useDemo.getState().signIn(email, pw);
       if (!r.ok) {
         busy.current = false; setState('idle'); setError(r.error); shake();
@@ -104,14 +107,16 @@ export default function SignIn() {
         return;
       }
       setState('done');
-      // A fresh history: back never returns to Sign in or the start screens.
-      timers.current.push(setTimeout(() => resetTo(nextRoute(useDemo.getState())), DUR.base));
-    }, 650));
+      // A fresh history: back never returns to Sign in or the start screens. Not cleared on unmount: the session exists
+      // now, so even if a hardware back pops Sign in during this beat, the reset still lands in the portal.
+      setTimeout(() => resetTo(nextRoute(useDemo.getState())), DUR.base);
+    }, DUR.verify);
   };
 
-  if (signedIn) return <Redirect href={nextRoute(useDemo.getState()) as any} />;
+  if (signedIn) return null; // forwarding (effect above)
   return (
     <Screen bg="aurora" px={16}>
+      {/* 'padding' on iOS and Android alike: edge-to-edge Android does not resize the window for the keyboard (as Pulse/Chat, d94c190) */}
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'web' ? undefined : 'padding'}>
         <Header />
         <ScrollView style={{ marginHorizontal: -s(16) }} contentContainerStyle={{ paddingHorizontal: s(16), paddingBottom: s(28) }}

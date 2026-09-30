@@ -7,7 +7,8 @@ import Stage from '@/app/onboarding/stage';
 import { useDemo } from '@/store/demo';
 
 jest.mock('expo-router', () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() }, useLocalSearchParams: () => ({}), useFocusEffect: jest.fn() }));
-beforeEach(() => { useDemo.getState().resetDemo(); jest.clearAllMocks(); });
+// building/stage are sealed to the client session (Task 2)
+beforeEach(() => { useDemo.getState().resetDemo(); useDemo.setState({ session: { role: 'client', email: 'sara@projectpulse.ae' } }); jest.clearAllMocks(); });
 
 test('Welcome (A2): Get started goes to the role screen; Sign in goes to sign in', async () => {
   await render(<Welcome />);

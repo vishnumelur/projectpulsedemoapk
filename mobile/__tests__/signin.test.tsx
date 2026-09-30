@@ -6,6 +6,10 @@ import ClientLayout from '@/app/(client)/_layout';
 import ExpertLayout from '@/app/(expert)/_layout';
 import Profile from '@/app/(client)/(tabs)/profile';
 import Dash from '@/app/(expert)/pro/(tabs)/index';
+import Gallery from '@/app/dev/gallery';
+import Building from '@/app/onboarding/building';
+import Creating from '@/app/onboarding/creating';
+import { PortalGuard } from '@/nav/PortalGuard';
 import { useDemo } from '@/store/demo';
 
 let mockParams: Record<string, string> = {};
@@ -118,7 +122,8 @@ describe('Sign in screen', () => {
   test('already signed in (web back button): Sign in forwards to the portal', async () => {
     useDemo.getState().signIn(OMAR, 'pulse2026'); useDemo.setState({ expertVerified: true });
     await render(<SignIn />);
-    expect(mockRedirect).toHaveBeenCalledWith('/pro'); expect(screen.queryByText('Welcome back')).toBeNull();
+    expect(router.dismissAll).toHaveBeenCalled(); expect(router.replace).toHaveBeenCalledWith('/pro'); // resetTo, not a plain redirect
+    expect(screen.queryByText('Welcome back')).toBeNull();
   });
   test('a double submit signs in once', async () => {
     const orig = useDemo.getState().signIn; const spy = jest.fn(orig);
@@ -184,5 +189,58 @@ describe('Log out', () => {
     await tick(500);
     expect(router.replace).toHaveBeenCalledWith('/onboarding/signup');
     expect(useDemo.getState().session).toBeNull();
+  });
+});
+
+describe('fix round 1', () => {
+  test('the hand-off after a sign in survives Sign in unmounting (hardware back in the beat)', async () => {
+    useDemo.getState().setRole('client');
+    await render(<SignIn />);
+    await fireEvent.press(screen.getByText('Sign in'));
+    await tick(700); // signed in, hand-off pending
+    expect(useDemo.getState().session?.role).toBe('client');
+    await screen.rerender(<></>); // Sign in unmounts (popped by back)
+    await tick(400);
+    expect(router.replace).toHaveBeenCalledWith('/onboarding/building');
+  });
+  test('a notice after log out shows no banner (it waits in the inbox)', () => {
+    useDemo.getState().signIn(SARA, 'pulse2026');
+    useDemo.getState().pushNotice({ kind: 'quotes', title: 'New quotes', text: 't', href: '/quotes', forRole: 'client' });
+    expect(useDemo.getState().banner).not.toBeNull();
+    useDemo.getState().signOut();
+    useDemo.getState().pushNotice({ kind: 'quotes', title: 'Later quotes', text: 't', href: '/quotes', forRole: 'client' });
+    expect(useDemo.getState().banner).toBeNull();
+    expect(useDemo.getState().notifications[0].title).toBe('Later quotes');
+    useDemo.getState().signIn(OMAR, 'pulse2026'); // the other portal: still no client banner
+    useDemo.getState().pushNotice({ kind: 'quotes', title: 'Client only', text: 't', href: '/quotes', forRole: 'client' });
+    expect(useDemo.getState().banner).toBeNull();
+  });
+  test.each([[null, '/onboarding/signup'], ['expert', '/pro']] as const)('client onboarding is sealed: session %s goes to %s', async (role, href) => {
+    useDemo.setState({ expertVerified: true, session: role ? { role, email: OMAR } : null });
+    await render(<Building />);
+    expect(mockRedirect).toHaveBeenCalledWith(href); expect(screen.queryByText('Villa')).toBeNull();
+    mockRedirect.mockClear();
+    await render(<Creating />);
+    expect(mockRedirect).toHaveBeenCalledWith(href);
+  });
+  test('client onboarding opens for the client session', async () => {
+    useDemo.setState({ session: { role: 'client', email: SARA } });
+    await render(<Building />);
+    expect(screen.getByText('Villa')).toBeTruthy(); expect(mockRedirect).not.toHaveBeenCalled();
+  });
+  describe('release build (__DEV__ = false)', () => {
+    const g = globalThis as any; let dev: boolean;
+    beforeEach(() => { dev = g.__DEV__; g.__DEV__ = false; });
+    afterEach(() => { g.__DEV__ = dev; });
+    test('the gallery redirects to the splash and creates no session', async () => {
+      await render(<Gallery />);
+      expect(mockRedirect).toHaveBeenCalledWith('/'); expect(screen.queryByText('Screen gallery')).toBeNull();
+      expect(useDemo.getState().session).toBeNull(); expect(useDemo.getState().devGallery).toBe(false);
+    });
+    test('the guards ignore a stale devGallery flag', async () => {
+      useDemo.setState({ session: null, devGallery: true });
+      await render(<PortalGuard role="expert"><></></PortalGuard>);
+      expect(mockRedirect).toHaveBeenCalledWith('/onboarding/signup');
+    });
   });
 });
