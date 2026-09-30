@@ -41,7 +41,7 @@ export default function StageScreen() {
       <Header center={<Eyebrow>2 OF 2</Eyebrow>} />
       <T size={27} w={700} ls={-0.035} lh={1.05} style={{ marginTop: s(14) }}>{`Where is your\n${b.name.toLowerCase()} today?`}</T>
       <View style={{ height: s(262), marginHorizontal: -s(16), marginTop: s(6) }}>
-        <ModelView model={b.id} stage={b.id === 'villa' ? st : 'solid'} radius={11.2} target={[0, 3.4, 0]} spin={0.08} lights={st === 6 ? 0.9 : 0} />
+        <ModelView model={b.id} stage={st} radius={11.2} target={[0, 3.4, 0]} spin={0.08} lights={st === 6 ? 0.9 : 0} />
       </View>
       <GestureDetector gesture={swipe}>
         <View onLayout={(e) => setW(e.nativeEvent.layout.width)} style={{ height: s(38), marginHorizontal: -s(16), marginTop: s(2) }}>

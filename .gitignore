@@ -6,5 +6,6 @@ mobile/.expo/
 mobile/dist/
 *.log
 design/fidelity/shots/
+design/fidelity/parity/
 design/fidelity/report.md
 design/fidelity/android/shots/

@@ -4,12 +4,12 @@ import { Image } from 'expo-image';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { CanvasHost } from './CanvasHost';
 import { Scene, ModelId, StageView } from './Scene';
+import type { Frame } from './frame';
 
-export const FRAME: Record<ModelId, { radius: number; target: [number, number, number]; height: number }> = {
-  villa: { radius: 9.2, target: [0, 1.8, 0], height: 0.5 }, shop: { radius: 10.2, target: [0.6, 3.2, 0], height: 0.42 },
-  tower: { radius: 17.5, target: [0, 13, 0], height: 0.22 }, factory: { radius: 14.2, target: [0.5, 3.0, 0], height: 0.5 },
-  reno: { radius: 10.0, target: [0.5, 3.0, 0.5], height: 0.45 },
-};
+/** Default framing, as approved for the villa. A screen's radius/target/height are always given in villa terms; Scene
+ *  fits every other model to its own bounding box with the same zoom and offset (see three/frame.ts), so all five
+ *  models appear whole, centred and at a consistent size on every screen. */
+export const VILLA_FRAME: Frame = { radius: 9.2, target: [0, 1.8, 0], height: 0.5 };
 const FALLBACK = { villa: require('../../assets/fallback/villa.png'), shop: require('../../assets/fallback/shop.png'),
   tower: require('../../assets/fallback/tower.png'), factory: require('../../assets/fallback/factory.png'), reno: require('../../assets/fallback/reno.png') };
 
@@ -22,7 +22,10 @@ type Props = { model: ModelId; stage?: StageView; lights?: number; radius?: numb
   spin?: number; yaw0?: number; shadows?: boolean; interactive?: boolean; riseKey?: string | number; style?: StyleProp<ViewStyle> };
 
 export function ModelView({ model, interactive = true, shadows = true, style, ...rest }: Props) {
-  const f = FRAME[model]; const yawVel = useRef(0);
+  const yawVel = useRef(0);
+  const [tx, ty, tz] = rest.target ?? VILLA_FRAME.target;
+  const frame = useMemo<Frame>(() => ({ radius: rest.radius ?? VILLA_FRAME.radius, target: [tx, ty, tz], height: rest.height ?? VILLA_FRAME.height }),
+    [rest.radius, rest.height, tx, ty, tz]);
   const pan = useMemo(() => Gesture.Pan().enabled(interactive).runOnJS(true).activeOffsetX([-10, 10]).failOffsetY([-10, 10])
     .onChange((e) => { yawVel.current = e.changeX * -0.01; }), [interactive]);
   return (
@@ -30,7 +33,7 @@ export function ModelView({ model, interactive = true, shadows = true, style, ..
       <GestureDetector gesture={pan}>
         <View style={[{ flex: 1 }, style]}>
           <CanvasHost shadows={shadows}>
-            <Scene model={model} radius={rest.radius ?? f.radius} target={rest.target ?? f.target} height={rest.height ?? f.height}
+            <Scene model={model} frame={frame}
               stage={rest.stage} lights={rest.lights} spin={rest.spin} yaw0={rest.yaw0} shadows={shadows} riseKey={rest.riseKey} yawVel={yawVel} />
           </CanvasHost>
         </View>

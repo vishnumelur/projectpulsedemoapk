@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { Directions, Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -15,7 +15,8 @@ import { s } from '@/theme/scale';
 import { C } from '@/theme/tokens';
 
 export default function Building() {
-  const [i, setI] = useState(0); const b = BUILDINGS[i];
+  const { type } = useLocalSearchParams<{ type?: string }>(); // deep link / QA: open on a given building
+  const [i, setI] = useState(Math.max(0, BUILDINGS.findIndex((x) => x.id === type))); const b = BUILDINGS[i];
   const go = (n: number) => { if (n !== i) { setI(n); Haptics.selectionAsync(); } };
   const step = (d: number) => go((i + d + BUILDINGS.length) % BUILDINGS.length);
   // Fling events carry no velocity: one fling per direction (swipe left = next, right = previous). Built once, so the

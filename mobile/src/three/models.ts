@@ -73,7 +73,7 @@ function bars(parent, from, to, step, fn, rise) {
 }
 function contact(root, w, d, op = 0.35) { // soft ambient-occlusion blob under a building
   const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshBasicMaterial({ map: contactTex(op), transparent: true, depthWrite: false }));
-  m.rotation.x = -Math.PI / 2; m.position.y = -0.41; root.add(m);
+  m.rotation.x = -Math.PI / 2; m.position.y = -0.41; m.userData.noBounds = true; root.add(m);
 }
 function plot(root, w, d, mat = M.paving) {
   contact(root, w * 1.5, d * 1.6, 0.28);
@@ -133,34 +133,6 @@ export function buildVilla() {
   part(solid, 0.3, 6.9, 3.4, M.traver, -5.55, 0, -0.8, { rise: 0.25, round: 0.05 });
   // landscape
   return { root, solid, warm: M.warm, inner, upIn };
-}
-
-export function villaStages(v) {
-  // wireframe hologram of the building
-  const wire = new THREE.Group(); v.root.add(wire);
-  v.root.updateMatrixWorld(true);
-  v.solid.traverse(o => {
-    if (o.isMesh && o.geometry.type !== 'SphereGeometry' && o.geometry.type !== 'PlaneGeometry') {
-      const e = new THREE.LineSegments(new THREE.EdgesGeometry(o.geometry, 30), M.line); e.applyMatrix4(o.matrixWorld); wire.add(e);
-      const gm = new THREE.Mesh(o.geometry, M.ghost); gm.applyMatrix4(o.matrixWorld); wire.add(gm);
-    }
-  });
-  const survey = new THREE.Group(); v.root.add(survey);
-  const fp = [[-5.5, -3.2], [4.3, -3.2], [4.3, 3.2], [-5.5, 3.2], [-5.5, -3.2]].map(([x, z]) => new THREE.Vector3(x, 0.03, z));
-  const dl = new THREE.Line(new THREE.BufferGeometry().setFromPoints(fp), M.ghostLine); dl.computeLineDistances(); survey.add(dl);
-  for (const [x, z] of fp.slice(0, 4)) {
-    const s = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.2, 8), M.wood); s.position.set(x, 0.6, z); s.castShadow = true; survey.add(s);
-    const f = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 16), M.blue); f.position.set(x, 1.25, z); survey.add(f);
-  }
-  const build = new THREE.Group(); v.root.add(build);
-  for (let x = -4.4; x <= 6.4; x += 1.35) for (const z of [2.05, -3.2]) cyl(build, 0.04, 0.04, 3.6, M.orange, x, 3.3, z, { seg: 6 });
-  for (const y of [4.3, 5.5, 6.7]) for (const z of [2.05, -3.2]) { const r = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 10.9, 6), M.orange); r.rotation.z = Math.PI / 2; r.position.set(1.0, y, z); build.add(r); }
-  part(build, 0.5, 12, 0.5, M.yellow, 7.4, 0, -4.9); part(build, 9.5, 0.4, 0.4, M.yellow, 4.3, 12, -4.9); part(build, 1, 1, 1, M.navy, 8.6, 11.6, -4.9);
-  const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 4.5, 4), M.frame); cable.position.set(1.4, 9.8, -4.9); build.add(cable);
-  part(build, 1.2, 0.5, 0.8, M.concrete2, 1.4, 7.1, -4.9);
-  part(build, 2.4, 1.1, 1.3, M.yellow, 7.0, 0, 4.8, { round: 0.05 });
-  Object.assign(v, { wire, survey, build });
-  return v;
 }
 
 // ---------- TOWER ----------
@@ -347,4 +319,151 @@ export function buildReno() {
 export function useSimpleGlass() {
   M.glass = new THREE.MeshStandardMaterial({ color: 0xcfe9ff, roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.45 });
   M.glassDark = new THREE.MeshStandardMaterial({ color: 0x7fa6c9, roughness: 0.08, metalness: 0.3, transparent: true, opacity: 0.8 });
+}
+
+// ---------- STAGE VARIANTS (every model) ----------
+// The approved villa page's stage language, derived from any model group:
+//   1 Planning      survey plot: dashed footprint, timber pegs with blue flags
+//   2 Design        the footprint plus a soft blueprint wireframe (edges only)
+//   3 Tender        full wireframe hologram: edges and ghosted volumes (the approved villa look)
+//   4 Contractor    the hologram with the foundations / plinth poured in solid
+//   5 Construction  lower parts built, upper parts held, scaffold and a tower crane (the approved villa rule)
+//   6 Handover      finished; the caller turns the interior lights on
+const lineSoft = new THREE.LineBasicMaterial({ color: 0x0000fe, transparent: true, opacity: 0.4 });
+export const BUILT = 0.4;       // rise below this is built at stage 5 (approved villa rule)
+export const FOUNDATION = 0.05; // rise at or below this is poured at stage 4
+
+type Rect = [number, number, number, number]; // x0, z0, x1, z1
+export type StageParams = {
+  footprint: Rect;
+  scaffold: { x0: number; x1: number; step: number; zs: number[]; y0: number; h: number; ledgers: number[] };
+  crane: { x: number; z: number; h: number; ry: number; reach: number; hook: number; loadY: number };
+  cabin: [number, number];
+  edgeAngle?: number; // EdgesGeometry threshold: 25° also outlines rounded slabs (3 × 30° segments); the villa keeps its approved 30°
+};
+
+function riseBox(solid, lo, hi) {
+  const box = new THREE.Box3(), b = new THREE.Box3();
+  for (const g of solid.children) { const r = g.userData.rise; if (r == null || r < lo || r >= hi) continue; b.setFromObject(g); box.union(b); }
+  return box;
+}
+const r2 = (n) => Math.round(n * 100) / 100;
+
+/** Stage geometry derived from the model's own bounds: the survey footprint is the part built by stage 5, the scaffold
+ *  wraps the next parts to rise (front and back faces, as on the villa), the crane stands off the back corner. */
+export function deriveStageParams(v, o: Partial<StageParams> = {}): StageParams {
+  const core = riseBox(v.solid, -Infinity, BUILT), next = riseBox(v.solid, BUILT, 0.7);
+  if (next.isEmpty()) next.copy(core);
+  const fp: Rect = o.footprint ?? [r2(core.min.x), r2(core.min.z), r2(core.max.x), r2(core.max.z)];
+  const sx0 = next.min.x + 0.1, sx1 = next.max.x - 0.1, n = Math.max(2, Math.round((sx1 - sx0) / 1.35)), step = (sx1 - sx0) / n;
+  const y0 = Math.max(0, next.min.y), h = Math.max(3.6, next.max.y + 0.6 - y0);
+  const scaffold = { x0: sx0, x1: sx1, step, zs: [r2(next.max.z + 0.2), r2(next.min.z - 0.2)], y0, h,
+    ledgers: [0.3, 0.63, 0.96].map((f) => r2(y0 + f * h)), ...o.scaffold };
+  const top = Math.max(core.max.y, next.max.y);
+  const cx = core.max.x + 1.6, cz = core.min.z - 1.6, tx = (core.min.x + core.max.x) / 2, tz = (core.min.z + core.max.z) / 2;
+  const dist = Math.hypot(tx - cx, tz - cz);
+  const crane = { x: r2(cx), z: r2(cz), h: r2(Math.max(12, top + 4)), ry: Math.atan2(tz - cz, -(tx - cx)), reach: r2(dist + 1.8),
+    hook: r2(dist * 0.75), loadY: r2(Math.min(top + 0.8, Math.max(12, top + 4) - 4.9)), ...o.crane };
+  return { footprint: fp, scaffold, crane, cabin: o.cabin ?? [r2(core.max.x - 1.2), r2(core.max.z + 1.8)], edgeAngle: o.edgeAngle };
+}
+
+export function makeStages(v, p: StageParams) {
+  if (v.wire) return v;
+  const geos = [];
+  const G = (g) => { geos.push(g); return g; };
+  // wireframe hologram of the building: edges (same material as the villa) + ghosted volumes sharing the solid geometry
+  const wire = new THREE.Group(), lines = new THREE.Group(), ghost = new THREE.Group(); wire.add(lines, ghost); v.root.add(wire);
+  v.solid.traverse((o) => {
+    if (o.isMesh && o.geometry.type !== 'SphereGeometry' && o.geometry.type !== 'PlaneGeometry') {
+      const e = new THREE.LineSegments(G(new THREE.EdgesGeometry(o.geometry, p.edgeAngle ?? 25)), M.line); e.applyMatrix4(o.matrixWorld); lines.add(e);
+      const gm = new THREE.Mesh(o.geometry, M.ghost); gm.applyMatrix4(o.matrixWorld); ghost.add(gm);
+    }
+  });
+  // survey: dashed footprint + corner pegs with blue flags
+  const survey = new THREE.Group(), pegs = new THREE.Group(); v.root.add(survey);
+  const [x0, z0, x1, z1] = p.footprint;
+  const fp = [[x0, z0], [x1, z0], [x1, z1], [x0, z1], [x0, z0]].map(([x, z]) => new THREE.Vector3(x, 0.03, z));
+  const dl = new THREE.Line(G(new THREE.BufferGeometry().setFromPoints(fp)), M.ghostLine); dl.computeLineDistances(); survey.add(dl, pegs);
+  const stake = G(new THREE.CylinderGeometry(0.05, 0.05, 1.2, 8)), flag = G(new THREE.SphereGeometry(0.14, 16, 16));
+  for (const [x, , z] of fp.slice(0, 4).map((q) => q.toArray())) {
+    const s = new THREE.Mesh(stake, M.wood); s.position.set(x, 0.6, z); s.castShadow = true; pegs.add(s);
+    const f = new THREE.Mesh(flag, M.blue); f.position.set(x, 1.25, z); pegs.add(f);
+  }
+  // construction: scaffold round the next level, tower crane, site cabin
+  const build = new THREE.Group(); v.root.add(build);
+  const sc = p.scaffold, L = sc.x1 - sc.x0 + 0.1, xc = (sc.x0 + sc.x1) / 2;
+  const post = G(new THREE.CylinderGeometry(0.04, 0.04, sc.h, 6)), ledger = G(new THREE.CylinderGeometry(0.035, 0.035, L, 6));
+  for (let x = sc.x0; x <= sc.x1 + 1e-6; x += sc.step) for (const z of sc.zs) { const m = new THREE.Mesh(post, M.orange); m.position.set(x, sc.y0 + sc.h / 2, z); m.castShadow = m.receiveShadow = true; build.add(m); }
+  for (const y of sc.ledgers) for (const z of sc.zs) { const r = new THREE.Mesh(ledger, M.orange); r.rotation.z = Math.PI / 2; r.position.set(xc, y, z); build.add(r); }
+  const c = p.crane, crane = new THREE.Group(); crane.position.set(c.x, 0, c.z); crane.rotation.y = c.ry; build.add(crane);
+  const box = (w, h, d, mat, x, y, z) => { const m = new THREE.Mesh(G(new THREE.BoxGeometry(w, h, d)), mat); m.position.set(x, y + h / 2, z); m.castShadow = m.receiveShadow = true; crane.add(m); return m; };
+  box(0.5, c.h, 0.5, M.yellow, 0, 0, 0); // mast
+  box(c.reach + 1.65, 0.4, 0.4, M.yellow, (1.65 - c.reach) / 2, c.h, 0); // jib + counter-jib
+  box(1, 1, 1, M.navy, 1.2, c.h - 0.4, 0); // counterweight
+  const cable = new THREE.Mesh(G(new THREE.CylinderGeometry(0.015, 0.015, c.h - c.loadY - 0.4, 4)), M.frame); cable.position.set(-c.hook, (c.h + c.loadY + 0.5) / 2, 0); crane.add(cable);
+  box(1.2, 0.5, 0.8, M.concrete2, -c.hook, c.loadY, 0); // load on the hook
+  const cabin = new THREE.Group(); cabin.position.set(p.cabin[0], 0, p.cabin[1]); build.add(cabin);
+  const cm = new THREE.Mesh(G(new RoundedBoxGeometry(2.4, 1.1, 1.3, 3, 0.05)), M.yellow); cm.position.y = 0.55; cm.castShadow = cm.receiveShadow = true; cabin.add(cm);
+  for (const g of [wire, survey, build]) { g.userData.stageVariant = true; g.visible = false; }
+  Object.assign(v, { wire, survey, build, stageGeos: geos });
+  return v;
+}
+
+/** Visibility and hold flags for a stage. Pure (no GL): Scene applies it, the unit test checks each stage differs. */
+export function applyStage(v, stage) {
+  const st = stage === 'solid' ? 6 : stage;
+  const on = !!v.wire;
+  if (on) {
+    v.survey.visible = st <= 2; v.survey.children[1].visible = st === 1;
+    v.wire.visible = st >= 2 && st <= 4; v.wire.children[1].visible = st >= 3;
+    const lm = st === 2 ? lineSoft : M.line; for (const l of v.wire.children[0].children) l.material = lm;
+    v.build.visible = st === 5;
+  }
+  v.solid.visible = !on || st >= 4;
+  for (const g of v.solid.children) {
+    const r = g.userData.rise;
+    g.userData.hold = !on ? false : st === 4 ? (r == null || r > FOUNDATION) : st === 5 ? (r != null && r >= BUILT && r < 1.0) : false;
+    if (r == null) g.visible = !g.userData.hold;
+  }
+  return st;
+}
+
+/** A stage signature (what is on screen), for tests and debugging. */
+export function stageSignature(v) {
+  const held = v.solid.children.filter((g) => g.userData.hold).length;
+  return JSON.stringify({ survey: v.survey?.visible, pegs: v.survey?.children[1].visible, wire: v.wire?.visible, ghost: v.wire?.children[1].visible,
+    soft: v.wire?.children[0].children[0]?.material === lineSoft, solid: v.solid.visible, held, build: v.build?.visible });
+}
+
+const SHARED = new Set<any>();
+/** Frees what a model owns: its geometries (stage variants included) and its per-model materials and textures. The
+ *  shared material palette (M, M2, the stage line materials) stays. */
+export function disposeModel(v) {
+  if (!SHARED.size) for (const m of [...Object.values(M), ...Object.values(M2), lineSoft]) SHARED.add(m);
+  const geos = new Set(v.stageGeos ?? []);
+  v.root.traverse((o) => {
+    if (o.geometry) geos.add(o.geometry);
+    const mats = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : [];
+    for (const m of mats) if (!SHARED.has(m) && !Object.values(M).includes(m)) { m.map?.dispose(); m.dispose(); }
+  });
+  geos.forEach((g) => g.dispose());
+}
+
+// Per-model stage geometry. The villa keeps its approved hand-placed survey, scaffold and crane exactly; the others
+// are derived from their bounds, with small placements so nothing clashes with the model's own site furniture.
+export const STAGE_OVERRIDES = {
+  villa: { footprint: [-5.5, -3.2, 4.3, 3.2], scaffold: { x0: -4.4, x1: 6.4, step: 1.35, zs: [2.05, -3.2], y0: 3.3, h: 3.6, ledgers: [4.3, 5.5, 6.7] },
+    crane: { x: 7.4, z: -4.9, h: 12, ry: 0, reach: 7.85, hook: 6.0, loadY: 7.1 }, cabin: [7.0, 4.8], edgeAngle: 30 },
+  shop: {}, tower: { edgeAngle: 10 }, factory: {}, reno: {}, // tower: its rounded floor plates' facets are shallower than 25°
+};
+/** Adds the stage variants to a built model (once). Measured at full height: the rise animation may already have
+ *  squashed parts by the time a screen first asks for a stage. */
+export function stagesFor(model, v) {
+  if (v.wire) return v;
+  const sy = v.solid.children.map((c) => c.scale.y); v.solid.children.forEach((c) => { c.scale.y = 1; });
+  v.root.updateMatrixWorld(true);
+  makeStages(v, deriveStageParams(v, STAGE_OVERRIDES[model] ?? {}));
+  v.solid.children.forEach((c, i) => { c.scale.y = sy[i]; });
+  v.root.updateMatrixWorld(true);
+  return v;
 }
