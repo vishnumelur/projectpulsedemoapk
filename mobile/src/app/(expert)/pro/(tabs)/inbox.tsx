@@ -1,2 +1,3 @@
-import { View } from 'react-native';
-export default function Placeholder() { return <View style={{ flex: 1, backgroundColor: '#F7F8FC' }} />; }
+// src/app/(expert)/pro/(tabs)/inbox.tsx — expert Inbox (shared InboxView, expert threads + notices)
+import { InboxView } from '@/ui/InboxView';
+export default function ExpertInbox() { return <InboxView role="expert" chatBase="/chat" />; }
