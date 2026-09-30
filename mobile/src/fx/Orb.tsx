@@ -57,7 +57,7 @@ function OrbBlob({ size, soft, calm, ring, style }: OrbProps) {
 
 /** Mockup `.orb`: dark core clipped to a circle, four blurred screen-blended blobs drifting on 6/7/5/4s loops, a top-left shine,
  *  the two glow shadows, and a 4s breathe. (`ring` is kept for API compatibility and draws the same orb.) */
-const ease = (t: number, T: number) => { const p = (t % T) / T; return (1 - Math.cos(p * Math.PI * 2)) / 2; }; // 0 -> 1 -> 0, like ease-in-out alternate
+const ease = (t: number, T: number) => { 'worklet'; const p = (t % T) / T; return (1 - Math.cos(p * Math.PI * 2)) / 2; }; // 0 -> 1 -> 0, like ease-in-out alternate
 const BLOBS = [
   { color: '#0000FE', w: 0.8, x: -0.1, y: 0.05, dx: 0.25, dy: 0.15, sc: 1.15, T: 6, o: 1 },
   { color: '#31D1FF', w: 0.7, x: 0.45, y: -0.05, dx: -0.3, dy: 0.25, sc: 0.85, T: 7, o: 1 },
