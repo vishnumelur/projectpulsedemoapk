@@ -70,7 +70,7 @@ export const useDemo = create<DemoState>()(persist((set, get) => ({
     if (existing) return existing.id;
     const ex = S.EXPERTS.find((e) => e.id === expertId)!; const sv = ex.services.find((x) => x.id === serviceId)!;
     const total = Math.round((sv.price + S.FEE) * (1 + S.VAT_RATE) * 100) / 100;
-    const job: Job = { id: uid('job'), requestId: 'req-bid', expertId, serviceId, title: sv.name, slotId, dayLabel: 'Thu 9 Oct', timeLabel: '10:00', total, status: 'booked', due: 'Sun 12 Oct' };
+    const job: Job = { id: uid('job'), requestId: 'req-bid', expertId, serviceId, title: sv.name, slotId, dayLabel: 'Thu 9 Oct', timeLabel: S.CLIENT_SLOTS.find((c) => c.id === slotId)?.time ?? '10:00', total, status: 'booked', due: 'Sun 12 Oct' };
     set((s) => ({ jobs: [job, ...s.jobs] }));
     get().pushNotice({ kind: 'payment', title: 'Payment held safely', text: `AED ${total.toLocaleString('en-US', { minimumFractionDigits: 2 })} until you sign off.`, href: `/job/${job.id}`, forRole: 'client' });
     return job.id;

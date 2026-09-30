@@ -57,3 +57,15 @@ test('resetDemo restores the seed', () => {
   expect(useDemo.getState().role).toBeNull();
   expect(useDemo.getState().quotes).toHaveLength(3);
 });
+
+test('booking a free slot creates exactly one new job, and paying twice is idempotent', () => {
+  const before = useDemo.getState().jobs.length;
+  const args = { expertId: 'omar', serviceId: 'bid-visit', slotId: 'thu-1500' };
+  const j1 = useDemo.getState().bookAndPay(args);
+  expect(j1).not.toBe('job-1');
+  expect(useDemo.getState().jobs).toHaveLength(before + 1);
+  expect(useDemo.getState().jobs.find((j) => j.id === j1)?.timeLabel).toBe('15:00');
+  const j2 = useDemo.getState().bookAndPay(args);
+  expect(j2).toBe(j1);
+  expect(useDemo.getState().jobs).toHaveLength(before + 1);
+});
