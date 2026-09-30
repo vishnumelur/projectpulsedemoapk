@@ -23,7 +23,7 @@ export default function Creating() {
   return (
     <Screen bg="pulse" px={16}>
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <View><Halo size={110} /><Orb size={110} /></View>
+        <View><Halo size={110} /><Orb size={110} variant="sphere" /></View>
         <T size={17} w={700} ls={-0.02} style={{ marginTop: s(34) }}>Building your project…</T>
         <View style={{ marginTop: s(16), gap: s(8), alignItems: 'flex-start' }}>
           {lines.map((l, i) => (

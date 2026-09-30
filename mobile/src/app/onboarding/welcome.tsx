@@ -26,7 +26,7 @@ export default function Welcome() {
         <Pressable onPress={() => router.push('/onboarding/signup?mode=signin')}><T size={11} w={600} c={C.mute}>Sign in</T></Pressable>
       </View>
       <View style={{ alignItems: 'center', marginTop: s(30), height: s(118) }}>
-        <View><Halo size={118} /><Orb size={118} /></View>
+        <View><Halo size={118} /><Orb size={118} variant="sphere" /></View>
         {chip('Villa · Design stage', { left: 0, top: s(6) })}
         {chip('Geotech Engineer', { right: -s(4), top: s(66) }, true)}
         {chip('Quote in 24h', { left: s(12), bottom: -s(24) })}
