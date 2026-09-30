@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useWindowDimensions } from 'react-native';
 import { Pressable, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -27,20 +28,41 @@ export default function Home() {
   const fresh = useMemo(() => newQuotesFor({ quotes } as any, 'req-bid'), [quotes]);
   const from = Math.min(...fresh.map((q) => q.price));
   const job = jobs.find((j) => j.status === 'visit' || j.status === 'booked');
+  const origin = useSharedValue({ dx: 0, dy: 0 });
   const leave = useSharedValue(0);
   const page = useAnimatedStyle(() => ({ opacity: 1 - leave.value }));
-  const blob = useAnimatedStyle(() => ({ transform: [{ scale: 1 + leave.value * 3 }] }));
-  // Ask bar: the blob expands (1 to 4) while the page fades (EASE, 350ms), light haptic, Pulse opens.
-  // The tab stays mounted under Pulse, so the values are reset once Pulse covers it.
+  const fly = useAnimatedStyle(() => {
+    const o = origin.value;
+    return { transform: [{ translateX: leave.value * o.dx }, { translateY: leave.value * o.dy }, { scale: 1 + leave.value * (90 / 30 - 1) }] };
+  });
+  const busy = useRef(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const orbRef = useRef<View>(null);
+  const { width: winW } = useWindowDimensions();
+  const [flying, setFlying] = useState<{ x: number; y: number } | null>(null);
+  // Ask bar: an unclipped overlay orb (Screen root) scales 30 to 90 and glides to Pulse's hero-orb spot while the page fades
+  // (EASE, 420ms) with a light haptic; then Pulse cross-fades in (see (client)/_layout.tsx). Reset when Home regains focus.
   const openPulse = () => {
+    if (busy.current) return;
+    busy.current = true;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    leave.value = withTiming(1, { duration: 350, easing: EASE });
-    router.push('/pulse');
-    setTimeout(() => { leave.value = 0; }, 900);
+    orbRef.current?.measureInWindow?.((x, y, w, h) => {
+      const cx = x + w / 2, cy = y + h / 2;
+      origin.value = { dx: winW / 2 - cx, dy: s(30) + s(40) + s(45) - cy };
+      setFlying({ x, y });
+    });
+    leave.value = withTiming(1, { duration: 420, easing: EASE });
+    timer.current = setTimeout(() => router.push('/pulse'), 420);
   };
+  useFocusEffect(useCallback(() => {
+    busy.current = false; leave.value = 0; setFlying(null);
+    return () => { if (timer.current) clearTimeout(timer.current); };
+  }, []));
   const b = BUILDINGS.find((x) => x.id === projectType)!;
   return (
-    <Screen bg="aurora3">
+    <Screen bg="aurora3" overlay={flying ? (
+      <Animated.View pointerEvents="none" style={[{ position: 'absolute', left: flying.x, top: flying.y, width: s(30), height: s(30) }, fly]}><Orb size={30} /></Animated.View>
+    ) : undefined}>
       <Animated.View style={[{ flex: 1 }, page]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: s(90) }}>
         <Rise index={0} blur={false}>
@@ -78,7 +100,7 @@ export default function Home() {
           <Pressable onPress={openPulse}>
             <IridescentBorder r={24}>
               <Glass r={24} style={{ flexDirection: 'row', alignItems: 'center', gap: s(10), paddingVertical: s(6), paddingLeft: s(8), paddingRight: s(6) }}>
-                <Animated.View style={blob}><Orb size={30} /></Animated.View>
+                <View ref={orbRef} collapsable={false} style={{ opacity: flying ? 0 : 1 }}><Orb size={30} /></View>
                 <GradientText shimmer base={C.faint2} size={12} style={{ flex: 1 }}>Ask Pulse anything…</GradientText>
                 <View style={{ width: s(32), height: s(32), borderRadius: s(16), backgroundColor: C.navy, alignItems: 'center', justifyContent: 'center' }}><Icon name="mic" size={13} color="#fff" stroke={2} /></View>
               </Glass>
