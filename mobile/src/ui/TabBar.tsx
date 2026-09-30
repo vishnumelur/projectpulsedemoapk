@@ -1,5 +1,4 @@
 import { Pressable, View } from 'react-native';
-import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { s } from '@/theme/scale';
 import { C } from '@/theme/tokens';
@@ -8,7 +7,9 @@ import { Icon, IconName } from './Icon';
 import { T } from './T';
 
 export type TabItem = { route: string; label: string; icon: IconName; also?: string[] };
-export function TabBar({ state, navigation, items }: BottomTabBarProps & { items: TabItem[] }) {
+// Structural subset of BottomTabBarProps (expo-router bundles its own copy of the react-navigation types).
+export type TabBarProps = { state: { index: number; routes: { name: string }[] }; navigation: { navigate: (name: never) => void }; items: TabItem[] };
+export function TabBar({ state, navigation, items }: TabBarProps) {
   const insets = useSafeAreaInsets();
   const current = state.routes[state.index].name;
   return (
