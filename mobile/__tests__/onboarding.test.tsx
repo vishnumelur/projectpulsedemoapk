@@ -1,18 +1,34 @@
 import { render, screen, fireEvent, act } from '@testing-library/react-native';
 import { router } from 'expo-router';
 import Welcome from '@/app/onboarding/welcome';
+import Role from '@/app/onboarding/role';
 import Building from '@/app/onboarding/building';
 import Stage from '@/app/onboarding/stage';
 import { useDemo } from '@/store/demo';
 
 jest.mock('expo-router', () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() }, useLocalSearchParams: () => ({}) }));
+jest.mock('@/fx/RoundOrb', () => { const { View: mockView } = require('react-native'); const mockOrb = () => require('react').createElement(mockView, { testID: 'RoundOrb' }); return { __esModule: true, RoundOrb: mockOrb, default: mockOrb }; });
 beforeEach(() => { useDemo.getState().resetDemo(); jest.clearAllMocks(); });
 
-test('Welcome: the role buttons set the role and go to sign up', async () => {
+test('Welcome (A2): Get started goes to the role screen; Sign in goes to sign in', async () => {
   await render(<Welcome />);
-  expect(screen.getByText('Ask. Get matched.')).toBeTruthy();
-  await fireEvent.press(screen.getByText('I need an expert'));
-  expect(useDemo.getState().role).toBe('client');
+  for (const t of ['Project Pulse', 'Can I add a floor to my villa?', 'Omar H.', 'AED 2,200', 'Your project,', 'in expert hands.',
+    'Answers in seconds. Verified engineers in Abu Dhabi when you need one.', 'Verified experts', 'Secure pay', 'Abu Dhabi']) expect(screen.getByText(t)).toBeTruthy();
+  await fireEvent.press(screen.getByText('Get started'));
+  expect(router.push).toHaveBeenCalledWith('/onboarding/role');
+  await fireEvent.press(screen.getByText('Sign in'));
+  expect(router.push).toHaveBeenCalledWith('/onboarding/signup?mode=signin');
+});
+
+test.each([["I'm building", 'client'], ["I'm an engineer", 'expert']] as const)('Role: tapping "%s" sets the %s role and moves on to sign up', async (card, role) => {
+  jest.useFakeTimers();
+  await render(<Role />);
+  expect(screen.getByText('What brings you\nto Pulse?')).toBeTruthy();
+  await fireEvent.press(screen.getByText(card));
+  expect(useDemo.getState().role).toBe(role);
+  expect(router.push).not.toHaveBeenCalled(); // the card lifts first
+  await act(async () => { jest.advanceTimersByTime(600); });
+  jest.useRealTimers();
   expect(router.push).toHaveBeenCalledWith('/onboarding/signup');
 });
 
