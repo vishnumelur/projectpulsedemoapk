@@ -1,6 +1,6 @@
 // Sign in (client Task 2, replaces 03 "Create your account"): the sealed demo's only door. The credentials decide the portal.
 import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { Redirect, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
@@ -44,13 +44,10 @@ function AccountRow({ a, on, last, onPress }: { a: DemoAccount; on: boolean; las
         backgroundColor: on ? 'rgba(0,0,254,0.045)' : pressed ? 'rgba(22,32,90,0.03)' : 'transparent', borderBottomWidth: last ? 0 : 1, borderBottomColor: C.line })}>
       <Avatar photo={a.photo} size={32} ring="white" />
       <View style={{ flex: 1 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(6) }}>
-          <T size={11.5} w={600} numberOfLines={1}>{a.name}</T>
-          <View style={{ paddingHorizontal: s(6), paddingVertical: s(1.5), borderRadius: s(6), backgroundColor: on ? C.tint : 'rgba(22,32,90,0.05)' }}>
-            <T size={8} w={700} ls={0.04} c={on ? C.blue : C.mute}>{a.tag}</T>
-          </View>
-        </View>
-        <T size={9.5} c={C.mute} style={{ marginTop: s(1.5) }}>{a.email}</T>
+        {/* role tag as a small eyebrow, so the full name and email always fit on a narrow phone */}
+        <T size={8} w={700} ls={0.12} c={on ? C.blue : C.faint}>{a.tag.toUpperCase()}</T>
+        <T size={11.5} w={600} numberOfLines={1} style={{ marginTop: s(1) }}>{a.name}</T>
+        <T size={9.5} c={C.mute} numberOfLines={1} style={{ marginTop: s(1) }}>{a.email}</T>
       </View>
       {/* selected: a filled Pulse Blue check; otherwise a quiet ring */}
       <View style={{ width: s(18), height: s(18), borderRadius: s(9), alignItems: 'center', justifyContent: 'center',
@@ -76,6 +73,9 @@ export default function SignIn() {
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
   const reduce = useReducedMotion();
+  // Already signed in (e.g. the browser's back button on web): Sign in is behind you, go to your portal. Checked once at
+  // mount, so a sign in made here is left to its own history reset. The dev gallery may still show this screen.
+  const [signedIn] = useState(() => { const st = useDemo.getState(); return !!st.session && !(__DEV__ && st.devGallery); });
 
   const shakeX = useSharedValue(0);
   const shakeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shakeX.value }] }));
@@ -109,6 +109,7 @@ export default function SignIn() {
     }, 650));
   };
 
+  if (signedIn) return <Redirect href={nextRoute(useDemo.getState()) as any} />;
   return (
     <Screen bg="aurora" px={16}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'web' ? undefined : 'padding'}>
@@ -139,12 +140,8 @@ export default function SignIn() {
                 </Pressable>
               </Field>
             </Animated.View>
-            <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginTop: s(9), minHeight: s(14) }}>
-              <View style={{ flex: 1, paddingRight: s(10) }}>
-                {error && <Animated.View entering={enterUp(0, 0)}><T size={10} w={500} c={ERR} accessibilityRole="alert">{error}</T></Animated.View>}
-              </View>
-              <Pressable hitSlop={8} accessibilityRole="link"><T size={10} w={600} c={C.mute}>Forgot password?</T></Pressable>
-            </View>
+            {error && <Animated.View entering={enterUp(0, 0)} style={{ marginTop: s(9) }}><T size={10} w={500} c={ERR} accessibilityRole="alert">{error}</T></Animated.View>}
+            <Pressable hitSlop={8} accessibilityRole="link" style={{ alignSelf: 'flex-end', marginTop: s(9) }}><T size={10} w={600} c={C.mute}>Forgot password?</T></Pressable>
             <Btn title="Sign in" style={{ marginTop: s(14) }} onPress={submit} busy={state === 'busy'} done={state === 'done'} />
           </Animated.View>
 

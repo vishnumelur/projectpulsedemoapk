@@ -54,7 +54,7 @@ describe('Sign in screen', () => {
     useDemo.getState().setRole('expert');
     await render(<SignIn />);
     for (const t of ['Welcome back', 'Sign in to Project Pulse', 'Sign in', 'Forgot password?', 'DEMO ACCOUNTS', 'Sara Al Mansoori', 'Omar Haddad',
-      'Client', 'Engineer', SARA, OMAR, 'pulse2026']) expect(screen.getAllByText(t).length).toBeGreaterThan(0);
+      'CLIENT', 'ENGINEER', SARA, OMAR, 'pulse2026']) expect(screen.getAllByText(t).length).toBeGreaterThan(0);
     expect(screen.getByLabelText('Email').props.value).toBe(OMAR);
     expect(screen.getByLabelText('Password').props.value).toBe('pulse2026');
     expect(screen.getByLabelText('Use the engineer demo account').props.accessibilityState).toEqual({ selected: true });
@@ -114,6 +114,11 @@ describe('Sign in screen', () => {
     expect(router.dismissAll).toHaveBeenCalled();
     expect(router.replace).toHaveBeenCalledTimes(1); expect(router.replace).toHaveBeenCalledWith(href);
     expect(router.push).not.toHaveBeenCalled();
+  });
+  test('already signed in (web back button): Sign in forwards to the portal', async () => {
+    useDemo.getState().signIn(OMAR, 'pulse2026'); useDemo.setState({ expertVerified: true });
+    await render(<SignIn />);
+    expect(mockRedirect).toHaveBeenCalledWith('/pro'); expect(screen.queryByText('Welcome back')).toBeNull();
   });
   test('a double submit signs in once', async () => {
     const orig = useDemo.getState().signIn; const spy = jest.fn(orig);

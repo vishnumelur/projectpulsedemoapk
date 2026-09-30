@@ -15,10 +15,10 @@ import { s } from '@/theme/scale';
 import { C } from '@/theme/tokens';
 
 /** Log out: signs out and starts a fresh history at Sign in. The demo data (Sara's project, Omar's quotes) stays.
- *  Navigation goes first and the session clears a tick later, so the portal's guard never races it with its own redirect. */
+ *  The portal's guard keeps the admitted portal rendered, so it never races this with a redirect of its own. */
 export function logOut() {
+  useDemo.getState().signOut();
   resetTo(SIGN_IN);
-  setTimeout(() => useDemo.getState().signOut(), 0);
 }
 
 /** A thin tappable "Log out" row (glass-card rows elsewhere use the same 12px rhythm). */
