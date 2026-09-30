@@ -24,7 +24,10 @@ const TAGS = ['On time', 'Clear report', 'Professional', 'Great value'];
 function Star({ on, i, onPress }: { on: boolean; i: number; onPress: () => void }) {
   return (
     <Pressable accessibilityLabel={`${i} stars`} onPress={onPress}>
-      <Animated.View entering={ZoomIn.delay(100 * i).springify().damping(10)} style={on ? (Platform.OS === 'web' ? ({ filter: 'drop-shadow(0 6px 10px rgba(0,0,254,0.28))' } as any) : { ...shadow(C.blue, 0.28, s(5), s(6)) }) : undefined}>
+      <Animated.View entering={ZoomIn.delay(100 * i).springify().damping(10)} style={on ? (Platform.OS === 'web' ? ({ filter: 'drop-shadow(0 6px 10px rgba(0,0,254,0.28))' } as any)
+        // Android: the same glyph-shaped drop shadow via RN's filter (a box shadow would draw the star's square box)
+        : Platform.OS === 'android' ? ({ filter: [{ dropShadow: { offsetX: 0, offsetY: s(6), standardDeviation: s(5), color: 'rgba(0,0,254,0.28)' } }] } as any)
+        : { ...shadow(C.blue, 0.28, s(5), s(6)) }) : undefined}>
         <Svg width={s(36)} height={s(36)} viewBox="0 0 24 24">
           <Defs><SvgGrad id="sg" x1="0" y1="0" x2="1" y2="1"><Stop offset="0" stopColor="#31D1FF" /><Stop offset="0.55" stopColor="#0000FE" /><Stop offset="1" stopColor="#7A5CFF" /></SvgGrad></Defs>
           <Path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.3l-5.6 2.9 1.1-6.3L2.9 9.5l6.3-.9z" fill={on ? 'url(#sg)' : '#E3E6F0'} />
