@@ -7,6 +7,7 @@ import { LogoMark } from '@/ui/LogoMark';
 import { Orb, Halo } from '@/fx/Orb';
 import { GradientText } from '@/fx/GradientText';
 import { s } from '@/theme/scale';
+import { shadow } from '@/theme/shadow';
 import { C } from '@/theme/tokens';
 import { useDemo } from '@/store/demo';
 
@@ -36,7 +37,7 @@ export default function Welcome() {
         <GradientText size={24} w={700} ls={-0.03} lh={1.12} colors={[C.blue, C.cyan]}>Build with confidence.</GradientText>
         <T size={11} c={C.mute} lh={1.5} style={{ marginTop: s(7) }}>Verified answers and vetted experts for your construction project.</T>
         <Pressable onPress={() => go('client')} style={{ marginTop: s(16), backgroundColor: C.blue, borderRadius: s(20), paddingVertical: s(8), paddingLeft: s(18), paddingRight: s(8),
-          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', shadowColor: C.blue, shadowOpacity: 0.28, shadowRadius: s(12), shadowOffset: { width: 0, height: s(10) }, elevation: 6 }}>
+          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', ...shadow(C.blue, 0.28, s(12), s(10)) }}>
           <View><T size={13} w={700} c="#fff">I need an expert</T><T size={9.5} w={500} c="rgba(255,255,255,0.75)" style={{ marginTop: 1 }}>Advice, quotes & site visits</T></View>
           <View style={{ width: s(30), height: s(30), borderRadius: s(15), backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' }}><T size={13} c="#fff">→</T></View>
         </Pressable>

@@ -16,6 +16,7 @@ import { KB } from '@/pulse/kb';
 import { useDemo } from '@/store/demo';
 import { simulateQuotes } from '@/sim/scheduler';
 import { s } from '@/theme/scale';
+import { shadow } from '@/theme/shadow';
 import { C, F, EASE } from '@/theme/tokens';
 
 const WHEN = [['asap', 'ASAP'], ['2w', 'Within 2 weeks'], ['flex', 'Flexible']] as const;
@@ -63,8 +64,8 @@ function SlidingSeg({ value, onChange }: { value: When; onChange: (k: When) => v
   const thumb = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
   return (
     <View onLayout={(ev) => setW(ev.nativeEvent.layout.width)} style={{ flexDirection: 'row', backgroundColor: '#F1F3F9', borderRadius: s(12), padding: s(3) }}>
-      {segW > 0 && <Animated.View style={[{ position: 'absolute', left: s(3), top: s(3), bottom: s(3), width: segW, borderRadius: s(9), backgroundColor: '#fff', elevation: 1,
-        shadowColor: '#16205A', shadowOpacity: 0.08, shadowRadius: s(8), shadowOffset: { width: 0, height: s(2) } }, thumb]} />}
+      {segW > 0 && <Animated.View style={[{ position: 'absolute', left: s(3), top: s(3), bottom: s(3), width: segW, borderRadius: s(9), backgroundColor: '#fff',
+        ...shadow('#16205A', 0.08, s(8), s(2)) }, thumb]} />}
       {WHEN.map(([k, label]) => (
         <Pressable key={k} onPress={() => { if (k !== value) Haptics.selectionAsync(); onChange(k); }} style={{ flex: 1, alignItems: 'center', paddingVertical: s(7) }}>
           <T size={9.6} w={600} ls={-0.02} numberOfLines={1} ellipsizeMode="clip" c={value === k ? C.navy : C.mute}>{label}</T>
@@ -107,7 +108,7 @@ export default function RequestQuote() {
         <SlidingSeg value={when} onChange={setWhen} />
         <View style={{ marginTop: s(4) }}>{kv('Sending to', (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(6) }}>
-            <View style={{ flexDirection: 'row' }}>{e.recommend.avatars.slice(0, 3).map((p, i) => <Avatar key={p} photo={p} size={18} ring="white" style={{ marginLeft: i ? -s(8) : 0, shadowOpacity: 0, elevation: 0 }} />)}</View>
+            <View style={{ flexDirection: 'row' }}>{e.recommend.avatars.slice(0, 3).map((p, i) => <Avatar key={p} photo={p} size={18} ring="white" style={{ marginLeft: i ? -s(8) : 0, ...shadow('#16205A', 0, 0) }} />)}</View>
             <T size={11.5} w={700}>5 experts</T>
           </View>))}</View>
       </View>

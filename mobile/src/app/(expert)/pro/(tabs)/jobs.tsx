@@ -13,6 +13,7 @@ import { DAYS } from '@/data/seed';
 import type { Slot } from '@/data/types';
 import { GRAD, EASE } from '@/theme/tokens';
 import { s } from '@/theme/scale';
+import { shadow } from '@/theme/shadow';
 import { C } from '@/theme/tokens';
 
 const ROW = { flexDirection: 'row', alignItems: 'center', gap: s(10), paddingVertical: s(11), paddingHorizontal: s(12), borderRadius: s(14), marginTop: s(8) } as const;
@@ -71,7 +72,7 @@ export default function Availability() {
             <LinearGradient colors={GRAD} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
           </Animated.View>
           <Animated.View style={[{ position: 'absolute', right: s(3), top: s(3), width: s(16), height: s(16), borderRadius: s(8), backgroundColor: '#fff',
-            shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: s(2), shadowOffset: { width: 0, height: s(2) }, elevation: 2 }, knob]} />
+            ...shadow('#000', 0.2, s(2), s(2)) }, knob]} />
         </Pressable>
       </View>
       <T size={11} c={C.mute} style={{ marginTop: s(4) }}>Clients can book your open slots</T>

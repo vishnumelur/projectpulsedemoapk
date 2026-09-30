@@ -15,6 +15,7 @@ import { useDemo } from '@/store/demo';
 import { RollingPrice } from '@/screens/expert/motion';
 import { GRAD } from '@/theme/tokens';
 import { s } from '@/theme/scale';
+import { shadow } from '@/theme/shadow';
 import { C } from '@/theme/tokens';
 
 const RANGE: Record<string, [number, number]> = { 'soil-test': [1800, 2600], boq: [1200, 1800], 'bid-review': [2000, 2800] };
@@ -71,7 +72,7 @@ export default function SendQuote() {
       <View style={{ flexDirection: 'row', gap: s(6), marginTop: s(8) }}>
         {[3, 5, 7].map((d) => d === days ? (
           <LinearGradient key={d} colors={GRAD} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-            style={[chip, { borderColor: 'transparent', shadowColor: C.blue, shadowOpacity: 0.22, shadowRadius: s(7), shadowOffset: { width: 0, height: s(6) }, elevation: 4 }]}>
+            style={[chip, { borderColor: 'transparent', ...shadow(C.blue, 0.22, s(7), s(6)) }]}>
             <T size={10.5} w={600} c="#fff">{`${d} days`}</T>
           </LinearGradient>
         ) : (

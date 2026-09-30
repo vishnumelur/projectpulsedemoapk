@@ -15,6 +15,7 @@ import { Sheet } from '@/ui/Sheet';
 import { EXPERTS, DAYS, CLIENT_SLOTS, FEE, VAT_RATE, aed } from '@/data/seed';
 import { useDemo } from '@/store/demo';
 import { s } from '@/theme/scale';
+import { shadow } from '@/theme/shadow';
 import { C, EASE } from '@/theme/tokens';
 
 const SPRING = { damping: 14, stiffness: 220, mass: 0.8 };
@@ -44,8 +45,7 @@ function DayCell({ d, on, onPress }: { d: (typeof DAYS)[number]; on: boolean; on
         {d.off ? <View style={{ paddingVertical: s(9) }}>{face(false)}</View> : (
           <>
             <Glass r={14} style={{ paddingVertical: s(9) }}><Animated.View style={base}>{face(false)}</Animated.View></Glass>
-            <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { paddingVertical: s(9), borderRadius: s(14), backgroundColor: C.blue, shadowColor: C.blue,
-              shadowOpacity: 0.3, shadowRadius: s(11), shadowOffset: { width: 0, height: s(10) }, elevation: 6 }, blue]}>{face(true)}</Animated.View>
+            <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { paddingVertical: s(9), borderRadius: s(14), backgroundColor: C.blue, ...shadow(C.blue, 0.3, s(11), s(10)) }, blue]}>{face(true)}</Animated.View>
           </>
         )}
       </Animated.View>

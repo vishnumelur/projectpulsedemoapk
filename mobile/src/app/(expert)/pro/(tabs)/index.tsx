@@ -13,6 +13,7 @@ import { useDemo } from '@/store/demo';
 import { EARNINGS, aed } from '@/data/seed';
 import { Rise, useCountUp, IS_TEST } from '@/screens/expert/motion';
 import { s } from '@/theme/scale';
+import { shadow } from '@/theme/shadow';
 import { C, EASE } from '@/theme/tokens';
 
 const AP = Animated.createAnimatedComponent(Path);
@@ -58,7 +59,7 @@ export default function ExpertHome() {
         </View>
         <LinearGradient colors={[C.navy, C.blue, C.cyan]} locations={[0, 0.7, 1]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
           style={{ marginTop: s(14), borderRadius: s(22), padding: s(16), overflow: 'hidden',
-            shadowColor: C.blue, shadowOpacity: 0.25, shadowRadius: s(17), shadowOffset: { width: 0, height: s(16) }, elevation: 8 }}>
+            ...shadow(C.blue, 0.25, s(17), s(16)) }}>
           <T size={10} w={600} c="rgba(255,255,255,0.75)">This month</T>
           <T size={26} w={700} ls={-0.04} c="#fff" style={{ marginTop: s(4) }}>{aed(total)}</T>
           <T size={10} c="rgba(255,255,255,0.7)" style={{ marginTop: s(2) }}><T size={10} w={700} c="#8FF0C0">{`↑ ${EARNINGS.trend}%`}</T> vs last month</T>

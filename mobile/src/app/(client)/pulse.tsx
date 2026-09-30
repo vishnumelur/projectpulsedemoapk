@@ -19,6 +19,7 @@ import { SUGGESTIONS, SUGGESTION_QUERY, STAGE_EXPERTS, renderBody } from '@/puls
 import { STAGES, Stage } from '@/data/types';
 import { CLIENT, aed } from '@/data/seed';
 import { s } from '@/theme/scale';
+import { shadow } from '@/theme/shadow';
 import { C, F } from '@/theme/tokens';
 
 function Counter({ to, ms }: { to: number; ms: number }) {
@@ -84,7 +85,7 @@ export default function PulseScreen() {
           <TextInput value={text} onChangeText={setText} onSubmitEditing={() => f.submit(text)} placeholder="Ask about your project" placeholderTextColor={C.faint2}
             allowFontScaling={false} style={{ flex: 1, fontFamily: F[400], fontSize: s(11.5), color: C.navy, paddingVertical: 0 }} />
           <Pressable onPress={() => f.submit(text)} style={{ width: s(32), height: s(32), borderRadius: s(16), backgroundColor: C.blue, alignItems: 'center', justifyContent: 'center',
-            shadowColor: C.blue, shadowOpacity: 0.3, shadowRadius: s(7), elevation: 4 }}><Icon name="send" size={14} color="#fff" stroke={2.4} /></Pressable>
+            ...shadow(C.blue, 0.3, s(7)) }}><Icon name="send" size={14} color="#fff" stroke={2.4} /></Pressable>
         </View>
       </KeyboardAvoidingView>
       <Sheet visible={stageSheet} onClose={() => setStageSheet(false)}>
@@ -116,7 +117,7 @@ export default function PulseScreen() {
           <T size={9.5} c={C.faint3} style={{ marginTop: s(6) }}>Finding your answer…</T>
           <LinearGradient colors={['#B9A8FF', 'rgba(185,168,255,0)']} style={{ width: 1, height: s(60), marginTop: s(22) }} />
           <View style={{ width: s(52), height: s(52), borderRadius: s(26), backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', marginTop: s(6),
-            shadowColor: '#16205A', shadowOpacity: 0.06, shadowRadius: s(10), elevation: 3 }}>
+            ...shadow('#16205A', 0.06, s(10)) }}>
             <Counter to={1240} ms={1700} /><T size={6.5} w={700} ls={0.12} c={C.mute}>GUIDES</T>
           </View>
         </View>
@@ -167,7 +168,7 @@ export default function PulseScreen() {
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(900).springify().damping(16)} style={{ marginTop: s(14) }}>
           <View style={{ borderRadius: s(22), backgroundColor: '#fff', padding: s(14), overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(0,0,254,0.06)',
-            shadowColor: C.blue, shadowOpacity: 0.12, shadowRadius: s(20), shadowOffset: { width: 0, height: s(18) }, elevation: 6 }}>
+            ...shadow(C.blue, 0.12, s(20), s(18)) }}>
             <LinearGradient colors={['rgba(49,209,255,0.32)', 'rgba(185,168,255,0.32)', 'rgba(0,0,254,0.16)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0.4 }}
               style={{ position: 'absolute', left: 0, right: 0, top: 0, height: s(64) }} />
             <LinearGradient colors={['rgba(255,255,255,0)', '#fff']} style={{ position: 'absolute', left: 0, right: 0, top: s(24), height: s(40) }} />

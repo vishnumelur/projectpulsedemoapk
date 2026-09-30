@@ -13,6 +13,7 @@ import { ProgressRing } from '@/fx/ProgressRing';
 import { useDemo } from '@/store/demo';
 import { EXPERTS, aed } from '@/data/seed';
 import { s } from '@/theme/scale';
+import { shadow } from '@/theme/shadow';
 import { C, EASE } from '@/theme/tokens';
 
 export default function Booked() {
@@ -40,7 +41,7 @@ export default function Booked() {
     <Screen bg="aurora3" px={16}>
       <View style={{ flex: 1, alignItems: 'center' }}>
         <View style={{ marginTop: s(70), width: s(92), height: s(92), alignItems: 'center', justifyContent: 'center' }}>
-          <View style={{ position: 'absolute', width: s(92), height: s(92), borderRadius: s(46), backgroundColor: 'rgba(0,0,254,0.16)', shadowColor: C.blue, shadowOpacity: 0.3, shadowRadius: s(25), elevation: 10 }} />
+          <View style={{ position: 'absolute', width: s(92), height: s(92), borderRadius: s(46), backgroundColor: 'rgba(0,0,254,0.16)', ...shadow(C.blue, 0.3, s(25)) }} />
           <View style={{ position: 'absolute', width: s(80), height: s(80), borderRadius: s(40), backgroundColor: 'rgba(255,255,255,0.92)' }} />
           <ProgressRing size={92} thickness={6} progress={prog} colors={['#31D1FF', '#0000FE', '#0000FE', '#31D1FF']} track="transparent">
             {tick ? <Animated.View entering={ZoomIn.springify().damping(9)}><Icon name="check" color={C.blue} size={34} stroke={2.6} /></Animated.View> : <View style={{ width: s(34), height: s(34) }} />}

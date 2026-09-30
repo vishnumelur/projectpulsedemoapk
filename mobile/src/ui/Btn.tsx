@@ -2,6 +2,7 @@ import { ActivityIndicator, Pressable, StyleProp, StyleSheet, TextStyle, View, V
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { s } from '@/theme/scale';
+import { shadow } from '@/theme/shadow';
 import { C, GRAD, GRAD_LOC } from '@/theme/tokens';
 import { T } from './T';
 import { Icon } from './Icon';
@@ -15,7 +16,7 @@ export function Btn({ title, onPress, variant = 'primary', disabled, busy, done,
     : <T size={12.5} w={700} c={variant === 'black' ? '#fff' : '#fff'} align="center" style={textStyle}>{title}</T>);
   const base: ViewStyle = { borderRadius: s(16), paddingVertical: s(13), alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
     opacity: disabled ? 0.45 : 1 };
-  const glow: ViewStyle = variant === 'black' ? {} : { shadowColor: C.blue, shadowOpacity: 0.28, shadowRadius: s(12), shadowOffset: { width: 0, height: s(10) }, elevation: 6 };
+  const glow: ViewStyle = variant === 'black' ? {} : { ...shadow(C.blue, 0.28, s(12), s(10)) };
   return (
     <Pressable testID="btn" disabled={inactive} onPress={() => { Haptics.selectionAsync(); onPress?.(); }}
       style={({ pressed }) => [base, glow, { backgroundColor: variant === 'black' ? '#000' : C.blue, transform: [{ scale: pressed ? 0.98 : 1 }] }, style]}>

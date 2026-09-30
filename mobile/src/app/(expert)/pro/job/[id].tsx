@@ -17,6 +17,7 @@ import { Rise, IS_TEST } from '@/screens/expert/motion';
 import { PHOTOS } from '@/theme/photos';
 import { GRAD, EASE } from '@/theme/tokens';
 import { s } from '@/theme/scale';
+import { shadow } from '@/theme/shadow';
 import { C } from '@/theme/tokens';
 
 type Ph = keyof typeof PHOTOS;
@@ -53,7 +54,7 @@ export default function Deliver() {
         <Glass r={16} style={{ padding: s(12), flexDirection: 'row', alignItems: 'center', gap: s(10) }}>
           <LinearGradient colors={['#FFFFFF', '#EEF1FB']} start={{ x: 0.33, y: 0 }} end={{ x: 0.67, y: 1 }}
             style={{ width: s(34), height: s(40), borderRadius: s(8), alignItems: 'center', justifyContent: 'flex-end', paddingBottom: s(4),
-              shadowColor: C.navy, shadowOpacity: 0.1, shadowRadius: s(5), shadowOffset: { width: 0, height: s(3) }, elevation: 2 }}>
+              ...shadow(C.navy, 0.1, s(5), s(3)) }}>
             <T size={7} w={800} c={C.blue}>PDF</T>
           </LinearGradient>
           <View style={{ flex: 1, minWidth: 0 }}>

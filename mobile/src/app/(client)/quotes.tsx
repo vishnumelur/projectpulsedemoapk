@@ -12,6 +12,7 @@ import { Orb } from '@/fx/Orb';
 import { useDemo, bestQuote } from '@/store/demo';
 import { EXPERTS, MARKET_AVG, aed } from '@/data/seed';
 import { s } from '@/theme/scale';
+import { shadow } from '@/theme/shadow';
 import { CountUp } from '@/screens/experts/fx';
 import { C, EASE } from '@/theme/tokens';
 
@@ -40,7 +41,7 @@ export default function Quotes() {
       <T size={25} w={700} ls={-0.035} lh={1.05} style={{ marginTop: s(14) }}>Your best match</T>
       <T size={11} c={C.mute} style={{ marginTop: s(4) }}>{`From ${all.length} quotes for your ${(req?.title ?? 'bid review').toLowerCase()}`}</T>
       <Animated.View entering={FadeInDown.delay(100).springify().damping(16)} style={{ marginTop: s(18) }}>
-        <Animated.View {...(back ? hide : {})} pointerEvents={back ? 'none' : 'auto'} style={[{ padding: s(18), borderRadius: s(24), backgroundColor: '#fff', alignItems: 'center', shadowColor: '#16205A', shadowOpacity: 0.06, shadowRadius: s(10), elevation: 3, backfaceVisibility: 'hidden' }, frontSt, frontOp]}>
+        <Animated.View {...(back ? hide : {})} pointerEvents={back ? 'none' : 'auto'} style={[{ padding: s(18), borderRadius: s(24), backgroundColor: '#fff', alignItems: 'center', ...shadow('#16205A', 0.06, s(10)), backfaceVisibility: 'hidden' }, frontSt, frontOp]}>
         <Avatar photo={ex.photo} size={64} />
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(4), marginTop: s(10) }}>
           <T size={14} w={700}>{ex.name}</T>
@@ -50,7 +51,7 @@ export default function Quotes() {
         <View style={{ marginTop: s(12) }}><CountUp to={best.price} prefix="AED " size={30} ls={-0.04} /></View>
         {below > 0 && <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(6), marginTop: s(10) }}><Orb size={14} /><T size={10} w={600} c={C.blue}>{`${below}% below average price`}</T></View>}
       </Animated.View>
-        <Animated.View {...(back ? {} : hide)} pointerEvents={back ? 'auto' : 'none'} style={[FACE, { borderRadius: s(24), backgroundColor: '#fff', padding: s(14), shadowColor: '#16205A', shadowOpacity: 0.06, shadowRadius: s(10), elevation: 3 }, backSt, backOp]}>
+        <Animated.View {...(back ? {} : hide)} pointerEvents={back ? 'auto' : 'none'} style={[FACE, { borderRadius: s(24), backgroundColor: '#fff', padding: s(14), ...shadow('#16205A', 0.06, s(10)) }, backSt, backOp]}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <T size={13} w={700}>Side by side</T>
             <Pressable onPress={toggle} hitSlop={10} accessibilityLabel="Close comparison"><T size={13} w={600} c={C.mute}>✕</T></Pressable>

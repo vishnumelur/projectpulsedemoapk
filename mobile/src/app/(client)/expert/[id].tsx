@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
+import { Platform, Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeIn, FadeInDown, interpolate, interpolateColor, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -23,11 +23,19 @@ const HERO_H = s(250);
 const HERO_RAD = s(18);
 const DOT_ON = s(5);
 const SPRING = { damping: 11, stiffness: 190, mass: 0.8 };
+const ANDROID = Platform.OS === 'android'; const R10 = s(10);
 /** Service card: the blue ring/border springs across on select (pop + colour); cards glide in staggered. */
 function ServiceCard({ x, on, i, onPress }: { x: Svc; on: boolean; i: number; onPress: () => void }) {
   const sel = useSharedValue(on ? 1 : 0);
   useEffect(() => { sel.value = withSpring(on ? 1 : 0, SPRING); }, [on, sel]);
-  const card = useAnimatedStyle(() => ({ shadowColor: interpolateColor(sel.value, [0, 1], ['#16205A', C.blue]), shadowOpacity: interpolate(sel.value, [0, 1], [0.05, 0.12]) }));
+  const card = useAnimatedStyle(() => {
+    const color = interpolateColor(sel.value, [0, 1], ['#16205A', C.blue]); const op = interpolate(sel.value, [0, 1], [0.05, 0.12]);
+    if (ANDROID) { // boxShadow (see theme/shadow): same colour/opacity blend as the iOS/web shadow
+      const g = sel.value; const r = Math.round(22 * (1 - g)), gg = Math.round(32 * (1 - g)), b = Math.round(90 + (254 - 90) * g);
+      return { boxShadow: `0px 0px ${R10}px rgba(${r},${gg},${b},${op})` } as any;
+    }
+    return { shadowColor: color, shadowOpacity: op };
+  });
   const ring = useAnimatedStyle(() => ({ opacity: Math.min(1, sel.value), transform: [{ scale: interpolate(sel.value, [0, 1], [1.05, 1]) }] }));
   const dot = useAnimatedStyle(() => ({ borderWidth: interpolate(sel.value, [0, 1], [2, DOT_ON]), borderColor: interpolateColor(sel.value, [0, 1], ['#CFD4E6', C.blue]),
     transform: [{ scale: interpolate(sel.value, [0, 0.5, 1], [1, 1.22, 1]) }] }));
@@ -35,7 +43,7 @@ function ServiceCard({ x, on, i, onPress }: { x: Svc; on: boolean; i: number; on
     <Animated.View entering={FadeInDown.delay(120 + i * 90).springify().damping(16)} style={{ marginTop: s(10) }}>
       <Pressable onPress={onPress}>
         <Animated.View style={[{ flexDirection: 'row', alignItems: 'center', gap: s(12), paddingVertical: s(14), paddingHorizontal: s(16), borderRadius: s(18), backgroundColor: '#fff',
-          shadowRadius: s(10), elevation: 2 }, card]}>
+          shadowRadius: s(10) }, card]}>
           <Animated.View style={[{ width: s(18), height: s(18), borderRadius: s(9) }, dot]} />
           <View style={{ flex: 1 }}><T size={12.5} w={600}>{x.name}</T><T size={10} w={500} c={C.mute} style={{ marginTop: 2 }}>{x.note}</T></View>
           <T size={13} w={700}>{x.price.toLocaleString('en-US')}</T>

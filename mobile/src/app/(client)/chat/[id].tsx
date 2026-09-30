@@ -15,6 +15,7 @@ import { useDemo } from '@/store/demo';
 import { EXPERTS } from '@/data/seed';
 import { PHOTOS, PhotoKey } from '@/theme/photos';
 import { s } from '@/theme/scale';
+import { shadow } from '@/theme/shadow';
 import { C, F } from '@/theme/tokens';
 
 function PhotoViewer({ photo, onClose }: { photo: PhotoKey | null; onClose: () => void }) {
@@ -58,7 +59,7 @@ export default function Chat() {
     ? <Pressable key={m.id} accessibilityLabel="Open photo" onPress={() => setViewer(m.photo!)} style={{ alignSelf: 'flex-start', marginTop: s(8) }}><Image source={PHOTOS[m.photo]} contentFit="cover" style={{ width: s(150), height: s(96), borderRadius: s(14) }} /></Pressable>
     : (
       <Animated.View key={m.id} entering={FadeInUp.springify().damping(16)} style={[{ maxWidth: '76%', paddingVertical: s(9), paddingHorizontal: s(12), borderRadius: s(16), marginTop: s(8) },
-        m.from === 'me' ? { alignSelf: 'flex-end', backgroundColor: C.blue, borderBottomRightRadius: s(5) } : { alignSelf: 'flex-start', backgroundColor: '#fff', borderBottomLeftRadius: s(5), shadowColor: '#16205A', shadowOpacity: 0.06, shadowRadius: s(5), elevation: 1 }]}>
+        m.from === 'me' ? { alignSelf: 'flex-end', backgroundColor: C.blue, borderBottomRightRadius: s(5) } : { alignSelf: 'flex-start', backgroundColor: '#fff', borderBottomLeftRadius: s(5), ...shadow('#16205A', 0.06, s(5)) }]}>
         <T size={11} lh={1.45} c={m.from === 'me' ? '#fff' : C.navy}>{m.text}</T>
       </Animated.View>
     );

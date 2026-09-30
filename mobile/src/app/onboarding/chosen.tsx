@@ -7,6 +7,7 @@ import { T } from '@/ui/T';
 import { ModelView } from '@/three/ModelView';
 import { BUILDINGS, BuildingType } from '@/data/types';
 import { s } from '@/theme/scale';
+import { shadow } from '@/theme/shadow';
 import { C } from '@/theme/tokens';
 
 export default function Chosen() {
@@ -17,7 +18,7 @@ export default function Chosen() {
     <Screen bg="aurora3" px={16}>
       <View style={{ alignItems: 'center', flex: 1 }}>
         <Animated.View entering={ZoomIn.springify().damping(9)} style={{ marginTop: s(34), width: s(44), height: s(44), borderRadius: s(22), backgroundColor: C.blue,
-          alignItems: 'center', justifyContent: 'center', shadowColor: C.blue, shadowOpacity: 0.35, shadowRadius: s(15), shadowOffset: { width: 0, height: s(12) }, elevation: 8 }}>
+          alignItems: 'center', justifyContent: 'center', ...shadow(C.blue, 0.35, s(15), s(12)) }}>
           <T size={20} c="#fff">✓</T>
         </Animated.View>
         <View style={{ height: s(320), alignSelf: 'stretch', marginHorizontal: -s(16), marginTop: s(10) }}><ModelView model={b.id} lights={0.9} spin={0.25} radius={9.8} target={[0, 1.8, 0]} /></View>

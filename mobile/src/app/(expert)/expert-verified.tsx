@@ -15,6 +15,7 @@ import { GradientText } from '@/fx/GradientText';
 import { useDemo } from '@/store/demo';
 import { GRAD } from '@/theme/tokens';
 import { s } from '@/theme/scale';
+import { shadow } from '@/theme/shadow';
 import { C } from '@/theme/tokens';
 
 // ✦ the badge spins in with a spring (ends at the mockup's rotate(-8deg))
@@ -22,7 +23,7 @@ function Badge({ children }: { children: React.ReactNode }) {
   const k = useSharedValue(0);
   useEffect(() => { k.value = withSpring(1, { damping: 9, stiffness: 110 }); }, []);
   const st = useAnimatedStyle(() => ({ transform: [{ scale: k.value }, { rotate: `${-8 - 180 * (1 - k.value)}deg` }] }));
-  return <Animated.View style={[st, { marginTop: s(84), borderRadius: s(30), shadowColor: C.blue, shadowOpacity: 0.3, shadowRadius: s(22), shadowOffset: { width: 0, height: s(20) }, elevation: 10 }]}>{children}</Animated.View>;
+  return <Animated.View style={[st, { marginTop: s(84), borderRadius: s(30), ...shadow(C.blue, 0.3, s(22), s(20)) }]}>{children}</Animated.View>;
 }
 export default function ExpertVerified() {
   const { stay } = useLocalSearchParams<{ stay?: string }>();
