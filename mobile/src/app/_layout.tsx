@@ -18,7 +18,7 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const [fonts] = useFonts({ HankenGrotesk_300Light, HankenGrotesk_400Regular, HankenGrotesk_500Medium, HankenGrotesk_600SemiBold, HankenGrotesk_700Bold, HankenGrotesk_800ExtraBold,
     // DejaVu subset for the few symbols Hanken lacks (✓ ◌ ★ ◆ ✦ ✕); used by T on native, see ui/T.tsx
-    'PPSym': require('../../assets/fonts/PPSym.ttf'), 'PPSym-Bold': require('../../assets/fonts/PPSym-Bold.ttf') });
+    'PPSym': require('../../assets/fonts/PPSym.ttf') });
   const [hydrated, setHydrated] = useState(useDemo.persist.hasHydrated());
   // Web: CanvasKit is loaded in index.web.js before the router entry. Never require Skia's web loader here —
   // Metro resolves it on native in dev and canvaskit.js imports Node's 'fs'.

@@ -10,9 +10,9 @@ export type TProps = TextProps & { size?: number; w?: W; c?: string; ls?: number
  *  heavier and sized differently, so native uses the bundled DejaVu subset (assets/fonts/PPSym*.ttf) for exactly these. */
 const SYM = /([✓◌★◆✦✕])/;
 const HANKEN_LINE = 1.303; // (hhea ascent + descent) / unitsPerEm
-function withSym(children: ReactNode, w: W): ReactNode {
+function withSym(children: ReactNode): ReactNode {
   if (Platform.OS === 'web') return children;
-  const family = w >= 600 ? 'PPSym-Bold' : 'PPSym';
+  const family = 'PPSym'; // the approved renders show the regular-weight symbols even in bold labels
   return Children.map(children, (ch) => typeof ch !== 'string' || !SYM.test(ch) ? ch
     : ch.split(SYM).map((part, i) => (i % 2 ? <Text key={i} style={{ fontFamily: family, fontWeight: 'normal' }}>{part}</Text> : part)));
 }
@@ -28,6 +28,6 @@ export function T({ size = 12, w = 400, c = C.navy, ls = 0, lh, align, style, ch
       {...rest}
       style={[{ fontFamily: F[w], fontSize: s(size), color: c, letterSpacing: s(size * ls), textAlign: align },
         line ? { lineHeight: s(size * line) } : null, style]}
-    >{withSym(children, w)}</Text>
+    >{withSym(children)}</Text>
   );
 }
