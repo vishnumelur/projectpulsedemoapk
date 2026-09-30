@@ -20,6 +20,7 @@ jest.mock('@/fx/Orb', () => {
   const C = (p: any) => require('react').createElement(View, { testID: 'Orb' }, p.children);
   return { __esModule: true, Orb: C, Halo: () => null, default: C };
 }, { virtual: true });
+jest.mock('@/fx/RoundOrb', () => mockFx('RoundOrb')(), { virtual: true });
 jest.mock('@/fx/Aurora', () => mockFx('Aurora')(), { virtual: true });
 jest.mock('@/fx/IridescentBorder', () => mockFx('IridescentBorder')(), { virtual: true });
 jest.mock('@/fx/ProgressRing', () => mockFx('ProgressRing')(), { virtual: true });
