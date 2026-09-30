@@ -1,7 +1,8 @@
 import { Platform, Pressable, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
-import Animated, { useAnimatedStyle, withTiming, FadeIn } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import { enterFade } from '@/theme/motion';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Directions, Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -58,7 +59,7 @@ export default function StageScreen() {
           </FadeEdges>
         </View>
       </GestureDetector>
-      <Animated.View key={st} entering={FadeIn.duration(250)}><T size={11} c={C.mute} align="center" style={{ marginTop: s(4) }}>{STAGE_DESC[st - 1]}</T></Animated.View>
+      <Animated.View key={st} entering={enterFade(0, 250)}><T size={11} c={C.mute} align="center" style={{ marginTop: s(4) }}>{STAGE_DESC[st - 1]}</T></Animated.View>
       <View style={{ marginTop: 'auto', marginBottom: s(18) }}><Btn title="Continue" onPress={() => router.push(`/onboarding/creating?type=${b.id}&stage=${st}`)} /></View>
     </Screen>
   );

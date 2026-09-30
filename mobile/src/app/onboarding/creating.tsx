@@ -1,7 +1,8 @@
 import { View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
+import { enterUp } from '@/theme/motion';
 import { Screen } from '@/ui/Screen';
 import { T } from '@/ui/T';
 import { Orb, Halo } from '@/fx/Orb';
@@ -27,7 +28,7 @@ export default function Creating() {
         <T size={17} w={700} ls={-0.02} style={{ marginTop: s(34) }}>Building your project…</T>
         <View style={{ marginTop: s(16), gap: s(8), alignItems: 'flex-start' }}>
           {lines.map((l, i) => (
-            <Animated.View key={l} entering={FadeInDown.delay(100 * (i + 1)).duration(1000)}>
+            <Animated.View key={l} entering={enterUp(i + 1, 70)}>
               <T size={11} c={i === 3 ? C.mute : C.navy}>{l}</T>
             </Animated.View>
           ))}
