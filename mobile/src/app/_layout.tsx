@@ -5,7 +5,6 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useFonts, HankenGrotesk_300Light, HankenGrotesk_400Regular, HankenGrotesk_500Medium, HankenGrotesk_600SemiBold,
   HankenGrotesk_700Bold, HankenGrotesk_800ExtraBold } from '@expo-google-fonts/hanken-grotesk';
 import { useEffect, useState } from 'react';
-import { Platform } from 'react-native';
 import { useDemo } from '@/store/demo';
 import { resumeSimulations } from '@/sim/scheduler';
 import { NoticeBanner } from '@/ui/NoticeBanner';
@@ -14,12 +13,12 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fonts] = useFonts({ HankenGrotesk_300Light, HankenGrotesk_400Regular, HankenGrotesk_500Medium, HankenGrotesk_600SemiBold, HankenGrotesk_700Bold, HankenGrotesk_800ExtraBold });
-  const [skiaReady, setSkiaReady] = useState(Platform.OS !== 'web');
   const [hydrated, setHydrated] = useState(useDemo.persist.hasHydrated());
-  useEffect(() => { if (Platform.OS === 'web') require('@shopify/react-native-skia/lib/module/web').LoadSkiaWeb({ locateFile: () => '/canvaskit.wasm' }).then(() => setSkiaReady(true)); }, []);
+  // Web: CanvasKit is loaded in index.web.js before the router entry. Never require Skia's web loader here —
+  // Metro resolves it on native in dev and canvaskit.js imports Node's 'fs'.
   useEffect(() => useDemo.persist.onFinishHydration(() => setHydrated(true)), []);
   useEffect(() => { if (hydrated) resumeSimulations(); }, [hydrated]);
-  const ready = fonts && skiaReady && hydrated;
+  const ready = fonts && hydrated;
   useEffect(() => { if (ready) SplashScreen.hideAsync(); }, [ready]);
   if (!ready) return null;
   return (
