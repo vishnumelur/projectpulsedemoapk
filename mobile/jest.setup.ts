@@ -23,7 +23,7 @@ jest.mock('@/fx/Orb', () => {
 jest.mock('@/fx/Aurora', () => mockFx('Aurora')(), { virtual: true });
 jest.mock('@/fx/IridescentBorder', () => mockFx('IridescentBorder')(), { virtual: true });
 jest.mock('@/fx/ProgressRing', () => mockFx('ProgressRing')(), { virtual: true });
-jest.mock(__dirname + '/src/three/ModelView', () => mockFx('ModelView')(), { virtual: true });
+jest.mock('@/three/ModelView', () => mockFx('ModelView')(), { virtual: true });
 jest.mock('@/fx/GradientText', () => {
   const { Text } = require('react-native');
   const G = (p: any) => require('react').createElement(Text, null, p.children);
