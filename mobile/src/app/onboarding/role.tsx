@@ -12,6 +12,7 @@ import { Glass } from '@/ui/Glass';
 import { T } from '@/ui/T';
 import { PHOTOS, PhotoKey } from '@/theme/photos';
 import { s } from '@/theme/scale';
+import { goBack } from '@/nav/back';
 import { shadow } from '@/theme/shadow';
 import { C } from '@/theme/tokens';
 import { DUR, EASE_OUT, SPRING, enterUp } from '@/theme/motion';
@@ -131,7 +132,7 @@ export default function RoleScreen() {
     <Screen bg="aurora3" px={16} overlay={card && from ? <Expand c={card} from={from} grow={grow} /> : undefined}>
       <Animated.View style={[{ flex: 1 }, page]}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: s(8) }}>
-          <Pressable onPress={() => (router.canGoBack?.() ? router.back() : router.replace('/onboarding/welcome'))} hitSlop={10} accessibilityLabel="Back">
+          <Pressable onPress={() => goBack('/onboarding/welcome')} hitSlop={10} accessibilityLabel="Back">
             <Glass r={16} style={{ width: s(32), height: s(32), alignItems: 'center', justifyContent: 'center' }}>
               {/* wrapped in a View: on web a bare <svg> paints under the positioned BlurView */}
               <View><Svg width={s(13)} height={s(13)} viewBox="0 0 24 24"><Path d="M15 5l-7 7 7 7" fill="none" stroke={C.navy} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" /></Svg></View>

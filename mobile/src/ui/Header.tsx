@@ -1,5 +1,5 @@
 import { Pressable, View, StyleProp, ViewStyle } from 'react-native';
-import { router } from 'expo-router';
+import { useGoBack } from '@/nav/back';
 import { s } from '@/theme/scale';
 import { C } from '@/theme/tokens';
 import { Glass } from './Glass';
@@ -8,8 +8,9 @@ import { T } from './T';
 export function BackButton({ onPress, flat, label = '‹' }: { onPress?: () => void; flat?: boolean; label?: string }) {
   const inner = <T size={label === '‹' ? 14 : 12} w={500} align="center">{label}</T>;
   const box = { width: s(32), height: s(32), borderRadius: s(16), alignItems: 'center', justifyContent: 'center' } as const;
+  const back = useGoBack();
   return (
-    <Pressable onPress={onPress ?? (() => router.back())} hitSlop={10}>
+    <Pressable onPress={onPress ?? back} hitSlop={10}>
       {flat ? <View style={[box, { backgroundColor: C.inputBg }]}>{inner}</View> : <Glass r={16} style={box}>{inner}</Glass>}
     </Pressable>
   );

@@ -17,6 +17,7 @@ import { Rise, IS_TEST } from '@/screens/expert/motion';
 import { PHOTOS } from '@/theme/photos';
 import { GRAD, EASE } from '@/theme/tokens';
 import { s } from '@/theme/scale';
+import { goBack } from '@/nav/back';
 import { shadow } from '@/theme/shadow';
 import { C } from '@/theme/tokens';
 
@@ -41,7 +42,7 @@ export default function Deliver() {
     if (done.current || job.status === 'report') return; done.current = true;
     useDemo.getState().completeJob(job.id);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    router.back();
+    goBack('/pro/jobs');
   };
   return (
     <Screen bg="aurora">
