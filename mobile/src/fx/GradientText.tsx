@@ -1,6 +1,6 @@
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { useSharedValue, withRepeat, withTiming, useAnimatedStyle, Easing, SharedValue } from 'react-native-reanimated';
+import Animated, { cancelAnimation, useSharedValue, withRepeat, withTiming, useAnimatedStyle, useReducedMotion, Easing, SharedValue } from 'react-native-reanimated';
 import { useEffect, useState } from 'react';
 import { Platform, Text, TextLayoutLine, View } from 'react-native';
 import { T, TProps } from '@/ui/T';
@@ -26,7 +26,12 @@ export function GradientText({ shimmer, base = '#16205A', colors = GRAD, childre
   const [lines, setLines] = useState<Line[]>([]);
   const [off, setOff] = useState({ x: 0, y: 0 });
   const x = useSharedValue(0);
-  useEffect(() => { if (shimmer) x.value = withRepeat(withTiming(1, { duration: 3200, easing: Easing.inOut(Easing.ease) }), -1, false); }, [shimmer]);
+  const reduce = useReducedMotion();
+  useEffect(() => {
+    if (!shimmer || reduce) return;
+    x.value = withRepeat(withTiming(1, { duration: 3200, easing: Easing.inOut(Easing.ease) }), -1, false);
+    return () => cancelAnimation(x);
+  }, [shimmer, reduce]);
   if (Platform.OS === 'web') {
     // @react-native-masked-view has no web implementation: clip a CSS gradient to the glyphs instead.
     const stops = colors.map((c, i) => `${c} ${Math.round((i / Math.max(1, colors.length - 1)) * 100)}%`).join(', ');
