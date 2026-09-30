@@ -45,7 +45,9 @@ export default function StageScreen() {
             <Animated.View style={[{ flexDirection: 'row', alignItems: 'center', height: s(38) }, row]}>
               {STAGES.map((name, i) => (
                 <Pressable key={name} onPress={() => pick(i + 1)} style={{ width: s(SLOT), alignItems: 'center' }}>
-                  <T size={i + 1 === st ? 23 : 15} w={i + 1 === st ? 700 : 600} ls={i + 1 === st ? -0.035 : -0.02} c={i + 1 === st ? C.navy : C.faint3}>{name}</T>
+                  {/* wider than the slot so a long name overflows both sides centred, as on web (a native Text wraps/clips at its box) */}
+                  <T size={i + 1 === st ? 23 : 15} w={i + 1 === st ? 700 : 600} ls={i + 1 === st ? -0.035 : -0.02} c={i + 1 === st ? C.navy : C.faint3}
+                    align="center" numberOfLines={1} style={{ width: s(SLOT + 60) }}>{name}</T>
                 </Pressable>
               ))}
             </Animated.View>

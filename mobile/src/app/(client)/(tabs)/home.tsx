@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useWindowDimensions } from 'react-native';
+import { Platform, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Pressable, ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
@@ -21,6 +21,7 @@ import { useDemo, newQuotesFor } from '@/store/demo';
 import { BUILDINGS, NEXT_STEP } from '@/data/types';
 import { EXPERTS, aed } from '@/data/seed';
 import { s } from '@/theme/scale';
+import { shadow } from '@/theme/shadow';
 import { C, EASE } from '@/theme/tokens';
 
 export default function Home() {
@@ -86,10 +87,11 @@ export default function Home() {
                 <LinearGradient colors={['rgba(0,0,254,0.06)', 'rgba(49,209,255,0.08)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0.3 }}
                   style={{ marginTop: s(8), borderRadius: s(14), paddingVertical: s(7), paddingLeft: s(7), paddingRight: s(18), marginRight: -s(6), flexDirection: 'row', alignItems: 'center', gap: s(9) }}>
                   <View style={{ width: s(28), height: s(28), borderRadius: s(14), backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center',
-                    shadowColor: C.blue, shadowOpacity: 0.12, shadowRadius: s(5), elevation: 2 }}><Icon name="arrowR" size={12} color={C.blue} stroke={2.4} /></View>
+                    ...shadow(C.blue, 0.12, s(5)) }}><Icon name="arrowR" size={12} color={C.blue} stroke={2.4} /></View>
                   <View style={{ flex: 1, minWidth: 0, alignItems: 'flex-start' }}>
                     <T size={8.5} w={700} ls={0.12} c={C.mute}>NEXT STEP</T>
-                    <GradientText shimmer size={11.5} w={700} style={{ marginTop: 1, flexShrink: 0, whiteSpace: 'nowrap' } as any}>{NEXT_STEP[stage - 1]}</GradientText>
+                    {/* one line that may run under "Start", as in the mockup (web: nowrap; native text can't overflow its box, so give it room) */}
+                    <GradientText shimmer size={11.5} w={700} style={{ marginTop: 1, flexShrink: 0, ...(Platform.OS === 'web' ? { whiteSpace: 'nowrap' } : { width: s(170) }) } as any}>{NEXT_STEP[stage - 1]}</GradientText>
                   </View>
                   <T size={10} w={700} c={C.blue}>Start</T>
                 </LinearGradient>
@@ -115,7 +117,10 @@ export default function Home() {
           <Glass r={20} style={{ paddingHorizontal: s(14) }}>
             {fresh.length > 0 && (
               <Pressable onPress={() => router.push('/quotes?request=req-bid')} style={{ flexDirection: 'row', alignItems: 'center', gap: s(11), paddingVertical: s(11), borderBottomWidth: 1, borderBottomColor: C.line }}>
-                <View style={{ width: s(32), height: s(32), borderRadius: s(16), backgroundColor: C.blue, alignItems: 'center', justifyContent: 'center', borderWidth: s(4), borderColor: 'rgba(0,0,254,0.12)' }}><T size={12} w={700} c="#fff">{String(fresh.length)}</T></View>
+                <View style={{ width: s(32), height: s(32), borderRadius: s(16), backgroundColor: C.blue, alignItems: 'center', justifyContent: 'center' }}>
+                  {/* mockup: box-shadow 0 0 0 4px rgba(0,0,254,.12), a ring OUTSIDE the 32px badge */}
+                  <View style={{ position: 'absolute', left: -s(4), top: -s(4), right: -s(4), bottom: -s(4), borderRadius: s(20), borderWidth: s(4), borderColor: 'rgba(0,0,254,0.12)' }} />
+                  <T size={12} w={700} c="#fff">{String(fresh.length)}</T></View>
                 <View style={{ flex: 1 }}><T size={12} w={700} ls={-0.01}>Quotes ready</T><T size={9.5} c={C.mute} style={{ marginTop: 1 }}>{`Bid review · from ${aed(from)}`}</T></View>
                 <T size={15} c={C.faint3}>›</T>
               </Pressable>
