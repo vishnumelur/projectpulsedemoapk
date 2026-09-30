@@ -8,6 +8,10 @@ import { useEffect, useState } from 'react';
 import { useDemo } from '@/store/demo';
 import { resumeSimulations } from '@/sim/scheduler';
 import { NoticeBanner } from '@/ui/NoticeBanner';
+import { LogBox } from 'react-native';
+
+// Library deprecation / capability notices (Skia path API, expo-gl) — not app errors; keep them out of the demo UI.
+LogBox.ignoreLogs(['[react-native-skia]', 'Multiple instances of Three.js', 'THREE.WebGLRenderer', 'EXGL: gl.pixelStorei']);
 
 SplashScreen.preventAutoHideAsync();
 
