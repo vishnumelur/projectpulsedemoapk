@@ -21,11 +21,10 @@ test('Home shows the approved content and wires the actions', async () => {
   expect(router.push).toHaveBeenCalledWith('/quotes?request=req-bid');
 });
 
-test('Profile switch goes to the expert side', async () => {
+test('Profile is sealed: no switch to the expert side, a Log out row instead', async () => {
   await render(<Profile />);
-  await fireEvent.press(screen.getByText('Switch to Expert app'));
-  expect(useDemo.getState().role).toBe('expert');
-  expect(router.replace).toHaveBeenCalledWith('/expert-role');
+  expect(screen.queryByText('Switch to Expert app')).toBeNull();
+  expect(screen.getByText('Log out')).toBeTruthy();
 });
 
 test('Tapping the Ask bar expands the blob and opens Pulse', async () => {

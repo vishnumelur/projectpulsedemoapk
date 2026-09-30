@@ -9,7 +9,8 @@ import { useDemo } from '@/store/demo';
 jest.mock('expo-router', () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() }, useLocalSearchParams: () => ({}), // runs like a mount-time focus; its cleanup runs on unmount (blur)
   useFocusEffect: jest.fn((cb: () => void | (() => void)) => require('react').useEffect(cb, [cb])),
   Redirect: jest.fn(() => null) }));
-beforeEach(() => { useDemo.getState().resetDemo(); jest.clearAllMocks(); });
+// building/stage are sealed to the client session (Task 2)
+beforeEach(() => { useDemo.getState().resetDemo(); useDemo.setState({ session: { role: 'client', email: 'sara@projectpulse.ae' } }); jest.clearAllMocks(); });
 
 test('Welcome (A3): Pulse greets you, with the lockup, the two replies and the trust line', async () => {
   await render(<Welcome />);

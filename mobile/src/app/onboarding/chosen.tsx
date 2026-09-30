@@ -9,8 +9,9 @@ import { BUILDINGS, BuildingType } from '@/data/types';
 import { s } from '@/theme/scale';
 import { shadow } from '@/theme/shadow';
 import { C } from '@/theme/tokens';
+import { withPortal } from '@/nav/PortalGuard';
 
-export default function Chosen() {
+function Chosen() {
   const { type = 'villa', stay } = useLocalSearchParams<{ type?: BuildingType; stay?: string }>();
   const b = BUILDINGS.find((x) => x.id === type) ?? BUILDINGS[0];
   useEffect(() => { if (stay) return; const t = setTimeout(() => router.replace(`/onboarding/stage?type=${b.id}`), 1400); return () => clearTimeout(t); }, [stay]);
@@ -28,3 +29,6 @@ export default function Chosen() {
     </Screen>
   );
 }
+
+// Client onboarding runs only inside the client session (sealed like the (client) group).
+export default withPortal('client', Chosen);

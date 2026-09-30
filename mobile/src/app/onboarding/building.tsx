@@ -13,8 +13,11 @@ import { ModelView } from '@/three/ModelView';
 import { BUILDINGS } from '@/data/types';
 import { s } from '@/theme/scale';
 import { C } from '@/theme/tokens';
+import { withPortal } from '@/nav/PortalGuard';
 
-export default function Building() {
+function Building() {
+  // First screen after Sign in: history was reset, so there is nothing to go back to (never back into the login).
+  const [hasBack] = useState(() => router.canGoBack?.() ?? true);
   const [i, setI] = useState(0); const b = BUILDINGS[i];
   const go = (n: number) => { if (n !== i) { setI(n); Haptics.selectionAsync(); } };
   const step = (d: number) => go((i + d + BUILDINGS.length) % BUILDINGS.length);
@@ -25,7 +28,7 @@ export default function Building() {
     Gesture.Fling().direction(Directions.RIGHT).runOnJS(true).onEnd(() => stepRef.current(-1))), []);
   return (
     <Screen bg="aurora" px={16}>
-      <Header center={<Eyebrow>1 OF 2</Eyebrow>} />
+      <Header back={hasBack} center={<Eyebrow>1 OF 2</Eyebrow>} />
       <T size={27} w={700} ls={-0.035} lh={1.05} style={{ marginTop: s(14) }}>{'What are you\nbuilding?'}</T>
       {/* a horizontal swipe switches building: the model's own drag-to-spin is off here, or its Pan would win every drag */}
       <GestureDetector gesture={swipe}>
@@ -40,3 +43,6 @@ export default function Building() {
     </Screen>
   );
 }
+
+// Client onboarding runs only inside the client session (sealed like the (client) group).
+export default withPortal('client', Building);

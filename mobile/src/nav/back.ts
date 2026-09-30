@@ -14,6 +14,12 @@ export function goBack(fallback: string) {
   else router.back();
 }
 
+/** Start a fresh history at `href`: pop every stacked screen, then replace, so back can never return (sign in, sign out). */
+export function resetTo(href: string) {
+  if (router.canDismiss?.()) router.dismissAll();
+  router.replace(href as any);
+}
+
 /** goBack with the current route group's tab root as the fallback. */
 export function useGoBack() {
   const path = usePathname?.() ?? '/';

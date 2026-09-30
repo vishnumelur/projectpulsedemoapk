@@ -1,5 +1,6 @@
 import { View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
+import { resetTo } from '@/nav/back';
 import { useEffect, useState } from 'react';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -50,7 +51,7 @@ export default function ExpertVerified() {
         <T size={11} c={C.mute} lh={1.55} align="center" style={{ marginTop: s(4.5) }}>{'Project Pulse approved your profile.\nYou\'ll now get requests in\n'}<T size={11} w={700} c={C.navy}>Abu Dhabi & Dubai</T>.</T>
         <Glass r={14} style={{ marginTop: s(22), paddingVertical: s(8), paddingHorizontal: s(14) }}><T size={10} c={C.mute} align="center">Under review took <T size={10} w={700}>2 days</T> · you'll hear by email</T></Glass>
       </View>
-      <Dock bg="none"><Btn title="Go to dashboard" onPress={() => { useDemo.getState().verifyExpert(); router.replace('/pro'); }} /></Dock>
+      <Dock bg="none"><Btn title="Go to dashboard" onPress={() => { useDemo.getState().verifyExpert(); resetTo('/pro'); }} /></Dock>
     </Screen>
   );
 }

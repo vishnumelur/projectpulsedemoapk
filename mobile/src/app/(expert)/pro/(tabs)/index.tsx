@@ -1,6 +1,6 @@
 // src/app/(expert)/pro/(tabs)/index.tsx — E4 expert dashboard
-import { ScrollView, View } from 'react-native';
-import { useEffect, useMemo, useRef } from 'react';
+import { Pressable, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path } from 'react-native-svg';
 import Animated, { LinearTransition, useAnimatedProps, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
@@ -10,6 +10,7 @@ import { PageScroll } from '@/ui/PageScroll';
 import { T } from '@/ui/T';
 import { Avatar } from '@/ui/Avatar';
 import { RequestCard } from '@/ui/RequestCard';
+import { LogoutSheet } from '@/ui/LogoutSheet';
 import { useDemo } from '@/store/demo';
 import { EARNINGS, aed } from '@/data/seed';
 import { Rise, useCountUp, IS_TEST } from '@/screens/expert/motion';
@@ -38,6 +39,7 @@ export default function ExpertHome() {
   const requests = useDemo((st) => st.requests);
   const reqs = useMemo(() => requests.filter((r) => r.status === 'sent'), [requests]);
   const total = useCountUp(EARNINGS.total, 1100, 150); // ✦ the amount counts up
+  const [menu, setMenu] = useState(false); // the avatar opens Omar's account sheet (Log out)
   // ✦ new requests slide in with a soft haptic: once as the first cards land, then for every request that arrives live
   const seen = useRef<Set<string> | null>(null);
   useEffect(() => {
@@ -56,7 +58,10 @@ export default function ExpertHome() {
       <PageScroll tabBar contentContainerStyle={{ paddingBottom: s(90) }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: s(8) }}>
           <View><T size={9.5} c={C.mute}>Good morning</T><T size={22} w={700} ls={-0.035} lh={1.1} style={{ marginTop: s(2) }}>Omar</T></View>
-          <Avatar photo="omar" size={34} ring="white" />
+          <Pressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setMenu(true); }} hitSlop={8} accessibilityRole="button"
+            accessibilityLabel="Account" style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.97 : 1 }] })}>
+            <Avatar photo="omar" size={34} ring="white" />
+          </Pressable>
         </View>
         <LinearGradient colors={[C.navy, C.blue, C.cyan]} locations={[0, 0.7, 1]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
           style={{ marginTop: s(14), borderRadius: s(22), padding: s(16), overflow: 'hidden',
@@ -75,6 +80,7 @@ export default function ExpertHome() {
           ))}
         </View>
       </PageScroll>
+      <LogoutSheet visible={menu} onClose={() => setMenu(false)} account="expert" />
     </Screen>
   );
 }

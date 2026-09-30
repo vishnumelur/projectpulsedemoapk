@@ -1,5 +1,6 @@
 import { View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
+import { resetTo } from '@/nav/back';
 import { useEffect } from 'react';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Screen } from '@/ui/Screen';
@@ -9,14 +10,15 @@ import { BUILDINGS, BuildingType, STAGES, Stage } from '@/data/types';
 import { useDemo } from '@/store/demo';
 import { s } from '@/theme/scale';
 import { C } from '@/theme/tokens';
+import { withPortal } from '@/nav/PortalGuard';
 
-export default function Creating() {
+function Creating() {
   const p = useLocalSearchParams<{ type?: BuildingType; stage?: string; stay?: string }>();
   const type = (p.type ?? 'villa') as BuildingType; const stage = Number(p.stage ?? 3) as Stage;
   const name = BUILDINGS.find((b) => b.id === type)!.name;
   useEffect(() => {
     if (p.stay) return;
-    const t = setTimeout(() => { useDemo.getState().completeClientOnboarding(type, stage); router.replace('/home'); }, 2600);
+    const t = setTimeout(() => { useDemo.getState().completeClientOnboarding(type, stage); resetTo('/home'); }, 2600);
     return () => clearTimeout(t);
   }, [p.stay]);
   const lines = [`✓ ${name} · ${STAGES[stage - 1]} stage`, '✓ 6 milestones created', '✓ Pulse tuned to your stage', '◌ Matching experts near Al Reem…'];
@@ -36,3 +38,6 @@ export default function Creating() {
     </Screen>
   );
 }
+
+// Client onboarding runs only inside the client session (sealed like the (client) group).
+export default withPortal('client', Creating);

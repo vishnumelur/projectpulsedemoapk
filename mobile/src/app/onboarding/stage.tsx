@@ -14,6 +14,7 @@ import { ModelView } from '@/three/ModelView';
 import { BUILDINGS, BuildingType, STAGES, STAGE_DESC, Stage as StageN } from '@/data/types';
 import { s } from '@/theme/scale';
 import { C, EASE } from '@/theme/tokens';
+import { withPortal } from '@/nav/PortalGuard';
 
 const SLOT = 118;
 const FADE = ['transparent', '#000', '#000', 'transparent'] as const;
@@ -25,7 +26,7 @@ function FadeEdges({ maskElement, children }: { maskElement: React.ReactElement;
   }
   return <MaskedView style={{ flex: 1 }} maskElement={maskElement}>{children}</MaskedView>;
 }
-export default function StageScreen() {
+function StageScreen() {
   const { type = 'villa', stage } = useLocalSearchParams<{ type?: BuildingType; stage?: string }>();
   const b = BUILDINGS.find((x) => x.id === type) ?? BUILDINGS[0];
   const [st, setSt] = useState<StageN>((Number(stage) || 3) as StageN); const [w, setW] = useState(0);
@@ -63,3 +64,6 @@ export default function StageScreen() {
     </Screen>
   );
 }
+
+// Client onboarding runs only inside the client session (sealed like the (client) group).
+export default withPortal('client', StageScreen);

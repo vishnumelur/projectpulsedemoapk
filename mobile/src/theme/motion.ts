@@ -11,7 +11,11 @@ export const DUR = { fast: 180, base: 280, slow: 420, reveal: 600,
   /** Ambient loops (full cycle): Ken Burns push-in, a floating card, a light sweep on a button, a light sweep on a progress segment. */
   kenBurns: 14000, float: 6000, sweep: 4000, trackSweep: 2600,
   /** Aurora blob drift, one way (the loop runs there and back): the mockup's 12s `drift2` and 16s `drift`. */
-  auroraA: 6000, auroraB: 8000 } as const;
+  auroraA: 6000, auroraB: 8000,
+  /** Wrong-credentials sway: each step, then the last settle to rest (timing only, no spring). */
+  shakeStep: 70, shakeSettle: 90,
+  /** A form "checking" beat before it answers (Sign in busy spinner). */
+  verify: 650 } as const;
 
 /** Critically-damped springs (ζ ≥ 1): settle without overshoot. Use for press feedback, sheets, thumbs, knobs. */
 export const SPRING = { damping: 30, stiffness: 260, mass: 1, overshootClamping: true } as const;
