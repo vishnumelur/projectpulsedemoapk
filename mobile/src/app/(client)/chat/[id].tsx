@@ -65,7 +65,7 @@ export default function Chat() {
     );
   return (
     <Screen bg="aurora">
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'web' ? undefined : 'padding'}>
         <View style={{ flexDirection: 'row', alignItems: 'center', paddingTop: s(9) }}>
           <BackButton />
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(8), marginLeft: s(10) }}>

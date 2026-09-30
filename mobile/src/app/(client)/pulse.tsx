@@ -50,7 +50,7 @@ export default function PulseScreen() {
   useEffect(() => { if (f.state === 'flagged') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }, [f.state]);
 
   if (f.state === 'open') return (
-    <Screen bg="white">
+    <Screen key={f.state} bg="white">
       <View style={{ alignItems: 'center', flex: 1 }}>
         <View style={{ marginTop: s(40) }}><Orb size={90} /></View>
         <View style={{ marginTop: s(34), alignItems: 'center' }}>
@@ -69,9 +69,11 @@ export default function PulseScreen() {
     </Screen>
   );
 
+  // each state remounts its screen (key): on Android, reusing the previous state's native views left a stale grey
+  // header box (the Ask stage chip) behind the flagged screen's back button
   if (f.state === 'ask') return (
-    <Screen bg="white">
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <Screen key={f.state} bg="white">
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'web' ? undefined : 'padding'}>
         <Head right={
           <Pressable onPress={() => setStageSheet(true)} style={{ flexDirection: 'row', alignItems: 'center', gap: s(5), backgroundColor: C.inputBg, paddingVertical: s(7), paddingHorizontal: s(11), borderRadius: s(16) }}>
             <T size={10.5} w={700}>{STAGES[f.askStage - 1]} stage</T><Icon name="chev" size={9} stroke={3} />
@@ -103,7 +105,7 @@ export default function PulseScreen() {
     const key = f.result?.kind === 'answer' ? f.result.entry.keyPhrase : '';
     const idx = key ? f.q.toLowerCase().indexOf(key.toLowerCase()) : -1;
     return (
-      <Screen bg="white">
+      <Screen key={f.state} bg="white">
         <View style={{ paddingTop: s(8) }}><BackButton flat /></View>
         <View style={{ alignItems: 'center' }}>
           <View style={{ marginTop: s(62) }}><Orb size={132} soft /></View>
@@ -126,10 +128,10 @@ export default function PulseScreen() {
   }
 
   if (f.state === 'flagged') return (
-    <Screen bg="white">
+    <Screen key={f.state} bg="white">
       <View style={{ paddingTop: s(8) }}><BackButton flat /></View>
       <View style={{ flex: 1, alignItems: 'center' }}>
-        <T size={13} c={C.faint} style={{ marginTop: s(20) }}>{`"${f.q}"`}</T>
+        <T size={13} c={C.faint} align="center" style={{ marginTop: s(20) }}>{`"${f.q}"`}</T>
         <View style={{ marginTop: s(30), width: s(104), height: s(104), alignItems: 'center', justifyContent: 'center' }}>
           <Orb size={104} soft calm style={{ position: 'absolute' }} />
           <Avatar photo="rashid" size={58} ring="white" />
@@ -154,7 +156,7 @@ export default function PulseScreen() {
   // answer + fallback
   const e = f.result?.kind === 'answer' ? f.result.entry : null;
   return (
-    <Screen bg="white">
+    <Screen key={f.state} bg="white">
       <Head />
       <View style={{ alignItems: 'flex-end', marginTop: s(14) }}>
         <View style={{ maxWidth: '78%', backgroundColor: C.navy, paddingVertical: s(10), paddingHorizontal: s(13), borderTopLeftRadius: s(18), borderTopRightRadius: s(18), borderBottomLeftRadius: s(18), borderBottomRightRadius: s(5) }}>
