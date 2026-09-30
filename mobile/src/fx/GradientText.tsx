@@ -2,7 +2,7 @@ import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { useSharedValue, withRepeat, withTiming, useAnimatedStyle, Easing } from 'react-native-reanimated';
 import { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { Platform, Text, View } from 'react-native';
 import { T, TProps } from '@/ui/T';
 import { GRAD } from '@/theme/tokens';
 
@@ -12,6 +12,15 @@ export function GradientText({ shimmer, base = '#16205A', colors = GRAD, childre
   const x = useSharedValue(0);
   useEffect(() => { if (shimmer) x.value = withRepeat(withTiming(1, { duration: 3200, easing: Easing.inOut(Easing.ease) }), -1, false); }, [shimmer]);
   const band = useAnimatedStyle(() => ({ transform: [{ translateX: -w * 1.5 + x.value * w * 2.5 }] }));
+  if (Platform.OS === 'web') {
+    // @react-native-masked-view has no web implementation: clip a CSS gradient to the glyphs instead.
+    const stops = colors.map((c, i) => `${c} ${Math.round((i / Math.max(1, colors.length - 1)) * 100)}%`).join(', ');
+    const web: any = shimmer
+      ? { backgroundImage: `linear-gradient(90deg, ${base} 35%, #31D1FF 45%, #0000FE 52%, #B9A8FF 58%, ${base} 68%)`, backgroundSize: '250% 100%', backgroundPosition: '100% 0' }
+      : { backgroundImage: `linear-gradient(90deg, ${stops})` };
+    // an inline span (nested Text) so a wrapped line slices one gradient, as the mockup's inline `.grad` span does
+    return <T {...t}><Text style={{ color: 'transparent', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', ...web } as any}>{children}</Text></T>;
+  }
   const text = <T {...t}>{children}</T>;
   return (
     <MaskedView maskElement={text} onLayout={(e) => setW(e.nativeEvent.layout.width)}>
