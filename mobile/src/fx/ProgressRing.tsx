@@ -15,7 +15,8 @@ export function ProgressRing({ size, thickness, progress, children, spin, colors
         <Path path={arc(1)} style="stroke" strokeWidth={t} color={track} />
         <Group origin={vec(c, c)} transform={rot}>
           <Path path={arc(Math.max(0.001, Math.min(1, progress)))} style="stroke" strokeWidth={t} strokeCap="butt">
-            <SweepGradient c={vec(c, c)} colors={colors} start={-90} end={270} />
+            {/* start at 12 o'clock by rotating a 0-360 sweep: native Skia clamps a negative start angle (seam at 3 o'clock) */}
+            <SweepGradient c={vec(c, c)} colors={colors} origin={vec(c, c)} transform={[{ rotate: -Math.PI / 2 }]} />
           </Path>
         </Group>
       </Canvas>
