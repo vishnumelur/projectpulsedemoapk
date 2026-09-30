@@ -6,6 +6,7 @@ import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withDelay, withSpr
 import Svg, { Path } from 'react-native-svg';
 import { Image } from 'expo-image';
 import { Screen } from '@/ui/Screen';
+import { PageScroll } from '@/ui/PageScroll';
 import { T } from '@/ui/T';
 import { Glass } from '@/ui/Glass';
 import { Sheet } from '@/ui/Sheet';
@@ -233,11 +234,11 @@ export default function Project() {
     <Screen bg="aurora">
       <GestureDetector gesture={swipe}>
         <View style={{ flex: 1 }}>
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: s(90) }}>
+          <PageScroll contentContainerStyle={{ paddingBottom: s(90) }}>
             <View>{head}</View>
             <TabsBar tab={tab} onTab={setTab} />
             <Animated.View style={bst}>{body}</Animated.View>
-          </ScrollView>
+          </PageScroll>
         </View>
       </GestureDetector>
       <PhotoViewer index={photo} onIndex={setPhoto} onClose={() => setPhoto(null)} />

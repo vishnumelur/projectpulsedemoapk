@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Screen } from '@/ui/Screen';
+import { PageScroll } from '@/ui/PageScroll';
 import { LiveDot } from '@/ui/LiveDot';
 import { Header } from '@/ui/Header';
 import { T } from '@/ui/T';
@@ -31,7 +32,7 @@ export default function Job() {
   const fill = steps.filter((x) => x.st === 'dn').length / 3 * 0.88;
   return (
     <Screen bg="aurora">
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: s(job.status === 'report' ? DOCK_SPACE : 30) }}>
+      <PageScroll contentContainerStyle={{ paddingBottom: s(job.status === 'report' ? DOCK_SPACE : 30) }}>
         <Header />
         <T size={22} w={700} ls={-0.035} lh={1.1} style={{ marginTop: s(12) }}>{job.title === 'Bid review + visit' ? 'Bid review' : job.title}</T>
         <T size={11} c={C.mute} style={{ marginTop: s(4) }}>Villa · Al Reem Island</T>
@@ -62,7 +63,7 @@ export default function Job() {
             {(['site1', 'site2'] as const).map((p) => <Image key={p} source={PHOTOS[p]} contentFit="cover" style={{ flex: 1, height: s(58), borderRadius: s(12) }} />)}
           </View>
         </Glass>
-      </ScrollView>
+      </PageScroll>
       {job.status === 'report' && <Dock><Btn title="View report" onPress={() => router.push(`/report/${job.id}`)} /></Dock>}
     </Screen>
   );

@@ -6,6 +6,7 @@ import Svg, { Path } from 'react-native-svg';
 import Animated, { LinearTransition, useAnimatedProps, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Screen } from '@/ui/Screen';
+import { PageScroll } from '@/ui/PageScroll';
 import { T } from '@/ui/T';
 import { Avatar } from '@/ui/Avatar';
 import { RequestCard } from '@/ui/RequestCard';
@@ -52,7 +53,7 @@ export default function ExpertHome() {
   }, [reqs]);
   return (
     <Screen bg="aurora3">
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: s(90) }}>
+      <PageScroll contentContainerStyle={{ paddingBottom: s(90) }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: s(8) }}>
           <View><T size={9.5} c={C.mute}>Good morning</T><T size={22} w={700} ls={-0.035} lh={1.1} style={{ marginTop: s(2) }}>Omar</T></View>
           <Avatar photo="omar" size={34} ring="white" />
@@ -73,7 +74,7 @@ export default function ExpertHome() {
             </Animated.View>
           ))}
         </View>
-      </ScrollView>
+      </PageScroll>
     </Screen>
   );
 }

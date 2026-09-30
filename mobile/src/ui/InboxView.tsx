@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Animated, { FadeInDown, LinearTransition, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Screen } from './Screen';
+import { PageScroll } from './PageScroll';
 import { T } from './T';
 import { Glass } from './Glass';
 import { Avatar } from './Avatar';
@@ -87,7 +88,7 @@ export function InboxView({ role, initialTab = 0, chatBase }: { role: 'client' |
     <Screen bg="aurora">
       <T size={22} w={700} ls={-0.035} style={{ marginTop: s(7) }}>Inbox</T>
       <Segmented options={['Messages', `Updates · ${unread}`]} value={tab} onChange={setTab} style={{ marginTop: s(12) }} />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: s(90) }}>
+      <PageScroll contentContainerStyle={{ paddingBottom: s(90) }}>
         {tab === 0 ? (
           <Glass r={18} style={{ marginTop: s(14), paddingHorizontal: s(14) }}>
             {threads.map((t, i) => (
@@ -108,7 +109,7 @@ export function InboxView({ role, initialTab = 0, chatBase }: { role: 'client' |
             ))}
           </Glass>
         ) : (<>{group('TODAY', today)}{group('EARLIER', earlier)}</>)}
-      </ScrollView>
+      </PageScroll>
     </Screen>
   );
 }
