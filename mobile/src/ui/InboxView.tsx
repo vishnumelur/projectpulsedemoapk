@@ -78,7 +78,7 @@ export function InboxView({ role, initialTab = 0, chatBase }: { role: 'client' |
       {list.map((n, i) => (
         <Pressable key={n.id} onPress={() => router.push(n.href as any)} style={{ flexDirection: 'row', gap: s(11), paddingVertical: s(9.5), borderBottomWidth: i === list.length - 1 ? 0 : 1, borderBottomColor: C.line }}>
           {noticeIcon(n)}
-          <View style={{ flex: 1, marginRight: -s(6) }}><T size={12} w={700} lh={1.75}>{n.title}</T><T size={10.5} c={C.mute} lh={1.93}>{n.text}</T><T size={9} c={C.faint2} style={{ marginTop: s(3) }}>{ago(n.at, now)}</T></View>
+          <View style={{ flex: 1, marginRight: -s(6) }}><T size={12} w={700} lh={1.33} style={{ paddingVertical: s(2.5) }}>{n.title}</T><T size={10.5} c={C.mute} lh={1.93}>{n.text}</T><T size={9} c={C.faint2} style={{ marginTop: s(3) }}>{ago(n.at, now)}</T></View>
           <UnreadDot on={!n.read && !faded} />
         </Pressable>
       ))}

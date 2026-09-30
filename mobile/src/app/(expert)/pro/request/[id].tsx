@@ -72,7 +72,9 @@ export default function SendQuote() {
       <View style={{ flexDirection: 'row', gap: s(6), marginTop: s(8) }}>
         {[3, 5, 7].map((d) => d === days ? (
           <LinearGradient key={d} colors={GRAD} locations={[0, 0.55, 1]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-            style={[chip, { borderColor: 'transparent', ...shadow(C.blue, 0.22, s(7), s(6)) }]}>
+            // no border on the gradient chip (Android paints a transparent border's strip white instead of the gradient);
+            // the 1px goes into the padding so the height matches the other chips
+            style={[chip, { borderWidth: 0, paddingVertical: s(9) + 1, ...shadow(C.blue, 0.22, s(7), s(6)) }]}>
             <T size={10.5} w={600} c="#fff">{`${d} days`}</T>
           </LinearGradient>
         ) : (
