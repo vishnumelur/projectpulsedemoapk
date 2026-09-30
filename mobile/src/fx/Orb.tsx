@@ -14,6 +14,10 @@ function useReduceMotion() {
 
 export type OrbProps = { size: number; soft?: boolean; calm?: boolean; ring?: boolean; style?: StyleProp<ViewStyle>; variant?: 'blob' | 'sphere' };
 
+/** Client request (after approval): the orb's silhouette must read as a round circle, so the edge waves are kept tiny; the
+ *  conic colours still rotate and drift slowly. */
+const ROUND = 0.12;
+
 function OrbBlob({ size, soft, calm, ring, style }: OrbProps) {
   const reduce = useReduceMotion();
   const clock = useClock();
@@ -21,7 +25,7 @@ function OrbBlob({ size, soft, calm, ring, style }: OrbProps) {
   const speed = reduce ? 0 : calm ? 0.28 : 0.55;
   const path = useDerivedValue(() => {
     const t = (clock.value / 1000) * speed;
-    const pts = blobPoints(t, r * (ring ? 0.8 : 1), c, c, 48);
+    const pts = blobPoints(t, r * (ring ? 0.8 : 1), c, c, 48, ROUND);
     const p = Skia.Path.Make();
     const mid = (i: number) => { const a = pts[i]; const b = pts[(i + 1) % pts.length]; return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; };
     const m0 = mid(pts.length - 1); p.moveTo(m0[0], m0[1]);
